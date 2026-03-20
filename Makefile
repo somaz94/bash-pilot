@@ -1,4 +1,4 @@
-.PHONY: build clean test test-unit cover cover-html fmt vet install demo demo-clean demo-all help
+.PHONY: build clean test test-unit cover cover-html fmt vet install demo demo-clean demo-all branch pr help
 
 APP_NAME=bash-pilot
 VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -53,6 +53,23 @@ demo-clean: ## Clean up demo resources
 	@./scripts/demo-clean.sh
 
 demo-all: demo demo-clean ## Run demo and clean up automatically
+
+## Workflow
+
+branch: ## Create feature branch (usage: make branch name=git-module)
+	@if [ -z "$(name)" ]; then echo "Usage: make branch name=<module-name>"; exit 1; fi
+	git checkout main
+	git pull origin main
+	git checkout -b feat/$(name)
+	@echo "\033[32m✓ Branch feat/$(name) created\033[0m"
+
+pr: ## Run tests, push, and create PR (usage: make pr title="Add git module")
+	@if [ -z "$(title)" ]; then echo "Usage: make pr title=\"PR title\""; exit 1; fi
+	go test ./... -race -cover
+	go vet ./...
+	git push -u origin $$(git branch --show-current)
+	gh pr create --title "$(title)" --body "## Summary"$$'\n\n'"Branch: $$(git branch --show-current)"$$'\n\n'"## Test plan"$$'\n\n'"- [ ] Unit tests pass"$$'\n'"- [ ] Coverage maintained"
+	@echo "\033[32m✓ PR created\033[0m"
 
 ## Help
 
