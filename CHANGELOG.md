@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-03-20)
+
+### Features
+
+- add prompt module with init and show subcommands ([20e690c](https://github.com/somaz94/bash-pilot/commit/20e690c81fb392dc5c09b75784f3e10c28c0a0ab))
+
+### Bug Fixes
+
+- suppress SIGPIPE error in demo prompt init phase ([9cc6ffa](https://github.com/somaz94/bash-pilot/commit/9cc6ffae3097a589073cb75e172b9787c067237b))
+- apply gofmt formatting to prompt helpers ([093f3e5](https://github.com/somaz94/bash-pilot/commit/093f3e540d3ce04999b0f0788d87f5fea123c1af))
+
+### Documentation
+
+- update changelog ([9bea5af](https://github.com/somaz94/bash-pilot/commit/9bea5af323d2949f9eeebfc56fa8666c00cfd0ea))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.3.0](https://github.com/somaz94/bash-pilot/compare/v0.2.0...v0.3.0) (2026-03-20)
 
 ### Features
