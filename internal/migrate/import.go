@@ -164,6 +164,9 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 		var content strings.Builder
 		content.WriteString("[user]\n")
+		if p.UserName != "" {
+			content.WriteString(fmt.Sprintf("\tname = %s\n", p.UserName))
+		}
 		if p.Email != "" {
 			content.WriteString(fmt.Sprintf("\temail = %s\n", p.Email))
 		}

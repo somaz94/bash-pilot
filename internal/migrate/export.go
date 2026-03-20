@@ -158,6 +158,9 @@ func exportGit(cfg *MigrateConfig, home string) {
 				}
 				for _, il := range strings.Split(string(incData), "\n") {
 					it := strings.TrimSpace(il)
+					if strings.HasPrefix(it, "name = ") {
+						profile.UserName = strings.TrimPrefix(it, "name = ")
+					}
 					if strings.HasPrefix(it, "email = ") {
 						profile.Email = strings.TrimPrefix(it, "email = ")
 					}

@@ -45,6 +45,7 @@ type GitExport struct {
 type GitProfileExport struct {
 	Name      string `json:"name"`
 	Directory string `json:"directory"`
+	UserName  string `json:"user_name,omitempty"`
 	Email     string `json:"email,omitempty"`
 	SignKey   string `json:"sign_key,omitempty"`
 }
