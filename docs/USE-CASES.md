@@ -69,9 +69,9 @@ bash-pilot ssh ping "staging-*"
 bash-pilot ssh audit
 
 # Example findings:
-# ! id_rsa_concrit: used by 12 hosts (consider per-host keys)
+# ! id_rsa_shared: used by 8 hosts (consider per-host keys)
 # ! staging.pem: permissions 0644 (should be 0600)
-# ✓ id_rsa_somaz94: permissions OK (0600)
+# ✓ id_rsa_personal: permissions OK (0600)
 ```
 
 **Common findings and fixes:**
@@ -140,10 +140,10 @@ ssh:
       label: "Development"
     staging:
       pattern: ["staging-*"]
-      label: "AWS Seoul (Staging)"
+      label: "AWS Staging"
     prod:
       pattern: ["prod-*"]
-      label: "AWS Seoul (Production)"
+      label: "AWS Production"
     k8s-dev:
       pattern: ["k8s-dev-*"]
     k8s-prod:

@@ -98,7 +98,7 @@ ANSI color-coded output with box drawing characters for grouping.
 
 ```
 ┌─ GIT ──────────────────────────────────────────────
-│   github.com-somaz94     github.com       somaz     id_rsa_somaz94
+│   github.com-personal    github.com       user1     id_rsa_personal
 └────────────────────────────────────────────────────
 ```
 

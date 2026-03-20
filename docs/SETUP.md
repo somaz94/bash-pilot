@@ -9,7 +9,7 @@ Step-by-step guide to set up bash-pilot with a real-world SSH environment.
 - [Install](#install)
 - [Create Config File](#create-config-file)
 - [Verify Setup](#verify-setup)
-- [Example: Real Environment](#example-real-environment)
+- [Example: Typical Environment](#example-typical-environment)
 - [Troubleshooting](#troubleshooting)
 
 <br/>
@@ -62,9 +62,9 @@ ssh:
 
     cloud:
       pattern:
-        - "test-server"
-        - "jenkins"
-      label: "AWS Frankfurt"
+        - "web-server"
+        - "ci-server"
+      label: "AWS Cloud"
 
     k8s:
       pattern:
@@ -75,9 +75,7 @@ ssh:
       pattern:
         - "nas*"
         - "server*"
-        - "mac-mini"
-        - "projectm-svn"
-        - "openclaw"
+        - "build-machine"
       label: "On-Premise Servers"
 
   ping:
@@ -90,9 +88,9 @@ ssh:
 | Group | Pattern | Matches |
 |-------|---------|---------|
 | `git` | `github.com*`, `git-codecommit*`, `gitlab` | GitHub accounts, CodeCommit, self-hosted GitLab |
-| `cloud` | `test-server`, `jenkins` | AWS EC2 instances (public IP) |
-| `k8s` | `k8s-*` | k8s-control-01, k8s-compute-01/02/03 |
-| `on-prem` | `nas*`, `server*`, `mac-mini`, ... | NAS, internal servers, build machines |
+| `cloud` | `web-server`, `ci-server` | AWS EC2 instances (public IP) |
+| `k8s` | `k8s-*` | k8s-control-01, k8s-worker-01/02/03 |
+| `on-prem` | `nas*`, `server*`, `build-machine`, ... | NAS, internal servers, build machines |
 
 > **Tip:** Hosts not matching any pattern are auto-detected by IP range and hostname. See [Auto-Detection Rules](CONFIGURATION.md#auto-detection-rules) for details.
 
@@ -110,22 +108,22 @@ bash-pilot ssh list
 
 # Expected output:
 # Git Services (3 hosts)
-#   github.com-somaz94        github.com               somaz         id_rsa_somaz94
-#   github.com-somaz940829    github.com               somaz-devops  id_rsa_somaz940829
-#   git-codecommit...         git-codecommit...        APKA...       id_rsa_codecommit
+#   github.com-personal       github.com               user1         id_rsa_personal
+#   github.com-work           github.com               user2         id_rsa_work
+#   git-codecommit...         git-codecommit...        AKID...       id_rsa_codecommit
 #
-# AWS Frankfurt (2 hosts)
-#   test-server               3.65.182.184             ec2-user      frankfurt-habby-1704.pem
-#   jenkins                   18.159.54.27             ec2-user      frankfurt-habby-1704.pem
+# AWS Cloud (2 hosts)
+#   web-server                54.123.45.67             ec2-user      my-region.pem
+#   ci-server                 54.123.45.68             ec2-user      my-region.pem
 #
 # Kubernetes Cluster (4 hosts)
-#   k8s-control-01            10.10.10.17              concrit       id_rsa_concrit
-#   k8s-compute-01            10.10.10.18              concrit       id_rsa_concrit
+#   k8s-control-01            10.0.1.10                admin         id_rsa_infra
+#   k8s-worker-01             10.0.1.11                admin         id_rsa_infra
 #   ...
 #
-# On-Premise Servers (8 hosts)
-#   nas                       10.10.10.5               somaz         id_rsa_concrit
-#   server1                   10.10.10.10              concrit       id_rsa_concrit
+# On-Premise Servers (5 hosts)
+#   nas                       192.168.1.10             user          id_rsa_office
+#   server1                   192.168.1.20             admin         id_rsa_office
 #   ...
 ```
 
@@ -139,7 +137,7 @@ bash-pilot ssh ping
 bash-pilot ssh ping k8s-*
 
 # Ping only cloud instances
-bash-pilot ssh ping test-server jenkins
+bash-pilot ssh ping web-server ci-server
 ```
 
 ### 3. Security audit
@@ -148,7 +146,7 @@ bash-pilot ssh ping test-server jenkins
 bash-pilot ssh audit
 
 # Expected warnings:
-# WARN  Shared key: id_rsa_concrit used by 12 hosts
+# WARN  Shared key: id_rsa_office used by 8 hosts
 # WARN  Key permission too open: ~/.ssh/some_key (0644, want 0600)
 ```
 
@@ -164,32 +162,31 @@ bash-pilot ssh ping -o json | jq '.[] | select(.reachable == false) | .name'
 
 <br/>
 
-## Example: Real Environment
+## Example: Typical Environment
 
 A typical SSH environment might look like this:
 
 ```
 ~/.ssh/config
 ├── Git (3 hosts)
-│   ├── github.com-somaz94        → github.com (personal)
-│   ├── github.com-somaz940829    → github.com (work)
-│   └── git-codecommit.*          → AWS CodeCommit
+│   ├── github.com-personal      → github.com (personal)
+│   ├── github.com-work          → github.com (work)
+│   └── git-codecommit.*         → AWS CodeCommit
 │
 ├── Cloud (2 hosts)
-│   ├── test-server               → 3.65.182.184 (AWS Frankfurt)
-│   └── jenkins                   → 18.159.54.27 (AWS Frankfurt)
+│   ├── web-server               → 54.123.45.67 (AWS)
+│   └── ci-server                → 54.123.45.68 (AWS)
 │
 ├── Kubernetes (4 hosts)
-│   ├── k8s-control-01            → 10.10.10.17
-│   ├── k8s-compute-01            → 10.10.10.18
-│   ├── k8s-compute-02            → 10.10.10.19
-│   └── k8s-compute-03            → 10.10.10.22
+│   ├── k8s-control-01           → 10.0.1.10
+│   ├── k8s-worker-01            → 10.0.1.11
+│   ├── k8s-worker-02            → 10.0.1.12
+│   └── k8s-worker-03            → 10.0.1.13
 │
-└── On-Premise (8 hosts)
-    ├── nas                       → 10.10.10.5
-    ├── server1~4                 → 10.10.10.10~15
-    ├── gitlab                    → 10.10.10.60
-    ├── mac-mini                  → 10.10.10.80
+└── On-Premise (5 hosts)
+    ├── nas                      → 192.168.1.10
+    ├── server1~3                → 192.168.1.20~40
+    ├── gitlab                   → 192.168.1.50
     └── ...
 ```
 

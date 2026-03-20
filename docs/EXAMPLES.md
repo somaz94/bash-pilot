@@ -35,25 +35,25 @@ make demo-all      # Run demo and clean up automatically
 ```bash
 $ bash-pilot ssh list
 ┌─ GIT ──────────────────────────────────────────────
-│   github.com-somaz94        github.com           somaz           id_rsa_somaz94
-│   github.com-somaz940829    github.com           somaz-devops    id_rsa_somaz940829
+│   github.com-personal     github.com           user1           id_rsa_personal
+│   github.com-work         github.com           user2           id_rsa_work
 └────────────────────────────────────────────────────
 
 ┌─ CLOUD ────────────────────────────────────────────
-│   test-server               3.65.182.184         ec2-user        frankfurt-habby-1704.pem
-│   jenkins                   18.159.54.27         ec2-user        frankfurt-habby-1704.pem
+│   web-server              54.123.45.67         ec2-user        my-region.pem
+│   ci-server               54.123.45.68         ec2-user        my-region.pem
 └────────────────────────────────────────────────────
 
 ┌─ K8S ──────────────────────────────────────────────
-│   k8s-control-01            10.10.10.17          concrit         id_rsa_concrit
-│   k8s-compute-01            10.10.10.18          concrit         id_rsa_concrit
-│   k8s-compute-02            10.10.10.19          concrit         id_rsa_concrit
-│   k8s-compute-03            10.10.10.22          concrit         id_rsa_concrit
+│   k8s-control-01          10.0.1.10            admin           id_rsa_infra
+│   k8s-worker-01           10.0.1.11            admin           id_rsa_infra
+│   k8s-worker-02           10.0.1.12            admin           id_rsa_infra
+│   k8s-worker-03           10.0.1.13            admin           id_rsa_infra
 └────────────────────────────────────────────────────
 
 ┌─ ON-PREM ──────────────────────────────────────────
-│   nas                       10.10.10.5           somaz           id_rsa_concrit
-│   server1                   10.10.10.10          concrit         id_rsa_concrit
+│   nas                     192.168.1.10         user            id_rsa_office
+│   server1                 192.168.1.20         admin           id_rsa_office
 │   ...
 └────────────────────────────────────────────────────
 ```
@@ -80,9 +80,9 @@ $ bash-pilot ssh list -o json | jq '.[].name'
 
 ```bash
 $ bash-pilot ssh ping
-✓ github.com-somaz94     0.12s
+✓ github.com-personal   0.12s
 ✓ nas                    0.02s
-✗ test-server            timeout (3.65.182.184)
+✗ web-server             timeout (54.123.45.67)
 ✓ k8s-control-01         0.01s
 ```
 
@@ -93,9 +93,9 @@ $ bash-pilot ssh ping
 ```bash
 $ bash-pilot ssh ping "k8s-*"
 ✓ k8s-control-01         0.01s
-✓ k8s-compute-01         0.01s
-✓ k8s-compute-02         0.01s
-✓ k8s-compute-03         0.01s
+✓ k8s-worker-01          0.01s
+✓ k8s-worker-02          0.01s
+✓ k8s-worker-03          0.01s
 ```
 
 <br/>
@@ -113,10 +113,10 @@ bash-pilot ssh ping -o json | jq -e '[.[] | select(.ok == false)] | length == 0'
 
 ```bash
 $ bash-pilot ssh audit
-! id_rsa_concrit: used by 12 hosts (consider per-host keys)
-! frankfurt-habby-1704.pem: permissions 0644 (should be 0600)
-✓ id_rsa_somaz94: permissions OK (0600)
-✓ id_rsa_somaz940829: permissions OK (0600)
+! id_rsa_office: used by 8 hosts (consider per-host keys)
+! my-region.pem: permissions 0644 (should be 0600)
+✓ id_rsa_personal: permissions OK (0600)
+✓ id_rsa_work: permissions OK (0600)
 ```
 
 <br/>
