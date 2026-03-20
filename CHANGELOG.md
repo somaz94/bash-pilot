@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-03-20)
+
+### Features
+
+- add env module with check and path subcommands ([0dfca6f](https://github.com/somaz94/bash-pilot/commit/0dfca6f53025d10b20c2f1afd49861641f19754e))
+
+### Documentation
+
+- update changelog ([97a6447](https://github.com/somaz94/bash-pilot/commit/97a64472f3b3371e2f64ea95dc49a80c5f3967d1))
+
+### Tests
+
+- improve env module coverage to 99.2% ([9630f14](https://github.com/somaz94/bash-pilot/commit/9630f1411fb64fa8233de89a6b2b255153fb246c))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.2.0](https://github.com/somaz94/bash-pilot/compare/v0.1.1...v0.2.0) (2026-03-20)
 
 ### Features
