@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-03-20)
+## [v0.6.0](https://github.com/somaz94/bash-pilot/compare/v0.5.0...v0.6.0) (2026-03-20)
 
 ### Features
 
