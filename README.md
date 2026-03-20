@@ -53,6 +53,7 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 - **`bash-pilot snapshot`** — Capture full environment snapshot to JSON (tools, versions, git, SSH, k8s, brew)
 - **`bash-pilot snapshot --summary`** — Preview snapshot summary
 - **`bash-pilot diff <file>`** — Compare saved snapshot against current environment
+- **`bash-pilot setup <file>`** — Install missing tools from a snapshot (supports `--dry-run`)
 
 <br/>
 
@@ -190,6 +191,12 @@ bash-pilot snapshot --summary
 
 # Compare snapshot against current environment
 bash-pilot diff my-env.json
+
+# Preview what would be installed
+bash-pilot setup my-env.json --dry-run
+
+# Install missing tools
+bash-pilot setup my-env.json
 ```
 
 <br/>

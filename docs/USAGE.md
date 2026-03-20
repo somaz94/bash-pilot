@@ -341,6 +341,42 @@ bash-pilot diff my-env.json -o json
 
 <br/>
 
+### setup
+
+Install missing tools from a saved snapshot — turns `diff` results into actions.
+
+```bash
+# Preview what would be installed
+bash-pilot setup my-env.json --dry-run
+
+# Install missing tools
+bash-pilot setup my-env.json
+
+# JSON output
+bash-pilot setup my-env.json -o json
+```
+
+**What gets installed:**
+- Missing tools detected in the Tools section of the diff (via brew on macOS, apt/snap on Linux)
+- Missing brew packages (macOS only)
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | `false` | Preview install plan without executing |
+
+**Action statuses:**
+
+| Status | Description |
+|--------|-------------|
+| pending | Will be installed (shown in dry-run) |
+| installed | Successfully installed |
+| skipped | No known install command for this tool/OS |
+| failed | Install command returned an error |
+
+<br/>
+
 ## Doctor (Cross-Module)
 
 Run all diagnostic checks in a single command — combines SSH audit, Git doctor, and Env check.
