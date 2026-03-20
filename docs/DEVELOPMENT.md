@@ -37,6 +37,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │       ├── prompt.go              # Prompt subcommands (init, show)
 │       ├── doctor.go              # Cross-module diagnostics
 │       ├── snapshot.go            # Snapshot & diff subcommands
+│       ├── setup.go               # Setup subcommand (install missing tools)
 │       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
@@ -64,7 +65,9 @@ Guide for building, testing, and contributing to bash-pilot.
 │   │   ├── snapshot.go            # Environment capture (tools, git, SSH, k8s, brew)
 │   │   ├── snapshot_test.go
 │   │   ├── diff.go                # Snapshot comparison logic
-│   │   └── diff_test.go
+│   │   ├── diff_test.go
+│   │   ├── setup.go               # Install missing tools from snapshot
+│   │   └── setup_test.go
 │   ├── config/
 │   │   ├── config.go             # YAML config loader
 │   │   └── config_test.go

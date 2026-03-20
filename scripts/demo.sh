@@ -329,7 +329,13 @@ echo ""
 run "$BINARY" diff "${DEMO_DIR}/snapshot.json"
 
 # ============================================================
-header 24 "version"
+header 24 "setup — Preview install plan (dry-run)"
+# ============================================================
+
+run "$BINARY" setup "${DEMO_DIR}/snapshot.json" --dry-run
+
+# ============================================================
+header 25 "version"
 # ============================================================
 
 run "$BINARY" version

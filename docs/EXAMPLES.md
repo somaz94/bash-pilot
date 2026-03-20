@@ -19,6 +19,7 @@ Hands-on examples for bash-pilot.
 - [Prompt Show](#prompt-show)
 - [Snapshot](#snapshot)
 - [Diff](#diff)
+- [Setup](#setup)
 - [Doctor](#doctor)
 - [Scripting with JSON](#scripting-with-json)
 
@@ -432,6 +433,53 @@ $ bash-pilot diff my-env.json
 ```bash
 # Check if environments match
 bash-pilot diff baseline.json -o json | jq '.summary.mismatch + .summary.missing'
+```
+
+<br/>
+
+## Setup
+
+### Preview install plan
+
+```bash
+$ bash-pilot setup teammate-env.json --dry-run
+┌─ SETUP PLAN (dry-run) ──────────────────────────
+  terraform            brew install terraform
+  helm                 brew install helm
+  jq                   brew install jq
+  htop                 brew install htop
+└────────────────────────────────────────────────
+
+! 4 tool(s) to install, 0 skipped
+
+Run without --dry-run to install.
+```
+
+### Install missing tools
+
+```bash
+$ bash-pilot setup teammate-env.json
+┌─ SETUP ─────────────────────────────────────────
+  terraform            installed
+  helm                 installed
+  jq                   installed
+  htop                 installed
+└────────────────────────────────────────────────
+
+✓ 4 installed, 0 skipped, 0 failed
+```
+
+### Onboarding workflow
+
+```bash
+# Senior engineer saves their environment
+bash-pilot snapshot > team-baseline.json
+
+# New team member compares
+bash-pilot diff team-baseline.json
+
+# New team member installs missing tools
+bash-pilot setup team-baseline.json
 ```
 
 <br/>
