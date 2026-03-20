@@ -6,12 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
+- add migrate command for cross-machine config migration ([8ad451c](https://github.com/somaz94/bash-pilot/commit/8ad451c4f8bc7dcf4850eab5e1accca128741d6d))
 - add setup command to install missing tools from snapshot ([78f99f2](https://github.com/somaz94/bash-pilot/commit/78f99f2fecebe695d856a0299409649e43e74886))
 - add snapshot and diff commands for environment comparison ([644cace](https://github.com/somaz94/bash-pilot/commit/644cace92e47c999e2eff6dc399dcffa4b70a81b))
 
 ### Bug Fixes
 
+- add user.name support in migrate git profile export/import ([0d98376](https://github.com/somaz94/bash-pilot/commit/0d983765b92cfa16d3eba05e4ac74c48b82d4910))
+- copy SSH config to ~/.ssh/config in demo for migrate export ([63e681c](https://github.com/somaz94/bash-pilot/commit/63e681c62943d4d99a06b9b0be89d2881b5628e1))
 - prevent Header panic when title exceeds 50 characters ([fcf6d2e](https://github.com/somaz94/bash-pilot/commit/fcf6d2e17699f6fa616ee376495f7693acc0037c))
+
+### Documentation
+
+- add snapshot/diff/setup use cases ([4c607a6](https://github.com/somaz94/bash-pilot/commit/4c607a696ecf85dc7f5ad6bba9698d16c4d9eb0b))
 
 ### Contributors
 
