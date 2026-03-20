@@ -1,0 +1,75 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./cmd/main.go
+    binary: bash-pilot
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/somaz94/bash-pilot/cmd/cli.Version={{.Version}}
+      - -X github.com/somaz94/bash-pilot/cmd/cli.GitCommit={{.Commit}}
+      - -X github.com/somaz94/bash-pilot/cmd/cli.BuildDate={{.Date}}
+
+archives:
+  - formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+
+release:
+  github:
+    owner: somaz94
+    name: bash-pilot
+  draft: false
+  prerelease: auto
+
+brews:
+  - repository:
+      owner: somaz94
+      name: homebrew-tap
+    homepage: "https://github.com/somaz94/bash-pilot"
+    description: "A powerful CLI toolkit for bash power users — SSH, Git, Env, Prompt"
+    license: "Apache-2.0"
+    install: |
+      bin.install "bash-pilot"
+    test: |
+      system "#{bin}/bash-pilot", "version"
+    caveats: |
+      🎉 bash-pilot installed!
+
+      Quick start:
+        bash-pilot ssh list              # List SSH hosts with grouping
+        bash-pilot ssh ping              # Test connectivity (parallel)
+        bash-pilot ssh audit             # Security audit
+        bash-pilot git profiles          # Git multi-profile management
+        bash-pilot env check             # Shell environment health scan
+        bash-pilot --help                # Full usage
+
+      Docs: https://github.com/somaz94/bash-pilot
