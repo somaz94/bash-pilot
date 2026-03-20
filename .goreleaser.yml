@@ -69,6 +69,9 @@ brews:
         bash-pilot ssh list              # List SSH hosts with grouping
         bash-pilot ssh ping              # Test connectivity (parallel)
         bash-pilot ssh audit             # Security audit
+        bash-pilot git profiles          # List git identity profiles
+        bash-pilot git doctor            # Diagnose gitconfig issues
+        bash-pilot git clean --dry-run   # Preview stale/duplicate cleanup
         bash-pilot --help                # Full usage
 
       Docs: https://github.com/somaz94/bash-pilot

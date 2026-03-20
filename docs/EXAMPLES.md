@@ -10,6 +10,9 @@ Hands-on examples for bash-pilot.
 - [SSH List](#ssh-list)
 - [SSH Ping](#ssh-ping)
 - [SSH Audit](#ssh-audit)
+- [Git Profiles](#git-profiles)
+- [Git Doctor](#git-doctor)
+- [Git Clean](#git-clean)
 - [Scripting with JSON](#scripting-with-json)
 
 <br/>
@@ -157,6 +160,86 @@ $ bash-pilot ssh audit
 ! my-region.pem: permissions 0644 (should be 0600)
 ✓ id_rsa_personal: permissions OK (0600)
 ✓ id_rsa_work: permissions OK (0600)
+```
+
+<br/>
+
+## Git Profiles
+
+### List profiles with active indicator
+
+```bash
+$ bash-pilot git profiles
+┌─ GIT PROFILES ────────────────────────────────────
+│   global (User)        user@gmail.com             (global)
+│ → work                 user@company.com           ~/work
+│   personal             user@gmail.com             ~/personal
+└────────────────────────────────────────────────────
+```
+
+The `→` arrow indicates the active profile based on your current directory.
+
+<br/>
+
+### JSON output
+
+```bash
+$ bash-pilot git profiles -o json
+[
+  {
+    "name": "global (User)",
+    "email": "user@gmail.com",
+    "active": false
+  },
+  {
+    "name": "work",
+    "directory": "~/work",
+    "email": "user@company.com",
+    "sign_key": "ABC123",
+    "active": true
+  }
+]
+```
+
+<br/>
+
+## Git Doctor
+
+### Diagnose gitconfig issues
+
+```bash
+$ bash-pilot git doctor
+┌─ GIT DOCTOR ──────────────────────────────────────
+! [safe.directory] Duplicate safe.directory: /home/user/repo1 (3 times)
+! [includeIf] Include target not found: ~/.gitconfig-old
+! [permissions] Gitconfig too open: ~/.gitconfig (mode 0644, recommend 0600)
+✓ [user.identity] No global user.email (using includeIf profiles)
+└────────────────────────────────────────────────────
+```
+
+<br/>
+
+## Git Clean
+
+### Dry run (preview)
+
+```bash
+$ bash-pilot git clean --dry-run
+┌─ DRY RUN — entries that would be removed ─────────
+!   safe.directory=/home/user/repo1 (line 15)
+!   safe.directory=/old/project (line 22, directory not found)
+└────────────────────────────────────────────────────
+```
+
+### Actual cleanup
+
+```bash
+$ bash-pilot git clean
+┌─ CLEANED ─────────────────────────────────────────
+!   safe.directory=/home/user/repo1 (line 15)
+!   safe.directory=/old/project (line 22, directory not found)
+└────────────────────────────────────────────────────
+✓ Backup saved to: /home/user/.gitconfig.bak
 ```
 
 <br/>

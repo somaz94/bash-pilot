@@ -199,7 +199,71 @@ header 8 "ssh audit — JSON output"
 run "$BINARY" ssh audit --config "$DEMO_CONFIG" -o json
 
 # ============================================================
-header 9 "version"
+header 9 "git profiles — Git identity profiles"
+# ============================================================
+
+# Create a demo gitconfig with includeIf profiles
+DEMO_GITCONFIG="${DEMO_DIR}/.gitconfig"
+DEMO_GITCONFIG_WORK="${DEMO_DIR}/.gitconfig-work"
+DEMO_GITCONFIG_PERSONAL="${DEMO_DIR}/.gitconfig-personal"
+
+cat > "$DEMO_GITCONFIG_WORK" <<'EOF'
+[user]
+	email = developer@company.com
+	signingkey = ABC123DEF456
+EOF
+
+cat > "$DEMO_GITCONFIG_PERSONAL" <<'EOF'
+[user]
+	email = user@gmail.com
+EOF
+
+cat > "$DEMO_GITCONFIG" <<EOF
+[user]
+	name = Demo User
+	email = demo@example.com
+[includeIf "gitdir:${DEMO_DIR}/work/"]
+	path = ${DEMO_GITCONFIG_WORK}
+[includeIf "gitdir:${DEMO_DIR}/personal/"]
+	path = ${DEMO_GITCONFIG_PERSONAL}
+[safe]
+	directory = ${DEMO_DIR}/repo1
+	directory = ${DEMO_DIR}/repo1
+	directory = ${DEMO_DIR}/repo2
+	directory = /nonexistent/old-project
+EOF
+
+run "$BINARY" git profiles --gitconfig "$DEMO_GITCONFIG"
+
+# ============================================================
+header 10 "git profiles — JSON output"
+# ============================================================
+
+run "$BINARY" git profiles --gitconfig "$DEMO_GITCONFIG" -o json
+
+# ============================================================
+header 11 "git doctor — Diagnose gitconfig issues"
+# ============================================================
+
+run "$BINARY" git doctor --gitconfig "$DEMO_GITCONFIG"
+
+# ============================================================
+header 12 "git clean — Preview stale/duplicate entries"
+# ============================================================
+
+run "$BINARY" git clean --gitconfig "$DEMO_GITCONFIG" --dry-run
+
+# ============================================================
+header 13 "git clean — Actually clean up"
+# ============================================================
+
+run "$BINARY" git clean --gitconfig "$DEMO_GITCONFIG"
+
+echo -e "${GREEN}Cleaned gitconfig. Backup at ${DEMO_GITCONFIG}.bak${RESET}"
+echo ""
+
+# ============================================================
+header 14 "version"
 # ============================================================
 
 run "$BINARY" version
