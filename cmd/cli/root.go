@@ -9,10 +9,10 @@ import (
 )
 
 var (
-	cfgFile  string
-	output   string
-	noColor  bool
-	appCfg   *config.Config
+	cfgFile string
+	output  string
+	noColor bool
+	appCfg  *config.Config
 )
 
 var rootCmd = &cobra.Command{
