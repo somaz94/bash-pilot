@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -72,5 +73,73 @@ func TestInitCmd_HasForceFlag(t *testing.T) {
 	}
 	if force.DefValue != "false" {
 		t.Errorf("--force default = %q, want %q", force.DefValue, "false")
+	}
+}
+
+func TestToWildcardPatterns(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []string
+		want  []string
+	}{
+		{
+			name:  "k8s hosts collapse",
+			input: []string{"k8s-control-01", "k8s-compute-01", "k8s-compute-02"},
+			want:  []string{"k8s-*"},
+		},
+		{
+			name:  "server with trailing digits",
+			input: []string{"server1", "server2", "server3"},
+			want:  []string{"server*"},
+		},
+		{
+			name:  "github prefix collapse",
+			input: []string{"github.com-personal", "github.com-work"},
+			want:  []string{"github.com-*"},
+		},
+		{
+			name:  "single host unchanged",
+			input: []string{"gitlab"},
+			want:  []string{"gitlab"},
+		},
+		{
+			name:  "mixed no common prefix",
+			input: []string{"nas", "jenkins", "test-server"},
+			want:  []string{"jenkins", "nas", "test-server"},
+		},
+		{
+			name:  "empty input",
+			input: nil,
+			want:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := toWildcardPatterns(tt.input)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("toWildcardPatterns(%v) = %v, want %v", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestExtractPrefix(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"k8s-control-01", "k8s-"},
+		{"github.com-somaz94", "github.com-"},
+		{"server1", "server"},
+		{"nas", "nas"},
+		{"gitlab", "gitlab"},
+	}
+
+	for _, tt := range tests {
+		got := extractPrefix(tt.name)
+		if got != tt.want {
+			t.Errorf("extractPrefix(%q) = %q, want %q", tt.name, got, tt.want)
+		}
 	}
 }

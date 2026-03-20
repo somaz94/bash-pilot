@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/somaz94/bash-pilot/internal/config"
 	"github.com/somaz94/bash-pilot/internal/ssh"
@@ -47,12 +49,12 @@ var initCmd = &cobra.Command{
 			if len(g.Hosts) == 0 {
 				continue
 			}
-			var patterns []string
+			var names []string
 			for _, h := range g.Hosts {
-				patterns = append(patterns, h.Name)
+				names = append(names, h.Name)
 			}
 			cfg.SSH.Groups[g.Name] = config.SSHGroup{
-				Pattern: patterns,
+				Pattern: toWildcardPatterns(names),
 			}
 		}
 
@@ -100,6 +102,72 @@ var initCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// toWildcardPatterns groups host names by common prefix and returns
+// wildcard patterns where possible. For example:
+//
+//	["k8s-control-01", "k8s-compute-01", "k8s-compute-02"] → ["k8s-*"]
+//	["nas", "nas-svn"] → ["nas*"]
+//	["gitlab"] → ["gitlab"]
+func toWildcardPatterns(names []string) []string {
+	if len(names) <= 1 {
+		return names
+	}
+
+	sort.Strings(names)
+
+	// Group names by common prefix (split on '-' or '.').
+	prefixGroups := make(map[string][]string)
+	for _, name := range names {
+		prefix := extractPrefix(name)
+		prefixGroups[prefix] = append(prefixGroups[prefix], name)
+	}
+
+	var patterns []string
+	seen := make(map[string]bool)
+
+	for prefix, group := range prefixGroups {
+		if len(group) >= 2 && prefix != "" {
+			// Multiple hosts share this prefix → wildcard.
+			pattern := prefix + "*"
+			if !seen[pattern] {
+				patterns = append(patterns, pattern)
+				seen[pattern] = true
+			}
+		} else {
+			// Single host or no clear prefix → keep as-is.
+			for _, name := range group {
+				if !seen[name] {
+					patterns = append(patterns, name)
+					seen[name] = true
+				}
+			}
+		}
+	}
+
+	sort.Strings(patterns)
+	return patterns
+}
+
+// extractPrefix returns the portion before the first '-' or '.' separator.
+// For names like "k8s-control-01" → "k8s-", "github.com-somaz94" → "github.com-",
+// "nas" → "nas", "server1" → "server".
+func extractPrefix(name string) string {
+	// Try splitting on '-'.
+	if idx := strings.Index(name, "-"); idx > 0 {
+		return name[:idx+1]
+	}
+	// Try splitting on '.'.
+	if idx := strings.Index(name, "."); idx > 0 {
+		return name[:idx+1]
+	}
+	// Strip trailing digits: "server1" → "server", "nas" → "nas".
+	i := len(name)
+	for i > 0 && name[i-1] >= '0' && name[i-1] <= '9' {
+		i--
+	}
+	return name[:i]
 }
 
 func init() {
