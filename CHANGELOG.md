@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-03-20)
+## [v0.2.0](https://github.com/somaz94/bash-pilot/compare/v0.1.1...v0.2.0) (2026-03-20)
 
 ### Features
 
@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
+- update changelog ([ff82fc5](https://github.com/somaz94/bash-pilot/commit/ff82fc5b181b5436c35a59f0bd4e1ef691b2db90))
 - add git module commands to Homebrew caveats ([af4f576](https://github.com/somaz94/bash-pilot/commit/af4f576b5a954211deafd0bf6745044b1e034805))
 - update CONTRIBUTORS.md ([eac6c5b](https://github.com/somaz94/bash-pilot/commit/eac6c5bd5da12e8531d2e49deb0ec39beeabc783))
 - update changelog ([0302a40](https://github.com/somaz94/bash-pilot/commit/0302a40f69cd2ce92f5011e07be428c88ab0ebf3))
