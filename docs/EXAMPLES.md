@@ -647,3 +647,4 @@ echo "| Key | Status | Detail |"
 echo "|-----|--------|--------|"
 bash-pilot ssh audit -o json | jq -r '.findings[] | "| \(.key) | \(.severity) | \(.message) |"'
 ```
+# test
