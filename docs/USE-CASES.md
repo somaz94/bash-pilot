@@ -10,6 +10,8 @@ Real-world scenarios for bash-pilot.
 - [Infrastructure Health Check](#infrastructure-health-check)
 - [Security Compliance Audit](#security-compliance-audit)
 - [Onboarding New Team Members](#onboarding-new-team-members)
+- [Environment Snapshot and Diff](#environment-snapshot-and-diff)
+- [New Machine Setup](#new-machine-setup)
 - [CI/CD Pipeline Integration](#cicd-pipeline-integration)
 - [Multi-Environment Management](#multi-environment-management)
 
@@ -82,6 +84,81 @@ bash-pilot ssh audit
 | Permissions 0644 | `chmod 0600 ~/.ssh/key_file` |
 | Key file not found | Remove stale entry or restore key |
 | No IdentityFile specified | Add `IdentityFile` directive |
+
+<br/>
+
+## Environment Snapshot and Diff
+
+**Scenario:** "It works on my machine" — something's different on your colleague's setup but you don't know what.
+
+```bash
+# Capture your working environment
+bash-pilot snapshot > my-env.json
+
+# Share the file with your colleague, they run:
+bash-pilot diff my-env.json
+
+# Output:
+# ✓ [System] all match
+# [Tools]
+#   ~ node                 v20.10.0 → v18.17.0
+#   - terraform            1.6.0 (not in current)
+# ✓ [Git] all match
+# [K8s Contexts]
+#   - prod-cluster         (not in current)
+#
+# ! 20 match, 1 changed, 2 missing, 0 new
+```
+
+**Before bash-pilot:** Manually compare `node --version`, `terraform --version`, `kubectl config get-contexts`... one by one.
+
+**After:** Single command shows every difference across tools, versions, git, SSH, k8s, and brew packages.
+
+<br/>
+
+## New Machine Setup
+
+**Scenario:** New MacBook or Linux server — need to install the same tools as your current machine.
+
+```bash
+# On your existing machine: save snapshot
+bash-pilot snapshot > team-baseline.json
+
+# On the new machine: preview what's missing
+bash-pilot setup team-baseline.json --dry-run
+
+# Output:
+# ┌─ SETUP PLAN (dry-run) ──────────────────────────
+#   terraform            brew install terraform
+#   helm                 brew install helm
+#   htop                 brew install htop
+# └────────────────────────────────────────────────
+# ! 3 tool(s) to install, 0 skipped
+
+# Install everything
+bash-pilot setup team-baseline.json
+```
+
+**Full onboarding workflow:**
+
+```bash
+# 1. Senior engineer saves baseline
+bash-pilot snapshot > team-baseline.json
+
+# 2. New team member checks what's different
+bash-pilot diff team-baseline.json
+
+# 3. Install missing tools automatically
+bash-pilot setup team-baseline.json
+
+# 4. Verify everything matches
+bash-pilot diff team-baseline.json
+# ✓ all match
+```
+
+**Before bash-pilot:** Share a wiki page with install instructions, hope everyone follows all steps correctly.
+
+**After:** One snapshot file + two commands = identical environment.
 
 <br/>
 
