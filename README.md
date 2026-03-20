@@ -179,9 +179,13 @@ ssh:
 bash-pilot completion zsh > "${fpath[1]}/_bash-pilot"
 source ~/.zshrc
 
-# Bash
+# Bash (Linux)
 bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
 source ~/.bashrc
+
+# Bash (macOS)
+bash-pilot completion bash > /usr/local/etc/bash_completion.d/bash-pilot
+source ~/.bash_profile
 
 # Fish
 bash-pilot completion fish > ~/.config/fish/completions/bash-pilot.fish
