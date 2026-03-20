@@ -37,8 +37,8 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
-### Env Module (coming soon)
-- **`bash-pilot env check`** — Shell environment health scan
+### Env Module
+- **`bash-pilot env check`** — Shell environment health scan (shell, tools, SSH agent, git, editor)
 - **`bash-pilot env path`** — PATH analysis (duplicates, missing directories)
 
 <br/>
@@ -144,6 +144,15 @@ bash-pilot git doctor
 
 # Clean up duplicate safe.directory entries
 bash-pilot git clean --dry-run
+
+# Shell environment health scan
+bash-pilot env check
+
+# PATH analysis
+bash-pilot env path
+
+# JSON output
+bash-pilot env check -o json
 ```
 
 <br/>
@@ -212,6 +221,7 @@ After setup, press `Tab` to auto-complete commands and flags:
 ```bash
 bash-pilot ssh <TAB>        # list, ping, audit
 bash-pilot git <TAB>        # profiles, doctor, clean
+bash-pilot env <TAB>        # check, path
 bash-pilot ssh list -<TAB>  # --config, --output, --no-color
 ```
 

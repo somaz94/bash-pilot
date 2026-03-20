@@ -33,6 +33,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │       ├── root.go                # Root command with global flags
 │       ├── ssh.go                 # SSH subcommands (list, ping, audit)
 │       ├── git.go                 # Git subcommands (profiles, doctor, clean)
+│       ├── env.go                 # Env subcommands (check, path)
 │       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
@@ -48,6 +49,9 @@ Guide for building, testing, and contributing to bash-pilot.
 │   ├── git/
 │   │   ├── gitconfig.go           # Gitconfig parser, profiles, doctor, clean
 │   │   └── gitconfig_test.go
+│   ├── env/
+│   │   ├── env.go                 # Environment check, PATH analysis
+│   │   └── env_test.go
 │   ├── config/
 │   │   ├── config.go             # YAML config loader
 │   │   └── config_test.go
@@ -77,6 +81,7 @@ Guide for building, testing, and contributing to bash-pilot.
 | `cmd/cli/` | Cobra CLI commands and flag definitions |
 | `internal/ssh/` | SSH config parsing, host grouping, connectivity testing, security audit |
 | `internal/git/` | Gitconfig parsing, multi-profile management, diagnostics, cleanup |
+| `internal/env/` | Shell environment health check, PATH analysis |
 | `internal/config/` | YAML configuration loader with defaults |
 | `internal/report/` | Output formatting (color, plain, JSON, table) |
 
@@ -109,6 +114,7 @@ make cover-html      # Open coverage report in browser
 |---------|----------|
 | `internal/ssh` | 96.1% |
 | `internal/git` | 94.2% |
+| `internal/env` | 85.5% |
 | `internal/config` | 82.4% |
 | `internal/report` | 100% |
 
