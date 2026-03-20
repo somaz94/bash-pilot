@@ -430,6 +430,16 @@ $ bash-pilot diff my-env.json
 ! 15 match, 1 changed, 2 missing, 1 new
 ```
 
+### Filter by section
+
+```bash
+# Compare only SSH keys
+$ bash-pilot diff my-env.json --only ssh
+
+# Compare only git and tools
+$ bash-pilot diff my-env.json --only git,tools
+```
+
 ### JSON diff for CI
 
 ```bash
@@ -469,6 +479,16 @@ $ bash-pilot setup teammate-env.json
 └────────────────────────────────────────────────
 
 ✓ 4 installed, 0 skipped, 0 failed
+```
+
+### Install only specific categories
+
+```bash
+# Install only missing tools (no brew packages)
+$ bash-pilot setup teammate-env.json --only tools
+
+# Install only missing brew packages
+$ bash-pilot setup teammate-env.json --only brew
 ```
 
 ### Onboarding workflow
@@ -537,6 +557,16 @@ $ bash-pilot migrate import my-config.json --dry-run
 └────────────────────────────────────────────────
 
 Run without --dry-run to apply.
+```
+
+### Import only specific sections
+
+```bash
+# Import only SSH config
+$ bash-pilot migrate import my-config.json --only ssh
+
+# Import only Git profiles
+$ bash-pilot migrate import my-config.json --only git
 ```
 
 ### Full machine migration workflow

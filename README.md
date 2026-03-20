@@ -52,14 +52,14 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 ### Snapshot Module
 - **`bash-pilot snapshot`** — Capture full environment snapshot to JSON (tools, versions, git, SSH, k8s, brew)
 - **`bash-pilot snapshot --summary`** — Preview snapshot summary
-- **`bash-pilot diff <file>`** — Compare saved snapshot against current environment
-- **`bash-pilot setup <file>`** — Install missing tools from a snapshot (supports `--dry-run`)
+- **`bash-pilot diff <file>`** — Compare saved snapshot against current environment (supports `--only`)
+- **`bash-pilot setup <file>`** — Install missing tools from a snapshot (supports `--dry-run`, `--only`)
 
 <br/>
 
 ### Migrate Module
 - **`bash-pilot migrate export`** — Export SSH config + Git profiles to portable JSON
-- **`bash-pilot migrate import <file>`** — Import config on new machine with path translation (supports `--dry-run`)
+- **`bash-pilot migrate import <file>`** — Import config on new machine with path translation (supports `--dry-run`, `--only`)
 
 <br/>
 

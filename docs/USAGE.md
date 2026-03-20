@@ -325,11 +325,21 @@ Compare a saved environment snapshot against the current environment.
 # Compare snapshot
 bash-pilot diff my-env.json
 
+# Compare only specific sections
+bash-pilot diff my-env.json --only ssh
+bash-pilot diff my-env.json --only git,tools
+
 # JSON output
 bash-pilot diff my-env.json -o json
 ```
 
 **Comparison sections:** System, Tools, Git, SSH Keys, K8s Contexts, Brew Packages
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--only` | (all) | Comma-separated sections to compare: `system`, `tools`, `git`, `ssh`, `k8s`, `brew` |
 
 **Entry statuses:**
 
@@ -353,6 +363,12 @@ bash-pilot setup my-env.json --dry-run
 # Install missing tools
 bash-pilot setup my-env.json
 
+# Install only tools (no brew packages)
+bash-pilot setup my-env.json --only tools
+
+# Install only brew packages
+bash-pilot setup my-env.json --only brew
+
 # JSON output
 bash-pilot setup my-env.json -o json
 ```
@@ -366,6 +382,7 @@ bash-pilot setup my-env.json -o json
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--dry-run` | `false` | Preview install plan without executing |
+| `--only` | (all) | Comma-separated sections to install: `tools`, `brew` |
 
 **Action statuses:**
 
@@ -418,6 +435,12 @@ bash-pilot migrate import my-config.json --dry-run
 # Apply changes
 bash-pilot migrate import my-config.json
 
+# Import only SSH config
+bash-pilot migrate import my-config.json --only ssh
+
+# Import only Git profiles
+bash-pilot migrate import my-config.json --only git
+
 # JSON output
 bash-pilot migrate import my-config.json -o json
 ```
@@ -436,6 +459,7 @@ bash-pilot migrate import my-config.json -o json
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--dry-run` | `false` | Preview changes without applying |
+| `--only` | (all) | Comma-separated sections to import: `ssh`, `git` |
 
 **Safety:**
 - Existing SSH hosts are never overwritten
