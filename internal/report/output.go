@@ -63,8 +63,12 @@ func (f *Formatter) Header(text string) {
 	if f.Format == "json" {
 		return
 	}
-	line := strings.Repeat("─", 50)
-	fmt.Fprintf(f.Writer, "%s %s %s\n", f.Color(Cyan, "┌─"), f.Color(Bold, text), f.Color(Cyan, line[:50-len(text)]))
+	remaining := 50 - len(text)
+	if remaining < 3 {
+		remaining = 3
+	}
+	line := strings.Repeat("─", remaining)
+	fmt.Fprintf(f.Writer, "%s %s %s\n", f.Color(Cyan, "┌─"), f.Color(Bold, text), f.Color(Cyan, line))
 }
 
 // Footer prints a section footer.
