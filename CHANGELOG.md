@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-03-20)
+
+### Features
+
+- add snapshot and diff commands for environment comparison ([644cace](https://github.com/somaz94/bash-pilot/commit/644cace92e47c999e2eff6dc399dcffa4b70a81b))
+
+### Bug Fixes
+
+- prevent Header panic when title exceeds 50 characters ([fcf6d2e](https://github.com/somaz94/bash-pilot/commit/fcf6d2e17699f6fa616ee376495f7693acc0037c))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.5.0](https://github.com/somaz94/bash-pilot/compare/v0.4.0...v0.5.0) (2026-03-20)
 
 ### Features
