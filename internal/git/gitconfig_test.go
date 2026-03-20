@@ -117,6 +117,41 @@ func TestGetProfiles_IncludeIf(t *testing.T) {
 	}
 }
 
+func TestGetProfiles_IncludeIF_CaseInsensitive(t *testing.T) {
+	dir := t.TempDir()
+
+	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	email = work@company.com
+`)
+
+	// Use includeIF (uppercase IF) like real-world gitconfig.
+	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	name = Test User
+	email = global@example.com
+[includeIF "gitdir:`+dir+`/work/"]
+	path = `+dir+`/.gitconfig-work
+`)
+
+	profiles, err := GetProfiles(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(profiles) < 2 {
+		t.Fatalf("expected at least 2 profiles, got %d", len(profiles))
+	}
+
+	found := false
+	for _, p := range profiles {
+		if p.Email == "work@company.com" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("includeIF (uppercase) should be recognized as includeIf")
+	}
+}
+
 func TestGetProfiles_GlobalOnly(t *testing.T) {
 	dir := t.TempDir()
 	cfg := writeTestFile(t, dir, ".gitconfig", `[user]

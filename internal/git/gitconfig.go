@@ -129,21 +129,21 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 	var profiles []Profile
 
 	for _, sec := range sections {
-		// Check for includeIf sections.
-		header := sec.Header
-		if !strings.HasPrefix(header, "includeIf ") {
+		// Check for includeIf sections (case-insensitive, git allows includeIF, includeIf, etc.).
+		headerLower := strings.ToLower(sec.Header)
+		if !strings.HasPrefix(headerLower, "includeif ") {
 			continue
 		}
 
 		// Parse condition: includeIf "gitdir:~/work/"
-		condition := strings.TrimPrefix(header, "includeIf ")
+		condition := sec.Header[len("includeIf "):]
 		condition = strings.Trim(condition, "\"")
 
-		if !strings.HasPrefix(condition, "gitdir:") {
+		if !strings.HasPrefix(strings.ToLower(condition), "gitdir:") {
 			continue
 		}
 
-		dir := strings.TrimPrefix(condition, "gitdir:")
+		dir := condition[len("gitdir:"):]
 		dir = strings.TrimSuffix(dir, "/")
 
 		var includePath string
@@ -390,7 +390,7 @@ func checkDuplicateSafeDirs(sections []Section, file string, result *DoctorResul
 
 func checkIncludeIfs(sections []Section, file string, result *DoctorResult) {
 	for _, sec := range sections {
-		if !strings.HasPrefix(sec.Header, "includeIf ") {
+		if !strings.HasPrefix(strings.ToLower(sec.Header), "includeif ") {
 			continue
 		}
 
@@ -429,7 +429,7 @@ func checkUserIdentity(sections []Section, file string, result *DoctorResult) {
 		// Check if there are includeIf profiles that provide email.
 		hasIncludeIf := false
 		for _, sec := range sections {
-			if strings.HasPrefix(sec.Header, "includeIf ") {
+			if strings.HasPrefix(strings.ToLower(sec.Header), "includeif ") {
 				hasIncludeIf = true
 				break
 			}
