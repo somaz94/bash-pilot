@@ -15,6 +15,8 @@ Hands-on examples for bash-pilot.
 - [Git Clean](#git-clean)
 - [Env Check](#env-check)
 - [Env Path](#env-path)
+- [Prompt Init](#prompt-init)
+- [Prompt Show](#prompt-show)
 - [Scripting with JSON](#scripting-with-json)
 
 <br/>
@@ -312,6 +314,57 @@ $ bash-pilot env path
 └────────────────────────────────────────────────────
 
 ! 8 entries, 0 duplicates, 1 missing
+```
+
+<br/>
+
+## Prompt Init
+
+### Generate and apply smart prompt
+
+```bash
+# Apply minimal prompt (git only)
+$ eval "$(bash-pilot prompt init)"
+
+# Your prompt now shows:
+user@host ~/project (main *) ❯
+
+# Apply full prompt (git + k8s)
+$ eval "$(bash-pilot prompt init --theme full)"
+
+# Your prompt now shows:
+user@host ~/project [prod-cluster:monitoring] (main *) ❯
+```
+
+### Persist in shell profile
+
+```bash
+# Add to ~/.bashrc or ~/.bash_profile
+echo 'eval "$(bash-pilot prompt init --theme full)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+<br/>
+
+## Prompt Show
+
+### Preview prompt components
+
+```bash
+$ bash-pilot prompt show
+┌─ PROMPT COMPONENTS ──────────────────────────────
+│ ✓ user@host:   user@hostname
+│ ✓ directory:   ~/projects/bash-pilot
+│ ✓ git:         main *
+└────────────────────────────────────────────────────
+
+$ bash-pilot prompt show --theme full
+┌─ PROMPT COMPONENTS ──────────────────────────────
+│ ✓ user@host:   user@hostname
+│ ✓ directory:   ~/projects/bash-pilot
+│ ✓ git:         main *
+│ ✓ k8s:         prod-cluster:monitoring
+└────────────────────────────────────────────────────
 ```
 
 <br/>
