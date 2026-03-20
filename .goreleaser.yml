@@ -73,3 +73,11 @@ brews:
         bash-pilot --help                # Full usage
 
       Docs: https://github.com/somaz94/bash-pilot
+
+scoops:
+  - repository:
+      owner: somaz94
+      name: scoop-bucket
+    homepage: "https://github.com/somaz94/bash-pilot"
+    description: "A powerful CLI toolkit for bash power users — SSH, Git, Env, Prompt"
+    license: "Apache-2.0"

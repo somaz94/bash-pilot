@@ -58,6 +58,10 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 # Homebrew
 brew install somaz94/tap/bash-pilot
 
+# Scoop (Windows)
+scoop bucket add somaz94 https://github.com/somaz94/scoop-bucket
+scoop install bash-pilot
+
 # curl (latest)
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
 
@@ -81,6 +85,9 @@ cd bash-pilot && make install
 # Homebrew
 brew update && brew upgrade bash-pilot
 
+# Scoop
+scoop update bash-pilot
+
 # curl (re-run installer)
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
 
@@ -95,6 +102,9 @@ go install github.com/somaz94/bash-pilot/cmd@latest
 ```bash
 # Homebrew
 brew uninstall bash-pilot
+
+# Scoop
+scoop uninstall bash-pilot
 
 # Manual
 sudo rm /usr/local/bin/bash-pilot

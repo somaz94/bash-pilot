@@ -20,6 +20,10 @@ Step-by-step guide to set up bash-pilot with a real-world SSH environment.
 # Homebrew (recommended)
 brew install somaz94/tap/bash-pilot
 
+# Scoop (Windows)
+scoop bucket add somaz94 https://github.com/somaz94/scoop-bucket
+scoop install bash-pilot
+
 # Or via curl (latest)
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
 

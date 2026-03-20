@@ -13,7 +13,8 @@ git tag v1.0.0 && git push origin v1.0.0
     └→ GitHub Actions (release.yml)
         └→ GoReleaser
             ├→ GitHub Releases (linux/darwin/windows x amd64/arm64)
-            └→ Homebrew tap update (somaz94/homebrew-tap)
+            ├→ Homebrew tap update (somaz94/homebrew-tap)
+            └→ Scoop bucket update (somaz94/scoop-bucket)
 ```
 
 <br/>
