@@ -153,6 +153,10 @@ header 2 "init — Auto-generate config from SSH config"
 # ============================================================
 
 export HOME="$DEMO_DIR"
+
+# Copy SSH config to ~/.ssh/config so migrate export can find it
+cp "$DEMO_SSH_CONFIG" "$DEMO_DIR/.ssh/config"
+chmod 0600 "$DEMO_DIR/.ssh/config"
 mkdir -p "$DEMO_DIR/.config/bash-pilot"
 
 run "$BINARY" init --config "$DEMO_CONFIG" --force
