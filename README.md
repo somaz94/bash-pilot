@@ -185,6 +185,9 @@ source ~/.bashrc
 
 # Bash (macOS — requires bash-completion@2)
 # brew install bash-completion@2
+# If use bash-completion@1
+# brew uninstall bash-completion
+# brew install bash-completion@2
 bash-pilot completion bash > "$(brew --prefix)/etc/bash_completion.d/bash-pilot"
 source ~/.bash_profile
 
