@@ -76,8 +76,21 @@ var installCommands = map[string]map[string][]string{
 }
 
 // Plan returns the list of actions needed to match the snapshot, without executing.
-func Plan(saved *Snapshot) *SetupResult {
-	diff := Diff(saved)
+func Plan(saved *Snapshot, onlyOpts ...map[string]bool) *SetupResult {
+	// Setup only cares about "tools" and "brew" sections.
+	// Build a filter that includes only those sections requested.
+	var only map[string]bool
+	if len(onlyOpts) > 0 && onlyOpts[0] != nil {
+		only = make(map[string]bool)
+		src := onlyOpts[0]
+		if src["tools"] {
+			only["tools"] = true
+		}
+		if src["brew"] {
+			only["brew"] = true
+		}
+	}
+	diff := Diff(saved, only)
 	result := &SetupResult{}
 	osName := runtime.GOOS
 
@@ -136,8 +149,8 @@ func Plan(saved *Snapshot) *SetupResult {
 }
 
 // Execute runs the planned setup actions, installing missing tools.
-func Execute(saved *Snapshot, dryRun bool) *SetupResult {
-	plan := Plan(saved)
+func Execute(saved *Snapshot, dryRun bool, onlyOpts ...map[string]bool) *SetupResult {
+	plan := Plan(saved, onlyOpts...)
 
 	if dryRun {
 		return plan

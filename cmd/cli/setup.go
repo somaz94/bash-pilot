@@ -34,16 +34,18 @@ Usage:
 		}
 
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		onlyFlag, _ := cmd.Flags().GetString("only")
+		only := snapshot.ParseOnly(onlyFlag)
 
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
 		if output == "json" {
-			result := snapshot.Execute(&saved, dryRun)
+			result := snapshot.Execute(&saved, dryRun, only)
 			return f.JSON(result)
 		}
 
 		if dryRun {
-			result := snapshot.Plan(&saved)
+			result := snapshot.Plan(&saved, only)
 			f.Header("SETUP PLAN (dry-run)")
 			fmt.Print(snapshot.FormatPlan(result))
 			f.Footer()
@@ -65,7 +67,7 @@ Usage:
 		}
 
 		f.Header("SETUP")
-		result := snapshot.Execute(&saved, false)
+		result := snapshot.Execute(&saved, false, only)
 		fmt.Print(snapshot.FormatPlan(result))
 		f.Footer()
 
@@ -86,5 +88,6 @@ Usage:
 
 func init() {
 	setupCmd.Flags().Bool("dry-run", false, "Preview install plan without executing")
+	setupCmd.Flags().String("only", "", "Comma-separated sections to install (tools,brew)")
 	rootCmd.AddCommand(setupCmd)
 }

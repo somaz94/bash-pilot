@@ -58,7 +58,10 @@ Usage:
 			return fmt.Errorf("invalid snapshot file: %w", err)
 		}
 
-		result := snapshot.Diff(&saved)
+		onlyFlag, _ := cmd.Flags().GetString("only")
+		only := snapshot.ParseOnly(onlyFlag)
+
+		result := snapshot.Diff(&saved, only)
 
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
@@ -114,6 +117,7 @@ Usage:
 
 func init() {
 	snapshotCmd.Flags().Bool("summary", false, "Show summary instead of full JSON")
+	diffCmd.Flags().String("only", "", "Comma-separated sections to compare (system,tools,git,ssh,k8s,brew)")
 
 	rootCmd.AddCommand(snapshotCmd)
 	rootCmd.AddCommand(diffCmd)

@@ -76,6 +76,11 @@ brews:
         bash-pilot env path              # PATH analysis
         bash-pilot prompt init           # Generate smart bash prompt
         bash-pilot prompt show           # Preview prompt components
+        bash-pilot snapshot --summary    # Environment snapshot summary
+        bash-pilot diff my-env.json      # Compare environments
+        bash-pilot setup my-env.json     # Install missing tools
+        bash-pilot migrate export        # Export SSH + Git config
+        bash-pilot migrate import f.json # Import config on new machine
         bash-pilot doctor                # Full system diagnostics
         bash-pilot --help                # Full usage
 

@@ -665,3 +665,119 @@ func TestFormatDiff_AllMatch(t *testing.T) {
 		t.Error("expected all match output")
 	}
 }
+
+func TestParseOnly(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected map[string]bool
+	}{
+		{"empty", "", nil},
+		{"single", "ssh", map[string]bool{"ssh": true}},
+		{"multiple", "ssh,git", map[string]bool{"ssh": true, "git": true}},
+		{"with spaces", " ssh , git ", map[string]bool{"ssh": true, "git": true}},
+		{"uppercase", "SSH,Git", map[string]bool{"ssh": true, "git": true}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ParseOnly(tt.input)
+			if tt.expected == nil {
+				if result != nil {
+					t.Errorf("expected nil, got %v", result)
+				}
+				return
+			}
+			if len(result) != len(tt.expected) {
+				t.Errorf("expected %d entries, got %d", len(tt.expected), len(result))
+			}
+			for k := range tt.expected {
+				if !result[k] {
+					t.Errorf("expected key %s", k)
+				}
+			}
+		})
+	}
+}
+
+func TestDiff_OnlyFilter(t *testing.T) {
+	origRunCommand := runCommand
+	origLookPath := lookPath
+	origGetenv := getenv
+	origUserHomeDir := userHomeDir
+	defer func() {
+		runCommand = origRunCommand
+		lookPath = origLookPath
+		getenv = origGetenv
+		userHomeDir = origUserHomeDir
+	}()
+
+	lookPath = func(file string) (string, error) { return "", errNotFound }
+	runCommand = func(name string, args ...string) ([]byte, error) { return nil, errNotFound }
+	getenv = func(key string) string {
+		if key == "SHELL" {
+			return "/bin/zsh"
+		}
+		return ""
+	}
+	userHomeDir = func() (string, error) { return "/tmp/nonexistent-home-for-test", nil }
+
+	saved := &Snapshot{
+		OS:   "darwin",
+		Arch: "arm64",
+		Shell: ShellInfo{
+			Shell: "/bin/zsh",
+		},
+		Tools: []ToolInfo{
+			{Name: "git", Version: "git version 2.42.0"},
+		},
+		Brew: []string{"wget"},
+	}
+
+	// Only tools
+	only := map[string]bool{"tools": true}
+	result := Diff(saved, only)
+
+	sectionNames := make(map[string]bool)
+	for _, sec := range result.Sections {
+		sectionNames[sec.Name] = true
+	}
+
+	if !sectionNames["Tools"] {
+		t.Error("expected Tools section")
+	}
+	if sectionNames["System"] {
+		t.Error("did not expect System section with --only tools")
+	}
+	if sectionNames["Git"] {
+		t.Error("did not expect Git section with --only tools")
+	}
+	if sectionNames["SSH Keys"] {
+		t.Error("did not expect SSH Keys section with --only tools")
+	}
+	if sectionNames["Brew Packages"] {
+		t.Error("did not expect Brew Packages section with --only tools")
+	}
+
+	// Only ssh,git
+	only2 := map[string]bool{"ssh": true, "git": true}
+	result2 := Diff(saved, only2)
+
+	sectionNames2 := make(map[string]bool)
+	for _, sec := range result2.Sections {
+		sectionNames2[sec.Name] = true
+	}
+
+	if !sectionNames2["Git"] {
+		t.Error("expected Git section")
+	}
+	if !sectionNames2["SSH Keys"] {
+		t.Error("expected SSH Keys section")
+	}
+	if sectionNames2["System"] {
+		t.Error("did not expect System section")
+	}
+	if sectionNames2["Tools"] {
+		t.Error("did not expect Tools section")
+	}
+}

@@ -42,16 +42,25 @@ var (
 )
 
 // Import applies the migrate config to the current machine.
-func Import(cfg *MigrateConfig, dryRun bool) (*ImportResult, error) {
+func Import(cfg *MigrateConfig, dryRun bool, onlyOpts ...map[string]bool) (*ImportResult, error) {
 	home, err := userHomeDir()
 	if err != nil {
 		return nil, err
 	}
 
+	var only map[string]bool
+	if len(onlyOpts) > 0 {
+		only = onlyOpts[0]
+	}
+
 	result := &ImportResult{}
 
-	importSSH(cfg, home, dryRun, result)
-	importGit(cfg, home, dryRun, result)
+	if only == nil || only["ssh"] {
+		importSSH(cfg, home, dryRun, result)
+	}
+	if only == nil || only["git"] {
+		importGit(cfg, home, dryRun, result)
+	}
 
 	return result, nil
 }
