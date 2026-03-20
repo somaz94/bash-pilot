@@ -77,7 +77,15 @@ main() {
 
   ok "bash-pilot v${VERSION} installed successfully!"
   echo ""
-  echo -e "Run ${CYAN}bash-pilot --help${RESET} to get started."
+  echo -e "🎉 ${BOLD}bash-pilot installed!${RESET}"
+  echo ""
+  echo -e "  Quick start:"
+  echo -e "    ${CYAN}bash-pilot ssh list${RESET}              # List SSH hosts with grouping"
+  echo -e "    ${CYAN}bash-pilot ssh ping${RESET}              # Test connectivity (parallel)"
+  echo -e "    ${CYAN}bash-pilot ssh audit${RESET}             # Security audit"
+  echo -e "    ${CYAN}bash-pilot --help${RESET}                # Full usage"
+  echo ""
+  echo -e "  Docs: ${CYAN}https://github.com/somaz94/bash-pilot${RESET}"
 }
 
 main
