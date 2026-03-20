@@ -1,6 +1,8 @@
 package env
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -316,5 +318,383 @@ func TestAnalyzePath_AllExist(t *testing.T) {
 
 	if len(result.Missing) != 0 {
 		t.Errorf("expected no missing dirs, got %d", len(result.Missing))
+	}
+}
+
+// --- Tests using function variable overrides ---
+
+func TestCheckCommonTools_AllFound(t *testing.T) {
+	origLookPath := lookPath
+	defer func() { lookPath = origLookPath }()
+
+	lookPath = func(file string) (string, error) {
+		return "/usr/bin/" + file, nil
+	}
+
+	result := &CheckResult{}
+	checkCommonTools(result)
+
+	for _, f := range result.Findings {
+		if f.Severity != "ok" {
+			t.Errorf("expected all ok, got %s for %s", f.Severity, f.Message)
+		}
+	}
+	if len(result.Findings) != 11 {
+		t.Errorf("expected 11 findings, got %d", len(result.Findings))
+	}
+}
+
+func TestCheckCommonTools_RequiredMissing(t *testing.T) {
+	origLookPath := lookPath
+	defer func() { lookPath = origLookPath }()
+
+	lookPath = func(file string) (string, error) {
+		return "", fmt.Errorf("not found")
+	}
+
+	result := &CheckResult{}
+	checkCommonTools(result)
+
+	errorCount := 0
+	warnCount := 0
+	for _, f := range result.Findings {
+		switch f.Severity {
+		case "error":
+			errorCount++
+		case "warn":
+			warnCount++
+		}
+	}
+	// git, ssh, curl are required → error
+	if errorCount != 3 {
+		t.Errorf("expected 3 errors (required tools), got %d", errorCount)
+	}
+	// the rest are optional → warn
+	if warnCount != 8 {
+		t.Errorf("expected 8 warnings (optional tools), got %d", warnCount)
+	}
+}
+
+func TestCheckSSHAgent_WithKeys(t *testing.T) {
+	origSock := os.Getenv("SSH_AUTH_SOCK")
+	origStat := statFunc
+	origRun := runCommand
+	defer func() {
+		os.Setenv("SSH_AUTH_SOCK", origSock)
+		statFunc = origStat
+		runCommand = origRun
+	}()
+
+	tmpDir := t.TempDir()
+	sockPath := filepath.Join(tmpDir, "agent.sock")
+	os.WriteFile(sockPath, []byte{}, 0600)
+	os.Setenv("SSH_AUTH_SOCK", sockPath)
+
+	statFunc = os.Stat
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		if name == "ssh-add" {
+			return []byte("2048 SHA256:abc key1 (RSA)\n4096 SHA256:def key2 (ED25519)"), nil
+		}
+		return nil, fmt.Errorf("unexpected command")
+	}
+
+	result := &CheckResult{}
+	checkSSHAgent(result)
+
+	if len(result.Findings) == 0 {
+		t.Fatal("expected findings")
+	}
+	if result.Findings[0].Severity != "ok" {
+		t.Errorf("expected ok, got %s", result.Findings[0].Severity)
+	}
+	if !strings.Contains(result.Findings[0].Message, "2 key(s) loaded") {
+		t.Errorf("expected 2 keys message, got %s", result.Findings[0].Message)
+	}
+}
+
+func TestCheckSSHAgent_NoKeys(t *testing.T) {
+	origSock := os.Getenv("SSH_AUTH_SOCK")
+	origStat := statFunc
+	origRun := runCommand
+	defer func() {
+		os.Setenv("SSH_AUTH_SOCK", origSock)
+		statFunc = origStat
+		runCommand = origRun
+	}()
+
+	tmpDir := t.TempDir()
+	sockPath := filepath.Join(tmpDir, "agent.sock")
+	os.WriteFile(sockPath, []byte{}, 0600)
+	os.Setenv("SSH_AUTH_SOCK", sockPath)
+
+	statFunc = os.Stat
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return nil, fmt.Errorf("exit status 1")
+	}
+
+	result := &CheckResult{}
+	checkSSHAgent(result)
+
+	if len(result.Findings) == 0 {
+		t.Fatal("expected findings")
+	}
+	if !strings.Contains(result.Findings[0].Message, "no keys loaded") {
+		t.Errorf("expected no keys message, got %s", result.Findings[0].Message)
+	}
+}
+
+func TestCheckGitConfig_BothSet(t *testing.T) {
+	origRun := runCommand
+	defer func() { runCommand = origRun }()
+
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		if name == "git" && len(args) >= 3 {
+			switch args[2] {
+			case "user.email":
+				return []byte("user@example.com\n"), nil
+			case "user.name":
+				return []byte("Test User\n"), nil
+			}
+		}
+		return nil, fmt.Errorf("unexpected")
+	}
+
+	result := &CheckResult{}
+	checkGitConfig(result)
+
+	if len(result.Findings) != 2 {
+		t.Fatalf("expected 2 findings, got %d", len(result.Findings))
+	}
+	for _, f := range result.Findings {
+		if f.Severity != "ok" {
+			t.Errorf("expected ok, got %s: %s", f.Severity, f.Message)
+		}
+	}
+}
+
+func TestCheckGitConfig_NoneSet(t *testing.T) {
+	origRun := runCommand
+	defer func() { runCommand = origRun }()
+
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return nil, fmt.Errorf("exit status 1")
+	}
+
+	result := &CheckResult{}
+	checkGitConfig(result)
+
+	if len(result.Findings) != 2 {
+		t.Fatalf("expected 2 findings, got %d", len(result.Findings))
+	}
+	for _, f := range result.Findings {
+		if f.Severity != "warn" {
+			t.Errorf("expected warn, got %s: %s", f.Severity, f.Message)
+		}
+	}
+}
+
+func TestCheckHomeDir_WithTempDir(t *testing.T) {
+	origHome := userHomeDir
+	origStat := statFunc
+	defer func() {
+		userHomeDir = origHome
+		statFunc = origStat
+	}()
+
+	tmpDir := t.TempDir()
+	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0700)
+	os.MkdirAll(filepath.Join(tmpDir, ".config"), 0755)
+
+	userHomeDir = func() (string, error) { return tmpDir, nil }
+	statFunc = os.Stat
+
+	result := &CheckResult{}
+	checkHomeDir(result)
+
+	if len(result.Findings) < 2 {
+		t.Fatalf("expected at least 2 findings, got %d", len(result.Findings))
+	}
+	// .ssh should be ok (0700)
+	if result.Findings[0].Severity != "ok" {
+		t.Errorf("expected ok for .ssh, got %s: %s", result.Findings[0].Severity, result.Findings[0].Message)
+	}
+	// .config should be ok
+	if result.Findings[1].Severity != "ok" {
+		t.Errorf("expected ok for .config, got %s: %s", result.Findings[1].Severity, result.Findings[1].Message)
+	}
+}
+
+func TestCheckHomeDir_SSHPermsTooOpen(t *testing.T) {
+	origHome := userHomeDir
+	origStat := statFunc
+	defer func() {
+		userHomeDir = origHome
+		statFunc = origStat
+	}()
+
+	tmpDir := t.TempDir()
+	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0755)
+	os.MkdirAll(filepath.Join(tmpDir, ".config"), 0755)
+
+	userHomeDir = func() (string, error) { return tmpDir, nil }
+	statFunc = os.Stat
+
+	result := &CheckResult{}
+	checkHomeDir(result)
+
+	if len(result.Findings) < 1 {
+		t.Fatal("expected findings")
+	}
+	if result.Findings[0].Severity != "warn" {
+		t.Errorf("expected warn for .ssh perms, got %s: %s", result.Findings[0].Severity, result.Findings[0].Message)
+	}
+	if !strings.Contains(result.Findings[0].Message, "permissions too open") {
+		t.Errorf("expected permissions warning, got %s", result.Findings[0].Message)
+	}
+}
+
+func TestCheckHomeDir_MissingDirs(t *testing.T) {
+	origHome := userHomeDir
+	origStat := statFunc
+	defer func() {
+		userHomeDir = origHome
+		statFunc = origStat
+	}()
+
+	tmpDir := t.TempDir()
+	// Don't create .ssh or .config
+
+	userHomeDir = func() (string, error) { return tmpDir, nil }
+	statFunc = os.Stat
+
+	result := &CheckResult{}
+	checkHomeDir(result)
+
+	warnCount := 0
+	for _, f := range result.Findings {
+		if f.Severity == "warn" {
+			warnCount++
+		}
+	}
+	// .ssh not found, .config not found, profile not found = 3 warnings
+	if warnCount < 2 {
+		t.Errorf("expected at least 2 warnings for missing dirs, got %d", warnCount)
+	}
+}
+
+func TestCheckHomeDir_HomeDirError(t *testing.T) {
+	origHome := userHomeDir
+	defer func() { userHomeDir = origHome }()
+
+	userHomeDir = func() (string, error) { return "", errors.New("no home") }
+
+	result := &CheckResult{}
+	checkHomeDir(result)
+
+	if len(result.Findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(result.Findings))
+	}
+	if result.Findings[0].Severity != "error" {
+		t.Errorf("expected error, got %s", result.Findings[0].Severity)
+	}
+}
+
+func TestCheckShell_WithBash(t *testing.T) {
+	origShell := os.Getenv("SHELL")
+	origRun := runCommand
+	defer func() {
+		os.Setenv("SHELL", origShell)
+		runCommand = origRun
+	}()
+
+	os.Setenv("SHELL", "/bin/bash")
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return []byte("GNU bash, version 5.2.15(1)-release (aarch64-apple-darwin)\n"), nil
+	}
+
+	result := &CheckResult{}
+	checkShell(result)
+
+	if len(result.Findings) < 2 {
+		t.Fatalf("expected at least 2 findings, got %d", len(result.Findings))
+	}
+	// First: shell name, second: bash version
+	if result.Findings[1].Severity != "ok" {
+		t.Errorf("expected ok for bash 5.x, got %s: %s", result.Findings[1].Severity, result.Findings[1].Message)
+	}
+}
+
+func TestCheckShell_OldBash(t *testing.T) {
+	origShell := os.Getenv("SHELL")
+	origRun := runCommand
+	defer func() {
+		os.Setenv("SHELL", origShell)
+		runCommand = origRun
+	}()
+
+	os.Setenv("SHELL", "/bin/bash")
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return []byte("GNU bash, version 3.2.57(1)-release (x86_64-apple-darwin)\n"), nil
+	}
+
+	result := &CheckResult{}
+	checkShell(result)
+
+	found := false
+	for _, f := range result.Findings {
+		if f.Severity == "warn" && strings.Contains(f.Message, "Old bash version") {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("expected warning for old bash version 3.x")
+	}
+}
+
+func TestCheckShell_VersionError(t *testing.T) {
+	origShell := os.Getenv("SHELL")
+	origRun := runCommand
+	defer func() {
+		os.Setenv("SHELL", origShell)
+		runCommand = origRun
+	}()
+
+	os.Setenv("SHELL", "/bin/bash")
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return nil, fmt.Errorf("command failed")
+	}
+
+	result := &CheckResult{}
+	checkShell(result)
+
+	// Should still have the shell finding, just no version
+	if len(result.Findings) != 1 {
+		t.Errorf("expected 1 finding (shell only, no version), got %d", len(result.Findings))
+	}
+}
+
+func TestExpandEnvPath_HomeDirError(t *testing.T) {
+	origHome := userHomeDir
+	defer func() { userHomeDir = origHome }()
+
+	userHomeDir = func() (string, error) { return "", errors.New("no home") }
+
+	got := expandEnvPath("~/bin")
+	if got != "~/bin" {
+		t.Errorf("expected ~/bin unchanged on error, got %s", got)
+	}
+}
+
+func TestAnalyzePath_DuplicateAlreadyReported(t *testing.T) {
+	original := os.Getenv("PATH")
+	defer os.Setenv("PATH", original)
+
+	// Three occurrences: second triggers dup, third should not re-add
+	os.Setenv("PATH", "/usr/bin:/tmp:/usr/bin:/usr/bin")
+
+	result := AnalyzePath()
+
+	if len(result.Duplicates) != 1 {
+		t.Errorf("expected 1 duplicate entry, got %d: %v", len(result.Duplicates), result.Duplicates)
 	}
 }

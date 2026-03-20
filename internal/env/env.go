@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+// Package-level function variables for testing.
+var (
+	lookPath   = exec.LookPath
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		return exec.Command(name, args...).Output()
+	}
+	statFunc    = os.Stat
+	userHomeDir = os.UserHomeDir
+)
+
 // CheckResult holds all findings from env check.
 type CheckResult struct {
 	Findings []Finding `json:"findings"`
@@ -71,7 +81,7 @@ func AnalyzePath() *PathResult {
 			Index: i + 1,
 		}
 
-		if info, err := os.Stat(expanded); err == nil && info.IsDir() {
+		if info, err := statFunc(expanded); err == nil && info.IsDir() {
 			entry.Exists = true
 		} else {
 			entry.Exists = false
@@ -124,7 +134,7 @@ func checkShell(result *CheckResult) {
 
 	// Check bash version if using bash.
 	if strings.Contains(shell, "bash") {
-		out, err := exec.Command(shell, "--version").Output()
+		out, err := runCommand(shell, "--version")
 		if err == nil {
 			lines := strings.Split(string(out), "\n")
 			if len(lines) > 0 {
@@ -166,7 +176,7 @@ func checkCommonTools(result *CheckResult) {
 	}
 
 	for _, tool := range tools {
-		path, err := exec.LookPath(tool.name)
+		path, err := lookPath(tool.name)
 		if err != nil {
 			sev := "warn"
 			if tool.required {
@@ -198,7 +208,7 @@ func checkSSHAgent(result *CheckResult) {
 		return
 	}
 
-	if _, err := os.Stat(sock); os.IsNotExist(err) {
+	if _, err := statFunc(sock); os.IsNotExist(err) {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "warn",
 			Category: "ssh-agent",
@@ -208,7 +218,7 @@ func checkSSHAgent(result *CheckResult) {
 	}
 
 	// Check loaded keys.
-	out, err := exec.Command("ssh-add", "-l").Output()
+	out, err := runCommand("ssh-add", "-l")
 	if err != nil {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "warn",
@@ -227,7 +237,7 @@ func checkSSHAgent(result *CheckResult) {
 }
 
 func checkGitConfig(result *CheckResult) {
-	out, err := exec.Command("git", "config", "--global", "user.email").Output()
+	out, err := runCommand("git", "config", "--global", "user.email")
 	if err != nil || strings.TrimSpace(string(out)) == "" {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "warn",
@@ -242,7 +252,7 @@ func checkGitConfig(result *CheckResult) {
 		})
 	}
 
-	out, err = exec.Command("git", "config", "--global", "user.name").Output()
+	out, err = runCommand("git", "config", "--global", "user.name")
 	if err != nil || strings.TrimSpace(string(out)) == "" {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "warn",
@@ -259,7 +269,7 @@ func checkGitConfig(result *CheckResult) {
 }
 
 func checkHomeDir(result *CheckResult) {
-	home, err := os.UserHomeDir()
+	home, err := userHomeDir()
 	if err != nil {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "error",
@@ -276,7 +286,7 @@ func checkHomeDir(result *CheckResult) {
 	}
 
 	for _, dir := range dirs {
-		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+		if info, err := statFunc(dir); err == nil && info.IsDir() {
 			perm := info.Mode().Perm()
 			if dir == filepath.Join(home, ".ssh") && perm&0077 != 0 {
 				result.Findings = append(result.Findings, Finding{
@@ -308,7 +318,7 @@ func checkHomeDir(result *CheckResult) {
 		profileFile = filepath.Join(home, ".bashrc")
 	}
 
-	if _, err := os.Stat(profileFile); err == nil {
+	if _, err := statFunc(profileFile); err == nil {
 		result.Findings = append(result.Findings, Finding{
 			Severity: "ok",
 			Category: "home",
@@ -346,7 +356,7 @@ func checkEditorSet(result *CheckResult) {
 
 func expandEnvPath(path string) string {
 	if strings.HasPrefix(path, "~/") {
-		home, err := os.UserHomeDir()
+		home, err := userHomeDir()
 		if err != nil {
 			return path
 		}
