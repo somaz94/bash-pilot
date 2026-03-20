@@ -17,6 +17,7 @@ Hands-on examples for bash-pilot.
 - [Env Path](#env-path)
 - [Prompt Init](#prompt-init)
 - [Prompt Show](#prompt-show)
+- [Doctor](#doctor)
 - [Scripting with JSON](#scripting-with-json)
 
 <br/>
@@ -365,6 +366,39 @@ $ bash-pilot prompt show --theme full
 │ ✓ git:         main *
 │ ✓ k8s:         prod-cluster:monitoring
 └────────────────────────────────────────────────────
+```
+
+<br/>
+
+## Doctor
+
+### Full system diagnostics
+
+```bash
+$ bash-pilot doctor
+┌─ DOCTOR: SSH ─────────────────────────────────────
+│ ✓ used by 1 host(s)
+│ ! used by 14 hosts (consider per-host keys)
+│ ✓ permissions OK (0600)
+└────────────────────────────────────────────────────
+
+┌─ DOCTOR: GIT ─────────────────────────────────────
+│ ✓ No issues found in gitconfig
+└────────────────────────────────────────────────────
+
+┌─ DOCTOR: ENV (SHELL) ─────────────────────────────
+│ ✓ Shell: /bin/bash
+│ ✓ Bash version: GNU bash, version 5.2.15...
+└────────────────────────────────────────────────────
+
+┌─ DOCTOR: ENV (TOOLS) ─────────────────────────────
+│ ✓ git: /usr/bin/git
+│ ✓ ssh: /usr/bin/ssh
+│ ✓ curl: /usr/bin/curl
+│ ! kubectl: not found
+└────────────────────────────────────────────────────
+
+! Total: 2 issue(s) — SSH: 1, Git: 0, Env: 1
 ```
 
 <br/>

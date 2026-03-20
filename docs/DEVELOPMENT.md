@@ -35,6 +35,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │       ├── git.go                 # Git subcommands (profiles, doctor, clean)
 │       ├── env.go                 # Env subcommands (check, path)
 │       ├── prompt.go              # Prompt subcommands (init, show)
+│       ├── doctor.go              # Cross-module diagnostics
 │       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
