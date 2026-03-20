@@ -43,8 +43,9 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
-### Prompt Module (coming soon)
-- **`bash-pilot prompt init`** — Smart bash prompt with git branch and k8s context
+### Prompt Module
+- **`bash-pilot prompt init`** — Generate smart bash prompt with git branch and k8s context
+- **`bash-pilot prompt show`** — Preview prompt components for current environment
 
 <br/>
 
@@ -153,6 +154,18 @@ bash-pilot env path
 
 # JSON output
 bash-pilot env check -o json
+
+# Generate smart prompt
+bash-pilot prompt init
+
+# Apply prompt to current shell
+eval "$(bash-pilot prompt init)"
+
+# Full theme with k8s context
+eval "$(bash-pilot prompt init --theme full)"
+
+# Preview prompt components
+bash-pilot prompt show
 ```
 
 <br/>
@@ -222,6 +235,7 @@ After setup, press `Tab` to auto-complete commands and flags:
 bash-pilot ssh <TAB>        # list, ping, audit
 bash-pilot git <TAB>        # profiles, doctor, clean
 bash-pilot env <TAB>        # check, path
+bash-pilot prompt <TAB>     # init, show
 bash-pilot ssh list -<TAB>  # --config, --output, --no-color
 ```
 

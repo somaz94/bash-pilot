@@ -10,6 +10,7 @@ Complete guide for using bash-pilot CLI.
 - [SSH Module](#ssh-module)
 - [Git Module](#git-module)
 - [Env Module](#env-module)
+- [Prompt Module](#prompt-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
 
@@ -212,6 +213,64 @@ bash-pilot env path -o json
 - All PATH entries with existence check
 - Duplicate directories (by canonical path)
 - Missing directories
+
+<br/>
+
+## Prompt Module
+
+<br/>
+
+### prompt init
+
+Generate a smart bash prompt script with git branch, dirty status, exit code indicator, and optional k8s context.
+
+```bash
+# Preview the generated script
+bash-pilot prompt init
+
+# Apply immediately
+eval "$(bash-pilot prompt init)"
+
+# Full theme (git + k8s context)
+eval "$(bash-pilot prompt init --theme full)"
+
+# Full theme without k8s
+eval "$(bash-pilot prompt init --theme full --no-k8s)"
+
+# Persist in your shell profile
+echo 'eval "$(bash-pilot prompt init)"' >> ~/.bashrc
+```
+
+**Themes:**
+
+| Theme | Description |
+|-------|-------------|
+| `minimal` (default) | user@host, directory, git branch/dirty, exit code |
+| `full` | All of minimal + k8s context:namespace |
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--theme` | `minimal` | Prompt theme: `minimal`, `full` |
+| `--no-k8s` | `false` | Disable k8s context (even in full theme) |
+
+<br/>
+
+### prompt show
+
+Preview what components would appear in the prompt for your current environment.
+
+```bash
+# Show current prompt components
+bash-pilot prompt show
+
+# Full theme preview
+bash-pilot prompt show --theme full
+
+# JSON output
+bash-pilot prompt show -o json
+```
 
 <br/>
 

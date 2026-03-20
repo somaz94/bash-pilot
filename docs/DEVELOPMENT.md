@@ -34,6 +34,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │       ├── ssh.go                 # SSH subcommands (list, ping, audit)
 │       ├── git.go                 # Git subcommands (profiles, doctor, clean)
 │       ├── env.go                 # Env subcommands (check, path)
+│       ├── prompt.go              # Prompt subcommands (init, show)
 │       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
@@ -52,6 +53,11 @@ Guide for building, testing, and contributing to bash-pilot.
 │   ├── env/
 │   │   ├── env.go                 # Environment check, PATH analysis
 │   │   └── env_test.go
+│   ├── prompt/
+│   │   ├── prompt.go              # Prompt script generation
+│   │   ├── helpers.go             # Git branch, k8s context helpers
+│   │   ├── prompt_test.go
+│   │   └── helpers_test.go
 │   ├── config/
 │   │   ├── config.go             # YAML config loader
 │   │   └── config_test.go
@@ -82,6 +88,7 @@ Guide for building, testing, and contributing to bash-pilot.
 | `internal/ssh/` | SSH config parsing, host grouping, connectivity testing, security audit |
 | `internal/git/` | Gitconfig parsing, multi-profile management, diagnostics, cleanup |
 | `internal/env/` | Shell environment health check, PATH analysis |
+| `internal/prompt/` | Smart prompt generation (git branch, k8s context) |
 | `internal/config/` | YAML configuration loader with defaults |
 | `internal/report/` | Output formatting (color, plain, JSON, table) |
 
@@ -114,7 +121,8 @@ make cover-html      # Open coverage report in browser
 |---------|----------|
 | `internal/ssh` | 96.1% |
 | `internal/git` | 94.2% |
-| `internal/env` | 85.5% |
+| `internal/env` | 99.2% |
+| `internal/prompt` | 99.0% |
 | `internal/config` | 82.4% |
 | `internal/report` | 100% |
 

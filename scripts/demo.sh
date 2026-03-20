@@ -287,7 +287,27 @@ header 17 "env path — JSON output"
 run "$BINARY" env path -o json
 
 # ============================================================
-header 18 "version"
+header 18 "prompt show — Preview prompt components"
+# ============================================================
+
+run "$BINARY" prompt show
+
+# ============================================================
+header 19 "prompt show — Full theme (git + k8s)"
+# ============================================================
+
+run "$BINARY" prompt show --theme full
+
+# ============================================================
+header 20 "prompt init — Generate prompt script (minimal)"
+# ============================================================
+
+echo -e "${YELLOW}Note: Showing first 20 lines of generated script${RESET}"
+echo ""
+run "$BINARY" prompt init 2>&1 | head -20
+
+# ============================================================
+header 21 "version"
 # ============================================================
 
 run "$BINARY" version
