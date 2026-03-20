@@ -45,13 +45,13 @@ func Audit(hosts []Host) AuditResult {
 			result.Findings = append(result.Findings, AuditFinding{
 				Severity: SeverityWarn,
 				Key:      keyName,
-				Message:  fmt.Sprintf("used by %d hosts (consider per-host keys)", len(hostNames)),
+				Message:  fmt.Sprintf("%s: used by %d hosts (consider per-host keys)", keyName, len(hostNames)),
 			})
 		} else {
 			result.Findings = append(result.Findings, AuditFinding{
 				Severity: SeverityOK,
 				Key:      keyName,
-				Message:  fmt.Sprintf("used by %d host(s)", len(hostNames)),
+				Message:  fmt.Sprintf("%s: used by %d host(s)", keyName, len(hostNames)),
 			})
 		}
 	}
@@ -70,7 +70,7 @@ func Audit(hosts []Host) AuditResult {
 				result.Findings = append(result.Findings, AuditFinding{
 					Severity: SeverityFail,
 					Key:      filepath.Base(h.IdentityFile),
-					Message:  "key file not found",
+					Message:  fmt.Sprintf("%s: key file not found", filepath.Base(h.IdentityFile)),
 				})
 			}
 			continue
@@ -81,13 +81,13 @@ func Audit(hosts []Host) AuditResult {
 			result.Findings = append(result.Findings, AuditFinding{
 				Severity: SeverityWarn,
 				Key:      filepath.Base(h.IdentityFile),
-				Message:  fmt.Sprintf("permissions %04o (should be 0600)", perm),
+				Message:  fmt.Sprintf("%s: permissions %04o (should be 0600)", filepath.Base(h.IdentityFile), perm),
 			})
 		} else {
 			result.Findings = append(result.Findings, AuditFinding{
 				Severity: SeverityOK,
 				Key:      filepath.Base(h.IdentityFile),
-				Message:  fmt.Sprintf("permissions OK (%04o)", perm),
+				Message:  fmt.Sprintf("%s: permissions OK (%04o)", filepath.Base(h.IdentityFile), perm),
 			})
 		}
 	}
