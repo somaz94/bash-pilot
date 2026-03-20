@@ -8,10 +8,6 @@ All notable changes to this project will be documented in this file.
 
 - add doctor command for full system diagnostics ([05b07a7](https://github.com/somaz94/bash-pilot/commit/05b07a775d64be20c5fd766307b032e6693b4b60))
 
-### Documentation
-
-- update changelog ([82b26ec](https://github.com/somaz94/bash-pilot/commit/82b26ec2d53db443f8d04c718c29c95a45445c0e))
-
 ### Contributors
 
 - somaz
@@ -29,11 +25,6 @@ All notable changes to this project will be documented in this file.
 - suppress SIGPIPE error in demo prompt init phase ([9cc6ffa](https://github.com/somaz94/bash-pilot/commit/9cc6ffae3097a589073cb75e172b9787c067237b))
 - apply gofmt formatting to prompt helpers ([093f3e5](https://github.com/somaz94/bash-pilot/commit/093f3e540d3ce04999b0f0788d87f5fea123c1af))
 
-### Documentation
-
-- update changelog ([43b7b5f](https://github.com/somaz94/bash-pilot/commit/43b7b5f34d93f7e6b42eb06848878016d5b7a6a8))
-- update changelog ([9bea5af](https://github.com/somaz94/bash-pilot/commit/9bea5af323d2949f9eeebfc56fa8666c00cfd0ea))
-
 ### Contributors
 
 - somaz
@@ -45,11 +36,6 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - add env module with check and path subcommands ([0dfca6f](https://github.com/somaz94/bash-pilot/commit/0dfca6f53025d10b20c2f1afd49861641f19754e))
-
-### Documentation
-
-- update changelog ([5130c3b](https://github.com/somaz94/bash-pilot/commit/5130c3bad68554d4428c9055fc0efe7426a33f44))
-- update changelog ([97a6447](https://github.com/somaz94/bash-pilot/commit/97a64472f3b3371e2f64ea95dc49a80c5f3967d1))
 
 ### Tests
 
@@ -73,10 +59,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- update changelog ([ff82fc5](https://github.com/somaz94/bash-pilot/commit/ff82fc5b181b5436c35a59f0bd4e1ef691b2db90))
 - add git module commands to Homebrew caveats ([af4f576](https://github.com/somaz94/bash-pilot/commit/af4f576b5a954211deafd0bf6745044b1e034805))
-- update CONTRIBUTORS.md ([eac6c5b](https://github.com/somaz94/bash-pilot/commit/eac6c5bd5da12e8531d2e49deb0ec39beeabc783))
-- update changelog ([0302a40](https://github.com/somaz94/bash-pilot/commit/0302a40f69cd2ce92f5011e07be428c88ab0ebf3))
 
 ### Contributors
 
