@@ -184,8 +184,8 @@ bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
 source ~/.bashrc
 
 # Bash (macOS)
-mkdir -p /usr/local/etc/bash_completion.d
-bash-pilot completion bash > /usr/local/etc/bash_completion.d/bash-pilot
+sudo mkdir -p /usr/local/etc/bash_completion.d
+bash-pilot completion bash | sudo tee /usr/local/etc/bash_completion.d/bash-pilot > /dev/null
 source ~/.bash_profile
 
 # Fish
