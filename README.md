@@ -183,7 +183,8 @@ source ~/.zshrc
 bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
 source ~/.bashrc
 
-# Bash (macOS — Homebrew)
+# Bash (macOS — requires bash-completion@2)
+# brew install bash-completion@2
 bash-pilot completion bash > "$(brew --prefix)/etc/bash_completion.d/bash-pilot"
 source ~/.bash_profile
 
