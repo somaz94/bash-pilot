@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
+- add setup command to install missing tools from snapshot ([78f99f2](https://github.com/somaz94/bash-pilot/commit/78f99f2fecebe695d856a0299409649e43e74886))
 - add snapshot and diff commands for environment comparison ([644cace](https://github.com/somaz94/bash-pilot/commit/644cace92e47c999e2eff6dc399dcffa4b70a81b))
 
 ### Bug Fixes
