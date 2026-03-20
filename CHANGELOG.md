@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - add doctor command for full system diagnostics ([05b07a7](https://github.com/somaz94/bash-pilot/commit/05b07a775d64be20c5fd766307b032e6693b4b60))
 
+### Bug Fixes
+
+- show key name in SSH audit messages ([00f3ee6](https://github.com/somaz94/bash-pilot/commit/00f3ee65633030b2d40f2c540fdcb6aeddddf093))
+
 ### Contributors
 
 - somaz
