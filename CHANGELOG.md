@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-03-20)
+
+### Features
+
+- add doctor command for full system diagnostics ([05b07a7](https://github.com/somaz94/bash-pilot/commit/05b07a775d64be20c5fd766307b032e6693b4b60))
+
+### Documentation
+
+- update changelog ([82b26ec](https://github.com/somaz94/bash-pilot/commit/82b26ec2d53db443f8d04c718c29c95a45445c0e))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.4.0](https://github.com/somaz94/bash-pilot/compare/v0.3.0...v0.4.0) (2026-03-20)
 
 ### Features
