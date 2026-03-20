@@ -164,8 +164,15 @@ make demo-all        # Run demo and clean up automatically
 ```bash
 make check-gh        # Verify gh CLI is installed and authenticated
 make branch name=git-module   # Create feature branch from main
-make pr title="feat: add git module"   # Test → push → create PR
+make pr title="feat: add git module"   # Test → push → create PR (auto-generates body)
 ```
+
+`make pr` automatically:
+1. Runs `go test ./... -race -cover` and `go vet`
+2. Pushes the branch to origin
+3. Generates PR body from commit history (categorized by `feat:`, `fix:`, `test:`, `docs:`)
+4. Detects changed test packages and builds a test plan checklist
+5. Creates the PR via `gh pr create`
 
 <br/>
 
@@ -173,7 +180,7 @@ make pr title="feat: add git module"   # Test → push → create PR
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
-| `ci.yml` | push, PR, dispatch | Unit tests → Build → Version verify |
+| `ci.yml` | push (main), PR, dispatch | Unit tests → Build → Version verify |
 | `release.yml` | tag push `v*` | GoReleaser (binaries + Homebrew + Scoop) |
 | `gitlab-mirror.yml` | push to main | Mirror to GitLab |
 | `changelog-generator.yml` | after release, PR merge | Auto-generate CHANGELOG.md |

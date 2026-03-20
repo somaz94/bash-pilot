@@ -73,7 +73,7 @@ pr: check-gh ## Run tests, push, and create PR (usage: make pr title="Add git mo
 	go test ./... -race -cover
 	go vet ./...
 	git push -u origin $$(git branch --show-current)
-	gh pr create --title "$(title)" --body "## Summary"$$'\n\n'"Branch: $$(git branch --show-current)"$$'\n\n'"## Test plan"$$'\n\n'"- [ ] Unit tests pass"$$'\n'"- [ ] Coverage maintained"
+	@./scripts/create-pr.sh "$(title)"
 	@echo "\033[32m✓ PR created\033[0m"
 
 ## Help
