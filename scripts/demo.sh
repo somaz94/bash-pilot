@@ -152,13 +152,9 @@ echo ""
 header 2 "init — Auto-generate config from SSH config"
 # ============================================================
 
-# Remove demo config to show init from scratch
-INIT_CONFIG="${DEMO_DIR}/init-config.yaml"
 export HOME="$DEMO_DIR"
 mkdir -p "$DEMO_DIR/.config/bash-pilot"
 
-echo -e "${YELLOW}Generating config from SSH config...${RESET}"
-run "$BINARY" ssh list --config "$DEMO_CONFIG" -o json 2>/dev/null | head -1 >/dev/null
 run "$BINARY" init --config "$DEMO_CONFIG" --force
 
 echo -e "${GREEN}Config auto-generated at ~/.config/bash-pilot/config.yaml${RESET}"
