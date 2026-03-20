@@ -11,6 +11,7 @@ Complete guide for using bash-pilot CLI.
 - [Git Module](#git-module)
 - [Env Module](#env-module)
 - [Prompt Module](#prompt-module)
+- [Doctor (Cross-Module)](#doctor-cross-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
 
@@ -271,6 +272,27 @@ bash-pilot prompt show --theme full
 # JSON output
 bash-pilot prompt show -o json
 ```
+
+<br/>
+
+## Doctor (Cross-Module)
+
+Run all diagnostic checks in a single command — combines SSH audit, Git doctor, and Env check.
+
+```bash
+# Full system diagnostics
+bash-pilot doctor
+
+# JSON output
+bash-pilot doctor -o json
+```
+
+**Sections reported:**
+- SSH: shared keys, file permissions, missing keys
+- Git: duplicate safe.directory, missing includeIf targets, permissions
+- Env: shell, tools, SSH agent, git config, editor, home directory
+
+Ends with a summary: `Total: N issue(s) — SSH: X, Git: Y, Env: Z`
 
 <br/>
 

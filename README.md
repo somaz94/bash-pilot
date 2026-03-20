@@ -49,6 +49,11 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
+### Cross-Module
+- **`bash-pilot doctor`** — Full system diagnostics (SSH audit + Git doctor + Env check)
+
+<br/>
+
 ## Quick Start
 
 <br/>
@@ -166,6 +171,9 @@ eval "$(bash-pilot prompt init --theme full)"
 
 # Preview prompt components
 bash-pilot prompt show
+
+# Full system diagnostics
+bash-pilot doctor
 ```
 
 <br/>
