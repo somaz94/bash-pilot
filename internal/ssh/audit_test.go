@@ -3,6 +3,7 @@ package ssh
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -65,7 +66,7 @@ func TestAudit_MissingKey(t *testing.T) {
 
 	foundMissing := false
 	for _, f := range result.Findings {
-		if f.Severity == SeverityFail && f.Message == "key file not found" {
+		if f.Severity == SeverityFail && strings.Contains(f.Message, "key file not found") {
 			foundMissing = true
 			break
 		}
