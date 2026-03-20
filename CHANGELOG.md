@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-03-20)
+## [v0.4.0](https://github.com/somaz94/bash-pilot/compare/v0.3.0...v0.4.0) (2026-03-20)
 
 ### Features
 
@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
+- update changelog ([43b7b5f](https://github.com/somaz94/bash-pilot/commit/43b7b5f34d93f7e6b42eb06848878016d5b7a6a8))
 - update changelog ([9bea5af](https://github.com/somaz94/bash-pilot/commit/9bea5af323d2949f9eeebfc56fa8666c00cfd0ea))
 
 ### Contributors
