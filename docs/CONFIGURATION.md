@@ -73,11 +73,28 @@ git:
 
 ## Git Section
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `git.profiles.<name>.directory` | string | — | Working directory for this profile |
-| `git.profiles.<name>.email` | string | — | Git user email |
-| `git.profiles.<name>.key` | string | — | SSH key path for this profile |
+The git module reads profiles directly from `~/.gitconfig` `includeIf` directives. No additional config is needed in `config.yaml`.
+
+### CLI Flags
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--gitconfig` | string | auto-detect | Path to gitconfig file |
+| `--dry-run` | bool | `false` | Preview changes without modifying (clean only) |
+
+### How Profiles Are Detected
+
+bash-pilot reads `~/.gitconfig` and finds `[includeIf "gitdir:..."]` sections:
+
+```gitconfig
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig-work
+
+[includeIf "gitdir:~/personal/"]
+    path = ~/.gitconfig-personal
+```
+
+Each included config provides the email and optional signing key for that directory.
 
 <br/>
 

@@ -30,7 +30,7 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
-### Git Module (coming soon)
+### Git Module
 - **`bash-pilot git profiles`** — Multi-profile git identity management
 - **`bash-pilot git doctor`** — Diagnose gitconfig issues (duplicate safe.directory, etc.)
 - **`bash-pilot git clean`** — Clean up stale/duplicate gitconfig entries
@@ -135,6 +135,15 @@ bash-pilot ssh audit
 
 # JSON output
 bash-pilot ssh list -o json
+
+# List git profiles
+bash-pilot git profiles
+
+# Diagnose gitconfig issues
+bash-pilot git doctor
+
+# Clean up duplicate safe.directory entries
+bash-pilot git clean --dry-run
 ```
 
 <br/>
@@ -202,6 +211,7 @@ After setup, press `Tab` to auto-complete commands and flags:
 
 ```bash
 bash-pilot ssh <TAB>        # list, ping, audit
+bash-pilot git <TAB>        # profiles, doctor, clean
 bash-pilot ssh list -<TAB>  # --config, --output, --no-color
 ```
 

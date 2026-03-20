@@ -8,6 +8,7 @@ Complete guide for using bash-pilot CLI.
 
 - [Init](#init)
 - [SSH Module](#ssh-module)
+- [Git Module](#git-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
 
@@ -92,6 +93,76 @@ bash-pilot ssh audit -o json
 | File permissions | warn | Key file permissions not 0600 |
 | Missing keys | fail | Identity file does not exist |
 | No identity file | warn | Host has no IdentityFile directive |
+
+<br/>
+
+## Git Module
+
+<br/>
+
+### git profiles
+
+List git identity profiles from `~/.gitconfig` includeIf directives.
+
+```bash
+# List all profiles
+bash-pilot git profiles
+
+# JSON output
+bash-pilot git profiles -o json
+
+# Specify gitconfig path
+bash-pilot git profiles --gitconfig /path/to/.gitconfig
+```
+
+Shows active profile based on current working directory. Profiles are detected from `includeIf "gitdir:..."` directives.
+
+<br/>
+
+### git doctor
+
+Diagnose common gitconfig issues.
+
+```bash
+# Run diagnostics
+bash-pilot git doctor
+
+# JSON output
+bash-pilot git doctor -o json
+```
+
+**Checks performed:**
+
+| Check | Severity | Description |
+|-------|----------|-------------|
+| Duplicate safe.directory | warn | Same directory listed multiple times |
+| Missing includeIf target | warn | Included config file does not exist |
+| No user.email | warn | No global email configured (unless using includeIf) |
+| Duplicate remote URLs | warn | Same URL configured in multiple remotes |
+| File permissions | warn | Gitconfig permissions too open (not 0600) |
+
+<br/>
+
+### git clean
+
+Remove duplicate and stale entries from gitconfig.
+
+```bash
+# Preview what would be removed
+bash-pilot git clean --dry-run
+
+# Actually clean up
+bash-pilot git clean
+
+# JSON output
+bash-pilot git clean -o json
+```
+
+**What gets cleaned:**
+- Duplicate `safe.directory` entries
+- Stale `safe.directory` entries (directory no longer exists)
+
+A backup is automatically created at `~/.gitconfig.bak` before any changes.
 
 <br/>
 
