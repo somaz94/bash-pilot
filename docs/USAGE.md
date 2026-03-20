@@ -12,6 +12,7 @@ Complete guide for using bash-pilot CLI.
 - [Env Module](#env-module)
 - [Prompt Module](#prompt-module)
 - [Snapshot Module](#snapshot-module)
+- [Migrate Module](#migrate-module)
 - [Doctor (Cross-Module)](#doctor-cross-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
@@ -374,6 +375,73 @@ bash-pilot setup my-env.json -o json
 | installed | Successfully installed |
 | skipped | No known install command for this tool/OS |
 | failed | Install command returned an error |
+
+<br/>
+
+## Migrate Module
+
+<br/>
+
+### migrate export
+
+Export SSH hosts, key references, and Git profiles to a portable JSON format. Private keys are NOT included.
+
+```bash
+# Export to file
+bash-pilot migrate export > my-config.json
+
+# Pipe to JSON viewer
+bash-pilot migrate export | jq .
+```
+
+**Exported data:**
+
+| Category | Details |
+|----------|---------|
+| SSH Hosts | name, hostname, user, port, identity file (tilde-relative), proxy, forward agent |
+| SSH Keys | name, type, path (no private key content) |
+| Git Identity | global user.name, user.email |
+| Git Profiles | includeIf profile name, directory, email, signing key |
+
+All paths are stored as `~/`-relative for cross-platform portability.
+
+<br/>
+
+### migrate import
+
+Import SSH hosts and Git profiles from a migrate config file. Paths are automatically translated to the local home directory.
+
+```bash
+# Preview changes
+bash-pilot migrate import my-config.json --dry-run
+
+# Apply changes
+bash-pilot migrate import my-config.json
+
+# JSON output
+bash-pilot migrate import my-config.json -o json
+```
+
+**Import behavior:**
+
+| Item | Action |
+|------|--------|
+| SSH hosts | Appended to `~/.ssh/config` (existing hosts skipped) |
+| SSH keys | Lists keys to generate with `ssh-keygen` commands |
+| Git identity | Sets global user.name/email via `git config --global` |
+| Git profiles | Creates directory, writes profile config, adds includeIf to `~/.gitconfig` |
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | `false` | Preview changes without applying |
+
+**Safety:**
+- Existing SSH hosts are never overwritten
+- Existing git profile configs are never overwritten
+- SSH private keys are never copied — only key generation commands are shown
+- `~/.ssh/config` is appended to, not replaced
 
 <br/>
 

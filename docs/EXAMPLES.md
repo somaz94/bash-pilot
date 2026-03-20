@@ -20,6 +20,8 @@ Hands-on examples for bash-pilot.
 - [Snapshot](#snapshot)
 - [Diff](#diff)
 - [Setup](#setup)
+- [Migrate Export](#migrate-export)
+- [Migrate Import](#migrate-import)
 - [Doctor](#doctor)
 - [Scripting with JSON](#scripting-with-json)
 
@@ -480,6 +482,75 @@ bash-pilot diff team-baseline.json
 
 # New team member installs missing tools
 bash-pilot setup team-baseline.json
+```
+
+<br/>
+
+## Migrate Export
+
+### Export config for migration
+
+```bash
+$ bash-pilot migrate export > my-config.json
+$ cat my-config.json | jq '.ssh.hosts[].name'
+"github.com-personal"
+"github.com-work"
+"server1"
+"k8s-control-01"
+```
+
+### Check what will be exported
+
+```bash
+$ bash-pilot migrate export | jq '{
+  ssh_hosts: (.ssh.hosts | length),
+  ssh_keys: (.ssh.keys | length),
+  git_profiles: (.git.profiles | length)
+}'
+{
+  "ssh_hosts": 14,
+  "ssh_keys": 5,
+  "git_profiles": 2
+}
+```
+
+<br/>
+
+## Migrate Import
+
+### Preview import on new machine
+
+```bash
+$ bash-pilot migrate import my-config.json --dry-run
+┌─ MIGRATE IMPORT (dry-run) ──────────────────────
+  SSH:
+    14 host(s) added, 0 skipped
+    3 key(s) to generate:
+      ssh-keygen -t ed25519 -f /home/newuser/.ssh/id_ed25519
+      ssh-keygen -t rsa -f /home/newuser/.ssh/id_rsa_work
+      ssh-keygen -t ed25519 -f /home/newuser/.ssh/id_ed25519_deploy
+  Git:
+    global user.name/email configured
+    2 profile directory(s) created
+    wrote ~/.gitconfig-work
+    wrote ~/.gitconfig-personal
+└────────────────────────────────────────────────
+
+Run without --dry-run to apply.
+```
+
+### Full machine migration workflow
+
+```bash
+# On old machine:
+bash-pilot snapshot > baseline.json
+bash-pilot migrate export > config.json
+
+# On new machine:
+bash-pilot setup baseline.json          # install tools
+bash-pilot migrate import config.json   # import SSH + git config
+# Generate the SSH keys that were listed:
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519
 ```
 
 <br/>

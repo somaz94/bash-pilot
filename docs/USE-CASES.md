@@ -12,6 +12,7 @@ Real-world scenarios for bash-pilot.
 - [Onboarding New Team Members](#onboarding-new-team-members)
 - [Environment Snapshot and Diff](#environment-snapshot-and-diff)
 - [New Machine Setup](#new-machine-setup)
+- [Config Migration Across Machines](#config-migration-across-machines)
 - [CI/CD Pipeline Integration](#cicd-pipeline-integration)
 - [Multi-Environment Management](#multi-environment-management)
 
@@ -178,6 +179,45 @@ bash-pilot ssh list -o json | jq -r '
 # Verify their connectivity
 bash-pilot ssh ping
 ```
+
+<br/>
+
+## Config Migration Across Machines
+
+**Scenario:** New MacBook, new Linux server, or just want the same SSH hosts and Git profiles everywhere.
+
+```bash
+# On your current machine: export config
+bash-pilot migrate export > my-config.json
+
+# On the new machine: preview what will be imported
+bash-pilot migrate import my-config.json --dry-run
+
+# Apply — SSH hosts added, Git profiles created, key generation commands shown
+bash-pilot migrate import my-config.json
+
+# Generate the missing SSH keys
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_work
+```
+
+**What makes this different from `cp ~/.ssh/config`:**
+- Paths are automatically translated (`/Users/somaz/` → `/home/somaz/`)
+- Existing hosts are not overwritten
+- SSH keys are not copied (security) — only generation commands are provided
+- Git includeIf profiles and directories are auto-created
+
+**Complete new machine setup (3 commands):**
+
+```bash
+bash-pilot setup baseline.json           # Install missing tools
+bash-pilot migrate import my-config.json  # Import SSH + Git config
+bash-pilot diff baseline.json            # Verify everything matches
+```
+
+**Before bash-pilot:** Manually copy files, fix paths, regenerate keys, edit gitconfig.
+
+**After:** Three commands. Done.
 
 <br/>
 
