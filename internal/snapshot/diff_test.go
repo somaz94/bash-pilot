@@ -781,3 +781,4 @@ func TestDiff_OnlyFilter(t *testing.T) {
 		t.Error("did not expect Tools section")
 	}
 }
+
