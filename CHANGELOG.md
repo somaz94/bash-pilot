@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
+- add auto-generated PR body script for make pr ([570d4f8](https://github.com/somaz94/bash-pilot/commit/570d4f88650974b73954fc40743d593f4553f51a))
+- wire --only flag to diff, setup, migrate import CLI commands ([032b705](https://github.com/somaz94/bash-pilot/commit/032b70579bdcdbce374f004d896e545437503575))
+- add --only flag for section filtering in diff, setup, migrate import ([153be71](https://github.com/somaz94/bash-pilot/commit/153be7186dca6f4ce430168c34a90d20cdb4e450))
 - add migrate command for cross-machine config migration ([8ad451c](https://github.com/somaz94/bash-pilot/commit/8ad451c4f8bc7dcf4850eab5e1accca128741d6d))
 - add setup command to install missing tools from snapshot ([78f99f2](https://github.com/somaz94/bash-pilot/commit/78f99f2fecebe695d856a0299409649e43e74886))
 - add snapshot and diff commands for environment comparison ([644cace](https://github.com/somaz94/bash-pilot/commit/644cace92e47c999e2eff6dc399dcffa4b70a81b))
@@ -18,7 +21,16 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
+- add --only flag usage and update goreleaser caveats ([a5cebd1](https://github.com/somaz94/bash-pilot/commit/a5cebd18396e824bcfdd7e15f4de020d4116b206))
 - add snapshot/diff/setup use cases ([4c607a6](https://github.com/somaz94/bash-pilot/commit/4c607a696ecf85dc7f5ad6bba9698d16c4d9eb0b))
+
+### Tests
+
+- add tests for --only flag in diff and migrate import ([bea038a](https://github.com/somaz94/bash-pilot/commit/bea038a15c1038ae323232da5b8eb0cc9627f8cf))
+
+### Continuous Integration
+
+- limit push trigger to main branch only ([06597cb](https://github.com/somaz94/bash-pilot/commit/06597cbe9001532beb22359b1191a0d5e61acc75))
 
 ### Contributors
 
