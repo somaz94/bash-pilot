@@ -11,6 +11,7 @@ Complete guide for using bash-pilot CLI.
 - [Git Module](#git-module)
 - [Env Module](#env-module)
 - [Prompt Module](#prompt-module)
+- [Snapshot Module](#snapshot-module)
 - [Doctor (Cross-Module)](#doctor-cross-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
@@ -272,6 +273,71 @@ bash-pilot prompt show --theme full
 # JSON output
 bash-pilot prompt show -o json
 ```
+
+<br/>
+
+## Snapshot Module
+
+<br/>
+
+### snapshot
+
+Capture a full snapshot of the current environment to JSON — tools, versions, shell, git identity, SSH keys, k8s contexts, PATH, and brew packages.
+
+```bash
+# Save snapshot to file
+bash-pilot snapshot > my-env.json
+
+# Preview snapshot summary
+bash-pilot snapshot --summary
+
+# JSON output (default)
+bash-pilot snapshot
+```
+
+**Captured data:**
+
+| Category | Details |
+|----------|---------|
+| System | OS, architecture, hostname, timestamp |
+| Shell | SHELL, version (bash), EDITOR/VISUAL, TERM |
+| Tools | git, ssh, curl, make, docker, kubectl, helm, terraform, go, node, python3 (name, path, version) |
+| Git | Global user.email, user.name, includeIf profiles |
+| SSH Keys | Key names, fingerprints, types |
+| K8s | Context names, current context |
+| PATH | All PATH entries |
+| Brew | Installed formulae (macOS only) |
+
+**Flags:**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--summary` | `false` | Show human-readable summary instead of full JSON |
+
+<br/>
+
+### diff
+
+Compare a saved environment snapshot against the current environment.
+
+```bash
+# Compare snapshot
+bash-pilot diff my-env.json
+
+# JSON output
+bash-pilot diff my-env.json -o json
+```
+
+**Comparison sections:** System, Tools, Git, SSH Keys, K8s Contexts, Brew Packages
+
+**Entry statuses:**
+
+| Status | Symbol | Description |
+|--------|--------|-------------|
+| match | (hidden) | Value identical in both |
+| mismatch | `~` | Value changed |
+| missing | `-` | In snapshot but not current |
+| extra | `+` | In current but not snapshot |
 
 <br/>
 

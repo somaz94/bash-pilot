@@ -49,6 +49,13 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
+### Snapshot Module
+- **`bash-pilot snapshot`** — Capture full environment snapshot to JSON (tools, versions, git, SSH, k8s, brew)
+- **`bash-pilot snapshot --summary`** — Preview snapshot summary
+- **`bash-pilot diff <file>`** — Compare saved snapshot against current environment
+
+<br/>
+
 ### Cross-Module
 - **`bash-pilot doctor`** — Full system diagnostics (SSH audit + Git doctor + Env check)
 
@@ -174,6 +181,15 @@ bash-pilot prompt show
 
 # Full system diagnostics
 bash-pilot doctor
+
+# Capture environment snapshot
+bash-pilot snapshot > my-env.json
+
+# Preview snapshot summary
+bash-pilot snapshot --summary
+
+# Compare snapshot against current environment
+bash-pilot diff my-env.json
 ```
 
 <br/>
@@ -244,6 +260,7 @@ bash-pilot ssh <TAB>        # list, ping, audit
 bash-pilot git <TAB>        # profiles, doctor, clean
 bash-pilot env <TAB>        # check, path
 bash-pilot prompt <TAB>     # init, show
+bash-pilot snapshot <TAB>   # --summary
 bash-pilot ssh list -<TAB>  # --config, --output, --no-color
 ```
 

@@ -17,6 +17,8 @@ Hands-on examples for bash-pilot.
 - [Env Path](#env-path)
 - [Prompt Init](#prompt-init)
 - [Prompt Show](#prompt-show)
+- [Snapshot](#snapshot)
+- [Diff](#diff)
 - [Doctor](#doctor)
 - [Scripting with JSON](#scripting-with-json)
 
@@ -366,6 +368,70 @@ $ bash-pilot prompt show --theme full
 │ ✓ git:         main *
 │ ✓ k8s:         prod-cluster:monitoring
 └────────────────────────────────────────────────────
+```
+
+<br/>
+
+## Snapshot
+
+### Capture environment snapshot
+
+```bash
+$ bash-pilot snapshot > my-env.json
+$ cat my-env.json | jq '.tools[] | .name + " " + .version'
+"git git version 2.42.0"
+"ssh OpenSSH_9.0p1"
+"curl curl 8.1.2"
+"docker Docker version 24.0.6"
+"go go1.22.0"
+"node v20.10.0"
+```
+
+### Preview snapshot summary
+
+```bash
+$ bash-pilot snapshot --summary
+┌─ ENVIRONMENT SNAPSHOT ──────────────────────────
+Hostname:  my-macbook
+OS/Arch:   darwin/arm64
+Shell:     /bin/zsh
+Tools:     8 installed
+SSH Keys:  3
+K8s:       2 context(s)
+PATH:      15 entries
+Brew:      42 packages
+Captured:  2024-01-15T10:30:00Z
+└────────────────────────────────────────────────
+```
+
+<br/>
+
+## Diff
+
+### Compare environments
+
+```bash
+$ bash-pilot diff my-env.json
+┌─ DIFF vs my-macbook (2024-01-15T10:30:00Z) ────
+✓ [System] all match
+  [Tools]
+  ~ git                  git version 2.42.0 → git version 2.43.0
+  - terraform            1.6.0 (not in current)
+  + rust                 1.75.0 (new)
+✓ [Git] all match
+✓ [SSH Keys] all match
+  [K8s Contexts]
+  - old-cluster          (not in current)
+└────────────────────────────────────────────────
+
+! 15 match, 1 changed, 2 missing, 1 new
+```
+
+### JSON diff for CI
+
+```bash
+# Check if environments match
+bash-pilot diff baseline.json -o json | jq '.summary.mismatch + .summary.missing'
 ```
 
 <br/>

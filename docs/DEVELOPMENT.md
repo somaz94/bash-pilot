@@ -36,6 +36,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │       ├── env.go                 # Env subcommands (check, path)
 │       ├── prompt.go              # Prompt subcommands (init, show)
 │       ├── doctor.go              # Cross-module diagnostics
+│       ├── snapshot.go            # Snapshot & diff subcommands
 │       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
@@ -59,6 +60,11 @@ Guide for building, testing, and contributing to bash-pilot.
 │   │   ├── helpers.go             # Git branch, k8s context helpers
 │   │   ├── prompt_test.go
 │   │   └── helpers_test.go
+│   ├── snapshot/
+│   │   ├── snapshot.go            # Environment capture (tools, git, SSH, k8s, brew)
+│   │   ├── snapshot_test.go
+│   │   ├── diff.go                # Snapshot comparison logic
+│   │   └── diff_test.go
 │   ├── config/
 │   │   ├── config.go             # YAML config loader
 │   │   └── config_test.go
@@ -90,6 +96,7 @@ Guide for building, testing, and contributing to bash-pilot.
 | `internal/git/` | Gitconfig parsing, multi-profile management, diagnostics, cleanup |
 | `internal/env/` | Shell environment health check, PATH analysis |
 | `internal/prompt/` | Smart prompt generation (git branch, k8s context) |
+| `internal/snapshot/` | Environment snapshot capture and diff comparison |
 | `internal/config/` | YAML configuration loader with defaults |
 | `internal/report/` | Output formatting (color, plain, JSON, table) |
 
@@ -124,6 +131,7 @@ make cover-html      # Open coverage report in browser
 | `internal/git` | 94.2% |
 | `internal/env` | 99.2% |
 | `internal/prompt` | 99.0% |
+| `internal/snapshot` | 96.5% |
 | `internal/config` | 82.4% |
 | `internal/report` | 100% |
 
