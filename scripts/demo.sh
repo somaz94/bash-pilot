@@ -314,7 +314,22 @@ header 21 "doctor — Full system diagnostics"
 run "$BINARY" doctor --config "$DEMO_CONFIG"
 
 # ============================================================
-header 22 "version"
+header 22 "snapshot — Capture environment snapshot"
+# ============================================================
+
+run "$BINARY" snapshot --summary
+
+# ============================================================
+header 23 "snapshot — Save and diff"
+# ============================================================
+
+echo -e "${YELLOW}Saving snapshot to ${DEMO_DIR}/snapshot.json${RESET}"
+"$BINARY" snapshot > "${DEMO_DIR}/snapshot.json"
+echo ""
+run "$BINARY" diff "${DEMO_DIR}/snapshot.json"
+
+# ============================================================
+header 24 "version"
 # ============================================================
 
 run "$BINARY" version
