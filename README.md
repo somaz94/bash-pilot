@@ -183,9 +183,8 @@ source ~/.zshrc
 bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
 source ~/.bashrc
 
-# Bash (macOS)
-sudo mkdir -p /usr/local/etc/bash_completion.d
-bash-pilot completion bash | sudo tee /usr/local/etc/bash_completion.d/bash-pilot > /dev/null
+# Bash (macOS — Homebrew)
+bash-pilot completion bash > "$(brew --prefix)/etc/bash_completion.d/bash-pilot"
 source ~/.bash_profile
 
 # Fish
