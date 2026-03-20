@@ -4,6 +4,7 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 > For detailed documentation, see the [docs/](docs/) folder:
 >
+> [Setup](docs/SETUP.md) |
 > [Usage](docs/USAGE.md) |
 > [Configuration](docs/CONFIGURATION.md) |
 > [Examples](docs/EXAMPLES.md) |

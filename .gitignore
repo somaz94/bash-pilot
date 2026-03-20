@@ -1,8 +1,40 @@
+# Binary
+bash-pilot
 bin/
-coverage.out
-coverage.html
 *.exe
 *.dll
 *.so
 *.dylib
+
+# Coverage
+*.out
+coverage.html
+
+# GoReleaser
+dist/
+
+# Logs
+logs
+*.log
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables file
+.env
+.env.test
+
+# OS metadata
 .DS_Store
+Thumbs.db
+
+# IDE files
+.idea
+.vscode
+*.code-workspace
