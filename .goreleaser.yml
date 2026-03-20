@@ -65,11 +65,10 @@ brews:
       🎉 bash-pilot installed!
 
       Quick start:
+        bash-pilot init                  # Auto-generate config from SSH config
         bash-pilot ssh list              # List SSH hosts with grouping
         bash-pilot ssh ping              # Test connectivity (parallel)
         bash-pilot ssh audit             # Security audit
-        bash-pilot git profiles          # Git multi-profile management
-        bash-pilot env check             # Shell environment health scan
         bash-pilot --help                # Full usage
 
       Docs: https://github.com/somaz94/bash-pilot

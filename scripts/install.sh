@@ -80,6 +80,7 @@ main() {
   echo -e "🎉 ${BOLD}bash-pilot installed!${RESET}"
   echo ""
   echo -e "  Quick start:"
+  echo -e "    ${CYAN}bash-pilot init${RESET}                  # Auto-generate config from SSH config"
   echo -e "    ${CYAN}bash-pilot ssh list${RESET}              # List SSH hosts with grouping"
   echo -e "    ${CYAN}bash-pilot ssh ping${RESET}              # Test connectivity (parallel)"
   echo -e "    ${CYAN}bash-pilot ssh audit${RESET}             # Security audit"
