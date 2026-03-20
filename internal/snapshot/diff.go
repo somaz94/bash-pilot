@@ -33,18 +33,48 @@ type DiffSummary struct {
 	Extra    int `json:"extra"`   // in current but not snapshot
 }
 
+// ParseOnly converts a comma-separated string to a section filter map.
+// Returns nil if input is empty (meaning "all sections").
+func ParseOnly(only string) map[string]bool {
+	if only == "" {
+		return nil
+	}
+	m := make(map[string]bool)
+	for _, s := range strings.Split(only, ",") {
+		s = strings.TrimSpace(strings.ToLower(s))
+		if s != "" {
+			m[s] = true
+		}
+	}
+	return m
+}
+
+func sectionEnabled(only map[string]bool, name string) bool {
+	if only == nil {
+		return true
+	}
+	return only[strings.ToLower(name)]
+}
+
 // Diff compares a saved snapshot against the current environment.
-func Diff(saved *Snapshot) *DiffResult {
+func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
+	var only map[string]bool
+	if len(onlyOpts) > 0 {
+		only = onlyOpts[0]
+	}
+
 	current := Capture()
 	result := &DiffResult{}
 
 	// System
-	sys := DiffSection{Name: "System"}
-	sys.Entries = append(sys.Entries, compareField("OS", saved.OS, current.OS))
-	sys.Entries = append(sys.Entries, compareField("Arch", saved.Arch, current.Arch))
-	sys.Entries = append(sys.Entries, compareField("Shell", saved.Shell.Shell, current.Shell.Shell))
-	sys.Entries = append(sys.Entries, compareField("Editor", saved.Shell.Editor, current.Shell.Editor))
-	result.Sections = append(result.Sections, sys)
+	if sectionEnabled(only, "system") {
+		sys := DiffSection{Name: "System"}
+		sys.Entries = append(sys.Entries, compareField("OS", saved.OS, current.OS))
+		sys.Entries = append(sys.Entries, compareField("Arch", saved.Arch, current.Arch))
+		sys.Entries = append(sys.Entries, compareField("Shell", saved.Shell.Shell, current.Shell.Shell))
+		sys.Entries = append(sys.Entries, compareField("Editor", saved.Shell.Editor, current.Shell.Editor))
+		result.Sections = append(result.Sections, sys)
+	}
 
 	// Tools
 	tools := DiffSection{Name: "Tools"}
@@ -94,13 +124,17 @@ func Diff(saved *Snapshot) *DiffResult {
 			})
 		}
 	}
-	result.Sections = append(result.Sections, tools)
+	if sectionEnabled(only, "tools") {
+		result.Sections = append(result.Sections, tools)
+	}
 
 	// Git
-	git := DiffSection{Name: "Git"}
-	git.Entries = append(git.Entries, compareField("user.email", saved.Git.Email, current.Git.Email))
-	git.Entries = append(git.Entries, compareField("user.name", saved.Git.Name, current.Git.Name))
-	result.Sections = append(result.Sections, git)
+	if sectionEnabled(only, "git") {
+		git := DiffSection{Name: "Git"}
+		git.Entries = append(git.Entries, compareField("user.email", saved.Git.Email, current.Git.Email))
+		git.Entries = append(git.Entries, compareField("user.name", saved.Git.Name, current.Git.Name))
+		result.Sections = append(result.Sections, git)
+	}
 
 	// SSH Keys
 	ssh := DiffSection{Name: "SSH Keys"}
@@ -143,10 +177,12 @@ func Diff(saved *Snapshot) *DiffResult {
 			})
 		}
 	}
-	result.Sections = append(result.Sections, ssh)
+	if sectionEnabled(only, "ssh") {
+		result.Sections = append(result.Sections, ssh)
+	}
 
 	// K8s Contexts
-	if len(saved.K8s) > 0 || len(current.K8s) > 0 {
+	if (len(saved.K8s) > 0 || len(current.K8s) > 0) && sectionEnabled(only, "k8s") {
 		k8s := DiffSection{Name: "K8s Contexts"}
 		savedCtx := make(map[string]bool)
 		for _, c := range saved.K8s {
@@ -172,7 +208,7 @@ func Diff(saved *Snapshot) *DiffResult {
 	}
 
 	// Brew packages
-	if len(saved.Brew) > 0 || len(current.Brew) > 0 {
+	if (len(saved.Brew) > 0 || len(current.Brew) > 0) && sectionEnabled(only, "brew") {
 		brew := DiffSection{Name: "Brew Packages"}
 		savedPkgs := make(map[string]bool)
 		for _, p := range saved.Brew {
