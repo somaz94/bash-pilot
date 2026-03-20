@@ -32,6 +32,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │   └── cli/
 │       ├── root.go                # Root command with global flags
 │       ├── ssh.go                 # SSH subcommands (list, ping, audit)
+│       ├── init.go                # Init command (auto-generate config)
 │       └── version.go             # Version subcommand
 ├── internal/
 │   ├── ssh/
@@ -58,7 +59,7 @@ Guide for building, testing, and contributing to bash-pilot.
 │   ├── workflows/                # CI/CD workflows
 │   ├── dependabot.yml            # Dependency updates
 │   └── release.yml               # Release note categories
-├── .goreleaser.yml               # Multi-platform build + Homebrew
+├── .goreleaser.yml               # Multi-platform build + Homebrew + Scoop
 ├── Makefile                      # Build, test, demo
 └── go.mod
 ```
@@ -101,7 +102,7 @@ make cover-html      # Open coverage report in browser
 
 | Package | Coverage |
 |---------|----------|
-| `internal/ssh` | 86.0% |
+| `internal/ssh` | 96.1% |
 | `internal/config` | 82.4% |
 | `internal/report` | 100% |
 
@@ -117,12 +118,23 @@ make demo-all        # Run demo and clean up automatically
 
 <br/>
 
+## Workflow
+
+```bash
+make check-gh        # Verify gh CLI is installed and authenticated
+make branch name=git-module   # Create feature branch from main
+make pr title="feat: add git module"   # Test → push → create PR
+```
+
+<br/>
+
 ## CI/CD Workflows
 
 | Workflow | Trigger | Description |
 |----------|---------|-------------|
 | `ci.yml` | push, PR, dispatch | Unit tests → Build → Version verify |
-| `release.yml` | tag push `v*` | GoReleaser (binaries + Homebrew) |
+| `release.yml` | tag push `v*` | GoReleaser (binaries + Homebrew + Scoop) |
+| `gitlab-mirror.yml` | push to main | Mirror to GitLab |
 | `changelog-generator.yml` | after release, PR merge | Auto-generate CHANGELOG.md |
 | `contributors.yml` | after changelog | Auto-generate CONTRIBUTORS.md |
 | `stale-issues.yml` | daily cron | Auto-close stale issues |
