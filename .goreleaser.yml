@@ -72,6 +72,8 @@ brews:
         bash-pilot git profiles          # List git identity profiles
         bash-pilot git doctor            # Diagnose gitconfig issues
         bash-pilot git clean --dry-run   # Preview stale/duplicate cleanup
+        bash-pilot env check             # Shell environment health scan
+        bash-pilot env path              # PATH analysis
         bash-pilot --help                # Full usage
 
       Docs: https://github.com/somaz94/bash-pilot

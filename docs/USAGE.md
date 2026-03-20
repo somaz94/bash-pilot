@@ -9,6 +9,7 @@ Complete guide for using bash-pilot CLI.
 - [Init](#init)
 - [SSH Module](#ssh-module)
 - [Git Module](#git-module)
+- [Env Module](#env-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
 
@@ -163,6 +164,54 @@ bash-pilot git clean -o json
 - Stale `safe.directory` entries (directory no longer exists)
 
 A backup is automatically created at `~/.gitconfig.bak` before any changes.
+
+<br/>
+
+## Env Module
+
+<br/>
+
+### env check
+
+Shell environment health scan — checks shell, tools, SSH agent, git config, editor, and home directory.
+
+```bash
+# Run full environment check
+bash-pilot env check
+
+# JSON output
+bash-pilot env check -o json
+```
+
+**Checks performed:**
+
+| Check | Category | Description |
+|-------|----------|-------------|
+| Shell | shell | SHELL env var, bash version (warns on 3.x) |
+| Common tools | tools | git, ssh, curl (required); make, docker, kubectl, helm, terraform, go, node, python3 (optional) |
+| SSH agent | ssh-agent | SSH_AUTH_SOCK set, socket exists, keys loaded |
+| Git config | git | Global user.email and user.name |
+| Home directory | home | ~/.ssh permissions, ~/.config exists, shell profile exists |
+| Editor | editor | EDITOR or VISUAL env var set |
+
+<br/>
+
+### env path
+
+Analyze the PATH environment variable.
+
+```bash
+# Show all PATH entries with status
+bash-pilot env path
+
+# JSON output
+bash-pilot env path -o json
+```
+
+**Reports:**
+- All PATH entries with existence check
+- Duplicate directories (by canonical path)
+- Missing directories
 
 <br/>
 

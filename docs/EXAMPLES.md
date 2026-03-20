@@ -13,6 +13,8 @@ Hands-on examples for bash-pilot.
 - [Git Profiles](#git-profiles)
 - [Git Doctor](#git-doctor)
 - [Git Clean](#git-clean)
+- [Env Check](#env-check)
+- [Env Path](#env-path)
 - [Scripting with JSON](#scripting-with-json)
 
 <br/>
@@ -240,6 +242,76 @@ $ bash-pilot git clean
 !   safe.directory=/old/project (line 22, directory not found)
 └────────────────────────────────────────────────────
 ✓ Backup saved to: /home/user/.gitconfig.bak
+```
+
+<br/>
+
+## Env Check
+
+### Shell environment health scan
+
+```bash
+$ bash-pilot env check
+┌─ ENV CHECK: editor ───────────────────────────────
+│ ✓ Editor: vim
+└────────────────────────────────────────────────────
+
+┌─ ENV CHECK: git ──────────────────────────────────
+│ ✓ git user.email: user@gmail.com
+│ ✓ git user.name: Demo User
+└────────────────────────────────────────────────────
+
+┌─ ENV CHECK: home ─────────────────────────────────
+│ ✓ /home/user/.ssh: OK
+│ ✓ /home/user/.config: OK
+│ ✓ /home/user/.bashrc: exists
+└────────────────────────────────────────────────────
+
+┌─ ENV CHECK: shell ────────────────────────────────
+│ ✓ Shell: /bin/bash
+│ ✓ Bash version: GNU bash, version 5.2.15...
+└────────────────────────────────────────────────────
+
+┌─ ENV CHECK: ssh-agent ────────────────────────────
+│ ✓ ssh-agent: 2 key(s) loaded
+└────────────────────────────────────────────────────
+
+┌─ ENV CHECK: tools ────────────────────────────────
+│ ✓ git: /usr/bin/git
+│ ✓ ssh: /usr/bin/ssh
+│ ✓ curl: /usr/bin/curl
+│ ✓ docker: /usr/bin/docker
+│ ! kubectl: not found
+│ ! helm: not found
+└────────────────────────────────────────────────────
+
+✓ Summary: 12 ok, 2 warnings, 0 errors
+```
+
+<br/>
+
+## Env Path
+
+### PATH analysis
+
+```bash
+$ bash-pilot env path
+┌─ PATH ENTRIES (8 total) ──────────────────────────
+│ ✓ [ 1] /usr/local/bin
+│ ✓ [ 2] /usr/bin
+│ ✓ [ 3] /bin
+│ ✓ [ 4] /usr/sbin
+│ ✓ [ 5] /sbin
+│ ✓ [ 6] /home/user/.local/bin
+│ ✓ [ 7] /usr/local/go/bin
+│ ✗ [ 8] /old/removed/path
+└────────────────────────────────────────────────────
+
+┌─ MISSING DIRECTORIES ────────────────────────────
+│ ✗ /old/removed/path
+└────────────────────────────────────────────────────
+
+! 8 entries, 0 duplicates, 1 missing
 ```
 
 <br/>
