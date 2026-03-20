@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/somaz94/bash-pilot/internal/migrate"
 	"github.com/somaz94/bash-pilot/internal/report"
@@ -67,10 +68,11 @@ Usage:
 		}
 
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		only := parseOnlyFlag(cmd)
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
 		if output == "json" {
-			result, err := migrate.Import(&cfg, dryRun)
+			result, err := migrate.Import(&cfg, dryRun, only)
 			if err != nil {
 				return err
 			}
@@ -84,7 +86,7 @@ Usage:
 
 		f.Header(title)
 
-		result, err := migrate.Import(&cfg, dryRun)
+		result, err := migrate.Import(&cfg, dryRun, only)
 		if err != nil {
 			return err
 		}
@@ -101,8 +103,24 @@ Usage:
 	},
 }
 
+func parseOnlyFlag(cmd *cobra.Command) map[string]bool {
+	onlyFlag, _ := cmd.Flags().GetString("only")
+	if onlyFlag == "" {
+		return nil
+	}
+	m := make(map[string]bool)
+	for _, s := range strings.Split(onlyFlag, ",") {
+		s = strings.TrimSpace(strings.ToLower(s))
+		if s != "" {
+			m[s] = true
+		}
+	}
+	return m
+}
+
 func init() {
 	migrateImportCmd.Flags().Bool("dry-run", false, "Preview changes without applying")
+	migrateImportCmd.Flags().String("only", "", "Comma-separated sections to import (ssh,git)")
 	migrateCmd.AddCommand(migrateExportCmd)
 	migrateCmd.AddCommand(migrateImportCmd)
 	rootCmd.AddCommand(migrateCmd)
