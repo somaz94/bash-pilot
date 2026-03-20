@@ -89,15 +89,20 @@ func ParseConfig(path string) ([]Host, error) {
 
 // parseKeyValue splits "Key Value" or "Key=Value" into key and value.
 func parseKeyValue(line string) (string, string) {
-	// Try space-separated first.
+	// Try equals-separated first (e.g., "Host=value").
+	if idx := strings.Index(line, "="); idx > 0 {
+		return strings.TrimSpace(line[:idx]), strings.TrimSpace(line[idx+1:])
+	}
+
+	// Try space/tab-separated (e.g., "Host value").
 	parts := strings.SplitN(line, " ", 2)
-	if len(parts) == 2 {
+	if len(parts) == 2 && strings.TrimSpace(parts[1]) != "" {
 		return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 	}
 
-	// Try equals-separated.
-	parts = strings.SplitN(line, "=", 2)
-	if len(parts) == 2 {
+	// Try tab-separated.
+	parts = strings.SplitN(line, "\t", 2)
+	if len(parts) == 2 && strings.TrimSpace(parts[1]) != "" {
 		return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
 	}
 
