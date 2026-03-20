@@ -184,6 +184,7 @@ bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
 source ~/.bashrc
 
 # Bash (macOS)
+mkdir -p /usr/local/etc/bash_completion.d
 bash-pilot completion bash > /usr/local/etc/bash_completion.d/bash-pilot
 source ~/.bash_profile
 
