@@ -20,8 +20,12 @@ Step-by-step guide to set up bash-pilot with a real-world SSH environment.
 # Homebrew (recommended)
 brew install somaz94/tap/bash-pilot
 
-# Or via curl
+# Or via curl (latest)
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
+
+# Or via curl (specific version)
+curl -sL https://github.com/somaz94/bash-pilot/releases/download/v0.1.0/bash-pilot_0.1.0_linux_amd64.tar.gz | tar xz
+sudo mv bash-pilot /usr/local/bin/
 
 # Or via Go
 go install github.com/somaz94/bash-pilot/cmd@latest
@@ -37,7 +41,21 @@ bash-pilot version
 
 ## Create Config File
 
-Create the config directory and file:
+The easiest way is to auto-generate from your existing SSH config:
+
+```bash
+# Auto-generate config from ~/.ssh/config
+bash-pilot init
+
+# Overwrite existing config
+bash-pilot init --force
+```
+
+This analyzes your `~/.ssh/config`, auto-detects host groups (git, cloud, k8s, on-prem), and writes the result to `~/.config/bash-pilot/config.yaml`.
+
+### Manual Setup
+
+Alternatively, create the config manually:
 
 ```bash
 mkdir -p ~/.config/bash-pilot

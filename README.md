@@ -58,8 +58,12 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 # Homebrew
 brew install somaz94/tap/bash-pilot
 
-# curl
+# curl (latest)
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
+
+# curl (specific version)
+curl -sL https://github.com/somaz94/bash-pilot/releases/download/v0.1.0/bash-pilot_0.1.0_linux_amd64.tar.gz | tar xz
+sudo mv bash-pilot /usr/local/bin/
 
 # Go install
 go install github.com/somaz94/bash-pilot/cmd@latest
@@ -104,6 +108,9 @@ rm -rf ~/.config/bash-pilot
 ### Basic Usage
 
 ```bash
+# Auto-generate config from existing ~/.ssh/config
+bash-pilot init
+
 # List SSH hosts grouped by type
 bash-pilot ssh list
 
@@ -124,7 +131,17 @@ bash-pilot ssh list -o json
 
 ## Configuration
 
-Create `~/.config/bash-pilot/config.yaml`:
+Auto-generate from your SSH config, or create manually:
+
+```bash
+# Auto-generate (recommended)
+bash-pilot init
+
+# Or create manually
+mkdir -p ~/.config/bash-pilot
+```
+
+Config file at `~/.config/bash-pilot/config.yaml`:
 
 ```yaml
 ssh:

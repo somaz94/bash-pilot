@@ -14,6 +14,46 @@ Hands-on examples for bash-pilot.
 
 <br/>
 
+## Init
+
+### Auto-generate config
+
+```bash
+$ bash-pilot init
+Config generated: /home/user/.config/bash-pilot/config.yaml
+Detected 4 groups from 15 hosts:
+  git        3 hosts
+  cloud      2 hosts
+  k8s        4 hosts
+  on-prem    6 hosts
+
+Edit the config to customize group patterns and labels.
+```
+
+### Preview without overwriting
+
+```bash
+$ bash-pilot init
+Config already exists: /home/user/.config/bash-pilot/config.yaml
+Use --force to overwrite.
+
+Generated config (preview):
+---
+ssh:
+  groups:
+    git:
+      pattern:
+        - github.com-personal
+        - github.com-work
+    cloud:
+      pattern:
+        - web-server
+        - ci-server
+  ...
+```
+
+<br/>
+
 ## Quick Demo
 
 Run the built-in demo to see all features:

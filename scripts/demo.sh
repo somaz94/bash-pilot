@@ -149,19 +149,35 @@ echo -e "${GREEN}Demo environment created at ${DEMO_DIR}${RESET}"
 echo ""
 
 # ============================================================
-header 2 "ssh list — Host grouping"
+header 2 "init — Auto-generate config from SSH config"
+# ============================================================
+
+# Remove demo config to show init from scratch
+INIT_CONFIG="${DEMO_DIR}/init-config.yaml"
+export HOME="$DEMO_DIR"
+mkdir -p "$DEMO_DIR/.config/bash-pilot"
+
+echo -e "${YELLOW}Generating config from SSH config...${RESET}"
+run "$BINARY" ssh list --config "$DEMO_CONFIG" -o json 2>/dev/null | head -1 >/dev/null
+run "$BINARY" init --config "$DEMO_CONFIG" --force
+
+echo -e "${GREEN}Config auto-generated at ~/.config/bash-pilot/config.yaml${RESET}"
+echo ""
+
+# ============================================================
+header 3 "ssh list — Host grouping"
 # ============================================================
 
 run "$BINARY" ssh list --config "$DEMO_CONFIG"
 
 # ============================================================
-header 3 "ssh list — JSON output"
+header 4 "ssh list — JSON output"
 # ============================================================
 
 run "$BINARY" ssh list --config "$DEMO_CONFIG" -o json
 
 # ============================================================
-header 4 "ssh ping — Connectivity test (all hosts)"
+header 5 "ssh ping — Connectivity test (all hosts)"
 # ============================================================
 
 echo -e "${YELLOW}Note: Most hosts will timeout since they are demo IPs${RESET}"
@@ -169,25 +185,25 @@ echo ""
 run "$BINARY" ssh ping --config "$DEMO_CONFIG" || true
 
 # ============================================================
-header 5 "ssh ping — Filter by pattern (k8s-* only)"
+header 6 "ssh ping — Filter by pattern (k8s-* only)"
 # ============================================================
 
 run "$BINARY" ssh ping --config "$DEMO_CONFIG" 'k8s-*' || true
 
 # ============================================================
-header 6 "ssh audit — Security audit"
+header 7 "ssh audit — Security audit"
 # ============================================================
 
 run "$BINARY" ssh audit --config "$DEMO_CONFIG"
 
 # ============================================================
-header 7 "ssh audit — JSON output"
+header 8 "ssh audit — JSON output"
 # ============================================================
 
 run "$BINARY" ssh audit --config "$DEMO_CONFIG" -o json
 
 # ============================================================
-header 8 "version"
+header 9 "version"
 # ============================================================
 
 run "$BINARY" version

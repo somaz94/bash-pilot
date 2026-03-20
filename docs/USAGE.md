@@ -6,9 +6,26 @@ Complete guide for using bash-pilot CLI.
 
 ## Table of Contents
 
+- [Init](#init)
 - [SSH Module](#ssh-module)
 - [Global Flags](#global-flags)
 - [Output Formats](#output-formats)
+
+<br/>
+
+## Init
+
+Auto-generate config from your existing SSH config.
+
+```bash
+# Generate ~/.config/bash-pilot/config.yaml
+bash-pilot init
+
+# Overwrite existing config
+bash-pilot init --force
+```
+
+Analyzes `~/.ssh/config`, auto-detects host groups (git, cloud, k8s, on-prem), and writes the config file. If a config already exists, shows a preview without overwriting unless `--force` is used.
 
 <br/>
 

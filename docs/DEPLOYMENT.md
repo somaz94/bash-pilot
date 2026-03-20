@@ -27,8 +27,15 @@ git tag v1.0.0 && git push origin v1.0.0
 Automatically built by GoReleaser.
 
 ```bash
+# Install latest
 curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
+
+# Install specific version
+curl -sL https://github.com/somaz94/bash-pilot/releases/download/v0.1.0/bash-pilot_0.1.0_linux_amd64.tar.gz | tar xz
+sudo mv bash-pilot /usr/local/bin/
 ```
+
+**Available archive naming pattern:** `bash-pilot_{version}_{os}_{arch}.tar.gz`
 
 **Supported platforms:**
 
