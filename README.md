@@ -172,6 +172,33 @@ ssh:
 
 <br/>
 
+## Shell Completion
+
+```bash
+# Zsh (macOS default)
+bash-pilot completion zsh > "${fpath[1]}/_bash-pilot"
+source ~/.zshrc
+
+# Bash
+bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
+source ~/.bashrc
+
+# Fish
+bash-pilot completion fish > ~/.config/fish/completions/bash-pilot.fish
+
+# PowerShell
+bash-pilot completion powershell > bash-pilot.ps1
+```
+
+After setup, press `Tab` to auto-complete commands and flags:
+
+```bash
+bash-pilot ssh <TAB>        # list, ping, audit
+bash-pilot ssh list -<TAB>  # --config, --output, --no-color
+```
+
+<br/>
+
 ## Global Flags
 
 | Flag | Short | Default | Description |

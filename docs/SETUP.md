@@ -41,6 +41,23 @@ Verify installation:
 bash-pilot version
 ```
 
+### Shell Completion (optional)
+
+Enable tab auto-completion for commands and flags:
+
+```bash
+# Zsh (macOS default)
+bash-pilot completion zsh > "${fpath[1]}/_bash-pilot"
+source ~/.zshrc
+
+# Bash
+bash-pilot completion bash > /etc/bash_completion.d/bash-pilot
+source ~/.bashrc
+
+# Fish
+bash-pilot completion fish > ~/.config/fish/completions/bash-pilot.fish
+```
+
 <br/>
 
 ## Create Config File
