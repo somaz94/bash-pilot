@@ -335,7 +335,32 @@ header 24 "setup — Preview install plan (dry-run)"
 run "$BINARY" setup "${DEMO_DIR}/snapshot.json" --dry-run
 
 # ============================================================
-header 25 "version"
+header 25 "migrate export — Export SSH + Git config"
+# ============================================================
+
+echo -e "${YELLOW}Saving migrate config to ${DEMO_DIR}/migrate.json${RESET}"
+"$BINARY" migrate export > "${DEMO_DIR}/migrate.json" 2>&1 || true
+echo ""
+echo -e "${YELLOW}Exported:${RESET}"
+cat "${DEMO_DIR}/migrate.json" | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    print(f'  SSH hosts: {len(d.get(\"ssh\",{}).get(\"hosts\",[]))}')
+    print(f'  SSH keys:  {len(d.get(\"ssh\",{}).get(\"keys\",[]))}')
+    print(f'  Git profiles: {len(d.get(\"git\",{}).get(\"profiles\",[]))}')
+except: print('  (empty or parse error)')
+" 2>/dev/null || echo "  (python3 not available)"
+echo ""
+
+# ============================================================
+header 26 "migrate import — Preview import (dry-run)"
+# ============================================================
+
+run "$BINARY" migrate import "${DEMO_DIR}/migrate.json" --dry-run
+
+# ============================================================
+header 27 "version"
 # ============================================================
 
 run "$BINARY" version

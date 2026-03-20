@@ -57,6 +57,12 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
+### Migrate Module
+- **`bash-pilot migrate export`** — Export SSH config + Git profiles to portable JSON
+- **`bash-pilot migrate import <file>`** — Import config on new machine with path translation (supports `--dry-run`)
+
+<br/>
+
 ### Cross-Module
 - **`bash-pilot doctor`** — Full system diagnostics (SSH audit + Git doctor + Env check)
 
@@ -197,6 +203,13 @@ bash-pilot setup my-env.json --dry-run
 
 # Install missing tools
 bash-pilot setup my-env.json
+
+# Export SSH + Git config for migration
+bash-pilot migrate export > my-config.json
+
+# Import on new machine
+bash-pilot migrate import my-config.json --dry-run
+bash-pilot migrate import my-config.json
 ```
 
 <br/>
