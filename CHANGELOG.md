@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-03-20)
+
+### Features
+
+- add git module (profiles, doctor, clean) ([631f499](https://github.com/somaz94/bash-pilot/commit/631f499401893d2a89f06f949b072155f1c562c6))
+
+### Bug Fixes
+
+- handle case-insensitive includeIf in gitconfig parser ([33c0027](https://github.com/somaz94/bash-pilot/commit/33c002709d2e8751a63578dbd9b717b53f641f92))
+
+### Documentation
+
+- add git module commands to Homebrew caveats ([af4f576](https://github.com/somaz94/bash-pilot/commit/af4f576b5a954211deafd0bf6745044b1e034805))
+- update CONTRIBUTORS.md ([eac6c5b](https://github.com/somaz94/bash-pilot/commit/eac6c5bd5da12e8531d2e49deb0ec39beeabc783))
+- update changelog ([0302a40](https://github.com/somaz94/bash-pilot/commit/0302a40f69cd2ce92f5011e07be428c88ab0ebf3))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.1.1](https://github.com/somaz94/bash-pilot/compare/v0.1.0...v0.1.1) (2026-03-20)
 
 ### Features
