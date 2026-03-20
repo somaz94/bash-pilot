@@ -12,8 +12,8 @@ var (
 	runCommand = func(name string, args ...string) ([]byte, error) {
 		return exec.Command(name, args...).Output()
 	}
-	lookPath   = exec.LookPath
-	getwd      = os.Getwd
+	lookPath    = exec.LookPath
+	getwd       = os.Getwd
 	currentUser = func() string {
 		u, err := user.Current()
 		if err != nil {
