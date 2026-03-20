@@ -493,3 +493,107 @@ func TestBuildHostBlock(t *testing.T) {
 		}
 	}
 }
+
+func TestImport_OnlySSH(t *testing.T) {
+	origUserHomeDir := userHomeDir
+	origWriteFile := writeFile
+	origReadFile := readFile
+	origMkdirAll := mkdirAll
+	origStatFile := statFile
+	origOpenFile := openFile
+	origRunGitConfig := runGitConfig
+	defer func() {
+		userHomeDir = origUserHomeDir
+		writeFile = origWriteFile
+		readFile = origReadFile
+		mkdirAll = origMkdirAll
+		statFile = origStatFile
+		openFile = origOpenFile
+		runGitConfig = origRunGitConfig
+	}()
+
+	tmpDir := t.TempDir()
+	userHomeDir = func() (string, error) { return tmpDir, nil }
+	mkdirAll = func(path string, perm os.FileMode) error { return nil }
+	statFile = func(name string) (os.FileInfo, error) { return nil, os.ErrNotExist }
+	openFile = func(name string) (*os.File, error) { return nil, os.ErrNotExist }
+	writeFile = func(name string, data []byte, perm os.FileMode) error { return nil }
+	readFile = func(name string) ([]byte, error) { return nil, os.ErrNotExist }
+	runGitConfig = func(args ...string) error {
+		t.Error("git config should not be called with --only ssh")
+		return nil
+	}
+
+	cfg := &MigrateConfig{
+		SSH: SSHExport{
+			Hosts: []SSHHostEntry{{Name: "server1", Hostname: "10.0.0.1"}},
+		},
+		Git: GitExport{
+			UserName:  "test",
+			UserEmail: "test@example.com",
+		},
+	}
+
+	only := map[string]bool{"ssh": true}
+	result, err := Import(cfg, true, only)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if result.SSHHostsAdded != 1 {
+		t.Errorf("expected 1 SSH host added, got %d", result.SSHHostsAdded)
+	}
+	if result.GitConfigWritten {
+		t.Error("expected git config NOT written with --only ssh")
+	}
+}
+
+func TestImport_OnlyGit(t *testing.T) {
+	origUserHomeDir := userHomeDir
+	origWriteFile := writeFile
+	origReadFile := readFile
+	origMkdirAll := mkdirAll
+	origStatFile := statFile
+	origOpenFile := openFile
+	origRunGitConfig := runGitConfig
+	defer func() {
+		userHomeDir = origUserHomeDir
+		writeFile = origWriteFile
+		readFile = origReadFile
+		mkdirAll = origMkdirAll
+		statFile = origStatFile
+		openFile = origOpenFile
+		runGitConfig = origRunGitConfig
+	}()
+
+	tmpDir := t.TempDir()
+	userHomeDir = func() (string, error) { return tmpDir, nil }
+	mkdirAll = func(path string, perm os.FileMode) error { return nil }
+	statFile = func(name string) (os.FileInfo, error) { return nil, os.ErrNotExist }
+	writeFile = func(name string, data []byte, perm os.FileMode) error { return nil }
+	readFile = func(name string) ([]byte, error) { return nil, os.ErrNotExist }
+	runGitConfig = func(args ...string) error { return nil }
+
+	cfg := &MigrateConfig{
+		SSH: SSHExport{
+			Hosts: []SSHHostEntry{{Name: "server1", Hostname: "10.0.0.1"}},
+		},
+		Git: GitExport{
+			UserName:  "test",
+			UserEmail: "test@example.com",
+		},
+	}
+
+	only := map[string]bool{"git": true}
+	result, err := Import(cfg, false, only)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if result.SSHHostsAdded != 0 {
+		t.Errorf("expected 0 SSH hosts with --only git, got %d", result.SSHHostsAdded)
+	}
+	if !result.GitConfigWritten {
+		t.Error("expected git config written with --only git")
+	}
+}
