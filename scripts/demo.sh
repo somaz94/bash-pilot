@@ -304,7 +304,8 @@ header 20 "prompt init — Generate prompt script (minimal)"
 
 echo -e "${YELLOW}Note: Showing first 20 lines of generated script${RESET}"
 echo ""
-run "$BINARY" prompt init 2>&1 | head -20
+"$BINARY" prompt init 2>&1 | head -20 || true
+echo ""
 
 # ============================================================
 header 21 "version"
