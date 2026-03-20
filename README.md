@@ -2,6 +2,15 @@
 
 A powerful CLI toolkit for bash power users — SSH management, Git multi-profile, environment health checks, and smart prompt.
 
+> For detailed documentation, see the [docs/](docs/) folder:
+>
+> [Usage](docs/USAGE.md) |
+> [Configuration](docs/CONFIGURATION.md) |
+> [Examples](docs/EXAMPLES.md) |
+> [Deployment](docs/DEPLOYMENT.md) |
+> [Development](docs/DEVELOPMENT.md) |
+> [Use Cases](docs/USE-CASES.md)
+
 <br/>
 
 ## Features
@@ -33,39 +42,60 @@ A powerful CLI toolkit for bash power users — SSH management, Git multi-profil
 
 <br/>
 
-## Installation
-
-<br/>
-
-### Homebrew
-
-```bash
-brew tap somaz94/tap
-brew install bash-pilot
-```
-
-<br/>
-
-### From source
-
-```bash
-git clone https://github.com/somaz94/bash-pilot.git
-cd bash-pilot
-make install
-```
-
-<br/>
-
-### Quick build
-
-```bash
-make build
-./bin/bash-pilot version
-```
-
-<br/>
-
 ## Quick Start
+
+<br/>
+
+### Install
+
+```bash
+# Homebrew
+brew install somaz94/tap/bash-pilot
+
+# curl
+curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
+
+# Go install
+go install github.com/somaz94/bash-pilot/cmd@latest
+
+# From source
+git clone https://github.com/somaz94/bash-pilot.git
+cd bash-pilot && make install
+```
+
+<br/>
+
+### Upgrade
+
+```bash
+# Homebrew
+brew update && brew upgrade bash-pilot
+
+# curl (re-run installer)
+curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
+
+# Go install
+go install github.com/somaz94/bash-pilot/cmd@latest
+```
+
+<br/>
+
+### Uninstall
+
+```bash
+# Homebrew
+brew uninstall bash-pilot
+
+# Manual
+sudo rm /usr/local/bin/bash-pilot
+
+# Optional: remove config
+rm -rf ~/.config/bash-pilot
+```
+
+<br/>
+
+### Basic Usage
 
 ```bash
 # List SSH hosts grouped by type
@@ -122,11 +152,12 @@ ssh:
 ## Development
 
 ```bash
-make fmt          # Format code
-make vet          # Run go vet
+make build        # Build binary
 make test         # Run tests with race detection
 make cover        # Generate coverage report
-make cover-html   # Open coverage in browser
+make demo         # Run demo
+make demo-all     # Run demo and clean up
+make help         # Show all targets
 ```
 
 <br/>
