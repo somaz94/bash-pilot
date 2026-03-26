@@ -15,11 +15,6 @@ make vet             # go vet
 make install         # Install to /usr/local/bin
 ```
 
-- Do not include `Co-Authored-By` lines in commit messages.
-- Use Conventional Commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `ci:`, `chore:`)
-- Do not push to remote. Only commit. The user will push manually.
-- Do not modify git config.
-
 ## Key Concepts
 
 - **SSH Module**: Parses `~/.ssh/config`, lists hosts with grouping, runs parallel connectivity checks, audits security issues
@@ -96,6 +91,3 @@ After modifying any code, always follow this order:
    - `CLAUDE.md` — Key Concepts, CLI Commands table, Project Structure
 
 Never skip tests or leave them for later. Every code change must have corresponding test coverage before documentation is updated.
-
-- Communicate with the user in Korean.
-- All documentation and code comments must be written in English.
