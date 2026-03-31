@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.6.1](https://github.com/somaz94/bash-pilot/compare/v0.6.0...v0.6.1) (2026-03-31)
+
+### Bug Fixes
+
+- correct ping error message, git active profile detection, doctor gitconfig path ([d90bbc8](https://github.com/somaz94/bash-pilot/commit/d90bbc8200a42cf90412895974aa18d0041fe04f))
+
+### Code Refactoring
+
+- replace eval with direct exec in demo.sh, cross-platform cover-html, add stars badge ([b524a8d](https://github.com/somaz94/bash-pilot/commit/b524a8d09ad0fb3b7c796c51a14a59b1825f3470))
+
+### Documentation
+
+- remove duplicate rules covered by global CLAUDE.md ([4529d78](https://github.com/somaz94/bash-pilot/commit/4529d786f662520c3a0b5bbf23ec43596107281f))
+
+### Tests
+
+- add connection refused and git active profile false positive tests ([cbfa2fa](https://github.com/somaz94/bash-pilot/commit/cbfa2fa6321cfbd61e7842f77a417f45bed9cd7d))
+
+### Continuous Integration
+
+- add changelog category groups in goreleaser config ([0161bb2](https://github.com/somaz94/bash-pilot/commit/0161bb2b729f45bdf773e045fd69311252cdcce7))
+
+### Chores
+
+- remove duplicate rules from CLAUDE.md (moved to global) ([11aed46](https://github.com/somaz94/bash-pilot/commit/11aed4639e07e64fa93910494178b61c4e9fa427))
+- add git config protection to CLAUDE.md ([218c329](https://github.com/somaz94/bash-pilot/commit/218c329bdfd9b8df85aa638fbb7a188a05a15b53))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.6.0](https://github.com/somaz94/bash-pilot/compare/v0.5.0...v0.6.0) (2026-03-20)
 
 ### Features
