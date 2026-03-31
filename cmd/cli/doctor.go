@@ -36,7 +36,7 @@ var doctorCmd = &cobra.Command{
 		sshResult = ssh.Audit(hosts)
 
 		// --- Git Doctor ---
-		gitResult, _ := git.Doctor("~/.gitconfig")
+		gitResult, _ := git.Doctor(resolveGitConfigPath())
 
 		// --- Env Check ---
 		envResult := env.Check()

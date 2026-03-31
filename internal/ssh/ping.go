@@ -62,7 +62,11 @@ func pingHost(h Host, timeout time.Duration) PingResult {
 
 	if err != nil {
 		result.OK = false
-		result.Error = fmt.Sprintf("timeout (%s)", addr)
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			result.Error = fmt.Sprintf("timeout (%s)", addr)
+		} else {
+			result.Error = err.Error()
+		}
 		return result
 	}
 	conn.Close()

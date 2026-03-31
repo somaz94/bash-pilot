@@ -166,7 +166,8 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 		active := false
 		if cwd != "" {
 			expandedDir := expandPath(dir)
-			if strings.HasPrefix(cwd, expandedDir) {
+			cleanDir := filepath.Clean(expandedDir)
+			if cwd == cleanDir || strings.HasPrefix(cwd, cleanDir+string(filepath.Separator)) {
 				active = true
 			}
 		}
