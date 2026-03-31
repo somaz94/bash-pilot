@@ -23,7 +23,7 @@ header() {
 
 run() {
   echo -e "${YELLOW}\$ $*${RESET}"
-  eval "$@"
+  "$@"
   echo ""
 }
 

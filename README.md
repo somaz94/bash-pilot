@@ -4,6 +4,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Latest Tag](https://img.shields.io/github/v/tag/somaz94/bash-pilot)](https://github.com/somaz94/bash-pilot/tags)
 [![Top Language](https://img.shields.io/github/languages/top/somaz94/bash-pilot)](https://github.com/somaz94/bash-pilot)
+![GitHub Stars](https://img.shields.io/github/stars/somaz94/bash-pilot?style=social)
 
 A powerful CLI toolkit for bash power users — SSH management, Git multi-profile, environment health checks, and smart prompt.
 

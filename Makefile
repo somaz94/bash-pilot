@@ -29,7 +29,7 @@ cover: ## Generate coverage report
 
 cover-html: cover ## Open coverage report in browser
 	go tool cover -html=coverage.out -o coverage.html
-	open coverage.html
+	@command -v xdg-open >/dev/null 2>&1 && xdg-open coverage.html || open coverage.html
 
 ## Quality
 
