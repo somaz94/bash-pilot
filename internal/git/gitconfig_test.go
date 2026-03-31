@@ -603,6 +603,35 @@ func TestGetProfiles_ActiveProfile(t *testing.T) {
 	}
 }
 
+func TestGetProfiles_ActiveProfileNoPrefixFalsePositive(t *testing.T) {
+	dir := t.TempDir()
+
+	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	email = work@company.com
+`)
+
+	cwd, _ := os.Getwd()
+
+	// gitdir is cwd+"-backup" — a different directory that starts with cwd as prefix.
+	// The work profile should NOT be active.
+	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	email = global@example.com
+[includeIf "gitdir:`+cwd+`-backup/"]
+	path = `+dir+`/.gitconfig-work
+`)
+
+	profiles, err := GetProfiles(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	for _, p := range profiles {
+		if p.Email == "work@company.com" && p.Active {
+			t.Errorf("work profile should NOT be active: cwd=%s, gitdir=%s-backup", cwd, cwd)
+		}
+	}
+}
+
 func TestFindDuplicateSafeDirs_NoDuplicates(t *testing.T) {
 	sections := []Section{
 		{

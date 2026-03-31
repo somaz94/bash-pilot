@@ -50,6 +50,35 @@ func TestPingHosts_Unreachable(t *testing.T) {
 	}
 }
 
+func TestPingHosts_ConnectionRefused(t *testing.T) {
+	// Open a listener to get a free port, then close it so the port is refused.
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, port, _ := net.SplitHostPort(ln.Addr().String())
+	ln.Close()
+
+	hosts := []Host{
+		{Name: "refused", Hostname: "127.0.0.1", Port: port},
+	}
+
+	results := PingHosts(hosts, 2*time.Second, 5)
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	if results[0].OK {
+		t.Error("expected OK=false for refused connection")
+	}
+	if results[0].Error == "" {
+		t.Error("expected error message")
+	}
+	// connection refused is not a timeout — error should not say "timeout"
+	if len(results[0].Error) >= 7 && results[0].Error[:7] == "timeout" {
+		t.Errorf("connection refused should not report as timeout, got: %s", results[0].Error)
+	}
+}
+
 func TestPingHosts_DefaultPort(t *testing.T) {
 	// Host with no port should default to 22.
 	hosts := []Host{
