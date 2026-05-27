@@ -128,14 +128,8 @@ var sshAuditCmd = &cobra.Command{
 		}
 
 		for _, finding := range result.Findings {
-			switch finding.Severity {
-			case ssh.SeverityOK:
-				f.Println(f.OK(fmt.Sprintf("%s: %s", finding.Key, finding.Message)))
-			case ssh.SeverityWarn:
-				f.Println(f.Warn(fmt.Sprintf("%s: %s", finding.Key, finding.Message)))
-			case ssh.SeverityFail:
-				f.Println(f.Fail(fmt.Sprintf("%s: %s", finding.Key, finding.Message)))
-			}
+			line := fmt.Sprintf("%s: %s", finding.Key, finding.Message)
+			f.Println(f.RenderSeverity(string(finding.Severity), line))
 		}
 
 		return nil

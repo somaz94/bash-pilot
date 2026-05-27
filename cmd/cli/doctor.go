@@ -55,14 +55,7 @@ var doctorCmd = &cobra.Command{
 			f.Println(f.OK("No SSH issues found"))
 		}
 		for _, finding := range sshResult.Findings {
-			switch finding.Severity {
-			case ssh.SeverityOK:
-				f.Println(f.OK(finding.Message))
-			case ssh.SeverityWarn:
-				f.Println(f.Warn(finding.Message))
-			case ssh.SeverityFail:
-				f.Println(f.Fail(finding.Message))
-			}
+			f.Println(f.RenderSeverity(string(finding.Severity), finding.Message))
 		}
 		f.Footer()
 		fmt.Println()
@@ -73,14 +66,7 @@ var doctorCmd = &cobra.Command{
 			f.Println(f.OK("No Git issues found"))
 		}
 		for _, issue := range gitResult.Issues {
-			switch issue.Severity {
-			case "ok":
-				f.Println(f.OK(issue.Message))
-			case "warn":
-				f.Println(f.Warn(issue.Message))
-			case "error":
-				f.Println(f.Fail(issue.Message))
-			}
+			f.Println(f.RenderSeverity(issue.Severity, issue.Message))
 		}
 		f.Footer()
 		fmt.Println()
@@ -90,14 +76,7 @@ var doctorCmd = &cobra.Command{
 		for _, category := range keys {
 			f.Header(fmt.Sprintf("DOCTOR: ENV (%s)", strings.ToUpper(category)))
 			for _, finding := range groups[category] {
-				switch finding.Severity {
-				case "ok":
-					f.Println(f.OK(finding.Message))
-				case "warn":
-					f.Println(f.Warn(finding.Message))
-				case "error":
-					f.Println(f.Fail(finding.Message))
-				}
+				f.Println(f.RenderSeverity(finding.Severity, finding.Message))
 			}
 			f.Footer()
 			fmt.Println()

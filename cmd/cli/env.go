@@ -33,14 +33,7 @@ var envCheckCmd = &cobra.Command{
 		for _, category := range keys {
 			f.Header(fmt.Sprintf("ENV CHECK: %s", category))
 			for _, finding := range groups[category] {
-				switch finding.Severity {
-				case "ok":
-					f.Println(f.OK(finding.Message))
-				case "warn":
-					f.Println(f.Warn(finding.Message))
-				case "error":
-					f.Println(f.Fail(finding.Message))
-				}
+				f.Println(f.RenderSeverity(finding.Severity, finding.Message))
 			}
 			f.Footer()
 			fmt.Println()

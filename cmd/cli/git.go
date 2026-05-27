@@ -89,15 +89,8 @@ var gitDoctorCmd = &cobra.Command{
 			if issue.File != "" && issue.Line > 0 {
 				loc = fmt.Sprintf(" (%s:%d)", issue.File, issue.Line)
 			}
-
-			switch issue.Severity {
-			case "ok":
-				f.Println(f.OK(fmt.Sprintf("[%s] %s%s", issue.Category, issue.Message, loc)))
-			case "warn":
-				f.Println(f.Warn(fmt.Sprintf("[%s] %s%s", issue.Category, issue.Message, loc)))
-			case "error":
-				f.Println(f.Fail(fmt.Sprintf("[%s] %s%s", issue.Category, issue.Message, loc)))
-			}
+			line := fmt.Sprintf("[%s] %s%s", issue.Category, issue.Message, loc)
+			f.Println(f.RenderSeverity(issue.Severity, line))
 		}
 		f.Footer()
 
