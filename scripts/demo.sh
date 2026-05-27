@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
+# Re-exec under bash if invoked via zsh; must precede `set -u` because of BASH_SOURCE below.
+if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BINARY="${PROJECT_DIR}/bin/bash-pilot"
-DEMO_DIR="/tmp/bash-pilot-demo"
+# shellcheck source=./_demo-common.sh
+. "${SCRIPT_DIR}/_demo-common.sh"
 DEMO_SSH_CONFIG="${DEMO_DIR}/ssh_config"
 DEMO_CONFIG="${DEMO_DIR}/config.yaml"
+
+# Restore HOME on exit so an interactive `source ./scripts/demo.sh` (or a trap firing mid-run)
+# does not leave the caller pointed at the demo directory.
+ORIG_HOME="${HOME:-}"
+trap 'export HOME="$ORIG_HOME"' EXIT
 
 # Colors
 GREEN='\033[32m'
@@ -15,14 +23,23 @@ CYAN='\033[36m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
+# sed -i wrapper that works on both BSD (macOS default) and GNU sed.
+sed_inplace() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
+  fi
+}
+
 header() {
   echo ""
-  echo -e "${BOLD}${CYAN}=== Phase $1: $2 ===${RESET}"
+  printf '%b\n' "${BOLD}${CYAN}=== Phase $1: $2 ===${RESET}"
   echo ""
 }
 
 run() {
-  echo -e "${YELLOW}\$ $*${RESET}"
+  printf '%b\n' "${YELLOW}\$ $*${RESET}"
   "$@"
   echo ""
 }
@@ -123,8 +140,7 @@ Host jump-box
 EOF
 
 # Replace DEMO_DIR placeholder with actual path
-sed -i '' "s|DEMO_DIR|${DEMO_DIR}|g" "$DEMO_SSH_CONFIG" 2>/dev/null || \
-  sed -i "s|DEMO_DIR|${DEMO_DIR}|g" "$DEMO_SSH_CONFIG"
+sed_inplace "s|DEMO_DIR|${DEMO_DIR}|g" "$DEMO_SSH_CONFIG"
 
 # Create demo config
 cat > "$DEMO_CONFIG" <<EOF
@@ -145,7 +161,7 @@ ssh:
     parallel: 10
 EOF
 
-echo -e "${GREEN}Demo environment created at ${DEMO_DIR}${RESET}"
+printf '%b\n' "${GREEN}Demo environment created at ${DEMO_DIR}${RESET}"
 echo ""
 
 # ============================================================
@@ -161,7 +177,7 @@ mkdir -p "$DEMO_DIR/.config/bash-pilot"
 
 run "$BINARY" init --config "$DEMO_CONFIG" --force
 
-echo -e "${GREEN}Config auto-generated at ~/.config/bash-pilot/config.yaml${RESET}"
+printf '%b\n' "${GREEN}Config auto-generated at ~/.config/bash-pilot/config.yaml${RESET}"
 echo ""
 
 # ============================================================
@@ -180,7 +196,7 @@ run "$BINARY" ssh list --config "$DEMO_CONFIG" -o json
 header 5 "ssh ping — Connectivity test (all hosts)"
 # ============================================================
 
-echo -e "${YELLOW}Note: Most hosts will timeout since they are demo IPs${RESET}"
+printf '%b\n' "${YELLOW}Note: Most hosts will timeout since they are demo IPs${RESET}"
 echo ""
 run "$BINARY" ssh ping --config "$DEMO_CONFIG" || true
 
@@ -263,7 +279,7 @@ header 13 "git clean — Actually clean up"
 
 run "$BINARY" git clean --gitconfig "$DEMO_GITCONFIG"
 
-echo -e "${GREEN}Cleaned gitconfig. Backup at ${DEMO_GITCONFIG}.bak${RESET}"
+printf '%b\n' "${GREEN}Cleaned gitconfig. Backup at ${DEMO_GITCONFIG}.bak${RESET}"
 echo ""
 
 # ============================================================
@@ -306,7 +322,7 @@ run "$BINARY" prompt show --theme full
 header 20 "prompt init — Generate prompt script (minimal)"
 # ============================================================
 
-echo -e "${YELLOW}Note: Showing first 20 lines of generated script${RESET}"
+printf '%b\n' "${YELLOW}Note: Showing first 20 lines of generated script${RESET}"
 echo ""
 "$BINARY" prompt init 2>&1 | head -20 || true
 echo ""
@@ -327,7 +343,7 @@ run "$BINARY" snapshot --summary
 header 23 "snapshot — Save and diff"
 # ============================================================
 
-echo -e "${YELLOW}Saving snapshot to ${DEMO_DIR}/snapshot.json${RESET}"
+printf '%b\n' "${YELLOW}Saving snapshot to ${DEMO_DIR}/snapshot.json${RESET}"
 "$BINARY" snapshot > "${DEMO_DIR}/snapshot.json"
 echo ""
 run "$BINARY" diff "${DEMO_DIR}/snapshot.json"
@@ -342,10 +358,10 @@ run "$BINARY" setup "${DEMO_DIR}/snapshot.json" --dry-run
 header 25 "migrate export — Export SSH + Git config"
 # ============================================================
 
-echo -e "${YELLOW}Saving migrate config to ${DEMO_DIR}/migrate.json${RESET}"
+printf '%b\n' "${YELLOW}Saving migrate config to ${DEMO_DIR}/migrate.json${RESET}"
 "$BINARY" migrate export > "${DEMO_DIR}/migrate.json" 2>&1 || true
 echo ""
-echo -e "${YELLOW}Exported:${RESET}"
+printf '%b\n' "${YELLOW}Exported:${RESET}"
 cat "${DEMO_DIR}/migrate.json" | python3 -c "
 import json, sys
 try:
@@ -371,5 +387,5 @@ run "$BINARY" version
 
 # ============================================================
 echo ""
-echo -e "${GREEN}${BOLD}Demo complete!${RESET}"
-echo -e "Run ${CYAN}make demo-clean${RESET} to remove demo resources."
+printf '%b\n' "${GREEN}${BOLD}Demo complete!${RESET}"
+printf '%b\n' "Run ${CYAN}make demo-clean${RESET} to remove demo resources."

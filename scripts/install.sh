@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Re-exec under bash if invoked via zsh (`zsh install.sh` or `... | zsh`).
+if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
 # bash-pilot installer
@@ -15,9 +17,9 @@ CYAN='\033[36m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-info()  { echo -e "${CYAN}▶ $*${RESET}"; }
-ok()    { echo -e "${GREEN}✓ $*${RESET}"; }
-fail()  { echo -e "${RED}✗ $*${RESET}"; exit 1; }
+info()  { printf '%b\n' "${CYAN}▶ $*${RESET}"; }
+ok()    { printf '%b\n' "${GREEN}✓ $*${RESET}"; }
+fail()  { printf '%b\n' "${RED}✗ $*${RESET}"; exit 1; }
 
 # Detect OS and architecture.
 detect_platform() {
@@ -46,7 +48,7 @@ get_latest_version() {
 }
 
 main() {
-  echo -e "${BOLD}bash-pilot installer${RESET}"
+  printf '%b\n' "${BOLD}bash-pilot installer${RESET}"
   echo ""
 
   detect_platform
@@ -59,7 +61,7 @@ main() {
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ARCHIVE}"
 
   TMPDIR=$(mktemp -d)
-  trap 'rm -rf "$TMPDIR"' EXIT
+  trap 'rm -rf "${TMPDIR:-}"' EXIT
 
   info "Downloading ${ARCHIVE}..."
   curl -sSL "$DOWNLOAD_URL" -o "${TMPDIR}/${ARCHIVE}" || fail "Download failed: ${DOWNLOAD_URL}"
@@ -77,16 +79,16 @@ main() {
 
   ok "bash-pilot v${VERSION} installed successfully!"
   echo ""
-  echo -e "🎉 ${BOLD}bash-pilot installed!${RESET}"
+  printf '%b\n' "🎉 ${BOLD}bash-pilot installed!${RESET}"
   echo ""
-  echo -e "  Quick start:"
-  echo -e "    ${CYAN}bash-pilot init${RESET}                  # Auto-generate config from SSH config"
-  echo -e "    ${CYAN}bash-pilot ssh list${RESET}              # List SSH hosts with grouping"
-  echo -e "    ${CYAN}bash-pilot ssh ping${RESET}              # Test connectivity (parallel)"
-  echo -e "    ${CYAN}bash-pilot ssh audit${RESET}             # Security audit"
-  echo -e "    ${CYAN}bash-pilot --help${RESET}                # Full usage"
+  printf '%b\n' "  Quick start:"
+  printf '%b\n' "    ${CYAN}bash-pilot init${RESET}                  # Auto-generate config from SSH config"
+  printf '%b\n' "    ${CYAN}bash-pilot ssh list${RESET}              # List SSH hosts with grouping"
+  printf '%b\n' "    ${CYAN}bash-pilot ssh ping${RESET}              # Test connectivity (parallel)"
+  printf '%b\n' "    ${CYAN}bash-pilot ssh audit${RESET}             # Security audit"
+  printf '%b\n' "    ${CYAN}bash-pilot --help${RESET}                # Full usage"
   echo ""
-  echo -e "  Docs: ${CYAN}https://github.com/somaz94/bash-pilot${RESET}"
+  printf '%b\n' "  Docs: ${CYAN}https://github.com/somaz94/bash-pilot${RESET}"
 }
 
 main

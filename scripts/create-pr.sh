@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Re-exec under bash if invoked via zsh.
+if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
 # Usage: ./scripts/create-pr.sh "PR title"
@@ -6,7 +8,9 @@ set -euo pipefail
 
 TITLE="${1:?Usage: create-pr.sh \"PR title\"}"
 BRANCH=$(git branch --show-current)
-BASE="main"
+# Detect the upstream default branch (main/master/etc); fall back to "main".
+BASE="${BASE:-$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || true)}"
+BASE="${BASE:-main}"
 
 # Get commits since diverging from base branch.
 COMMITS=$(git log "${BASE}..HEAD" --pretty=format:"- %s" --reverse 2>/dev/null || echo "")
@@ -31,7 +35,7 @@ SUMMARY=""
 [ -n "$OTHERS" ] && SUMMARY="${SUMMARY}${OTHERS}\n"
 
 # Trim trailing newlines.
-SUMMARY=$(echo -e "$SUMMARY" | sed '/^$/d')
+SUMMARY=$(printf '%b' "$SUMMARY" | sed '/^$/d')
 
 if [ -z "$SUMMARY" ]; then
   SUMMARY="$COMMITS"
@@ -57,9 +61,9 @@ $([ -n "$CI" ] && echo "$CI" || true)
 - [x] \`go vet\` passes
 $(if [ "$HAS_TESTS" = true ]; then
   echo "- [x] New/updated tests added"
-  for pkg in $CHANGED_PKGS; do
-    echo "- [x] \`${pkg}\` tests pass"
-  done
+  while IFS= read -r pkg; do
+    [ -n "$pkg" ] && echo "- [x] \`${pkg}\` tests pass"
+  done <<<"$CHANGED_PKGS"
 fi)
 - [ ] Demo script passes (\`make demo\`)
 - [ ] Build succeeds (\`make build\`)
