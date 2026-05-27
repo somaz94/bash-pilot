@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/somaz94/bash-pilot/internal/migrate"
 	"github.com/somaz94/bash-pilot/internal/report"
+	"github.com/somaz94/bash-pilot/internal/snapshot"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +68,8 @@ Usage:
 		}
 
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
-		only := parseOnlyFlag(cmd)
+		onlyFlag, _ := cmd.Flags().GetString("only")
+		only := snapshot.ParseOnly(onlyFlag)
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
 		if output == "json" {
@@ -101,21 +102,6 @@ Usage:
 
 		return nil
 	},
-}
-
-func parseOnlyFlag(cmd *cobra.Command) map[string]bool {
-	onlyFlag, _ := cmd.Flags().GetString("only")
-	if onlyFlag == "" {
-		return nil
-	}
-	m := make(map[string]bool)
-	for _, s := range strings.Split(onlyFlag, ",") {
-		s = strings.TrimSpace(strings.ToLower(s))
-		if s != "" {
-			m[s] = true
-		}
-	}
-	return m
 }
 
 func init() {
