@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.6.2](https://github.com/somaz94/bash-pilot/compare/v0.6.1...v0.6.2) (2026-05-28)
+
+### Code Refactoring
+
+- use internal/testutil in snapshot tests ([62e22eb](https://github.com/somaz94/bash-pilot/commit/62e22eb3fd28496af9c3fef249f3b3835ed971ee))
+- use internal/testutil in env tests ([9f1ff93](https://github.com/somaz94/bash-pilot/commit/9f1ff933062b58e304741067277a5fa7f8cad15b))
+- introduce internal/testutil and use it in git tests ([b24de53](https://github.com/somaz94/bash-pilot/commit/b24de539126c6a2dba01830d03241052fa2398a5))
+- extract file permission magic numbers to config.Perm* ([bc0bdeb](https://github.com/somaz94/bash-pilot/commit/bc0bdeb00085252589a4d216e031509b7936d6fa))
+- split git.Clean into backup + rewrite helpers ([b25b0af](https://github.com/somaz94/bash-pilot/commit/b25b0af4dc659b377ff75adda6cb32a4b738eed5))
+- split snapshot.captureGit, extract parseIncludeIfProfiles ([4020971](https://github.com/somaz94/bash-pilot/commit/40209712f683af0046654647d7562ce312956b51))
+- unify severity rendering in report.RenderSeverity ([79b39f5](https://github.com/somaz94/bash-pilot/commit/79b39f525cf114ba7605497418edabebcbb320bd))
+- reuse snapshot.ParseOnly in migrate import ([736a42d](https://github.com/somaz94/bash-pilot/commit/736a42d63a08a35092045aea20c9667638b586c9))
+- make shell scripts bash+zsh portable and safer ([b692262](https://github.com/somaz94/bash-pilot/commit/b692262150d1d55069624ed3686f1baa934cfd5c))
+
+### Continuous Integration
+
+- add concurrency guards to recurring workflows ([e9c158d](https://github.com/somaz94/bash-pilot/commit/e9c158d7ee43496cf425c4a39886506c84dc0525))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.6.1](https://github.com/somaz94/bash-pilot/compare/v0.6.0...v0.6.1) (2026-03-31)
 
 ### Bug Fixes
