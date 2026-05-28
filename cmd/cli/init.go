@@ -85,11 +85,11 @@ var initCmd = &cobra.Command{
 		}
 
 		// Create directory and write config.
-		if err := os.MkdirAll(cfgDir, 0755); err != nil {
+		if err := os.MkdirAll(cfgDir, config.PermConfigDir); err != nil {
 			return fmt.Errorf("failed to create config directory: %w", err)
 		}
 
-		if err := os.WriteFile(cfgPath, data, 0644); err != nil {
+		if err := os.WriteFile(cfgPath, data, config.PermConfigFile); err != nil {
 			return fmt.Errorf("failed to write config: %w", err)
 		}
 

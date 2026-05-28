@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/somaz94/bash-pilot/internal/config"
 )
 
 // ImportResult holds the result of an import operation.
@@ -70,7 +72,7 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 	// Ensure ~/.ssh exists.
 	if !dryRun {
-		mkdirAll(sshDir, 0700)
+		mkdirAll(sshDir, config.PermSSHDir)
 	}
 
 	// Read existing SSH config to detect duplicates.
@@ -96,7 +98,7 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		// Append to existing config.
 		content := "\n# Imported by bash-pilot migrate\n" + strings.Join(newBlocks, "\n")
 
-		f, err := os.OpenFile(sshConfigPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		f, err := os.OpenFile(sshConfigPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, config.PermSSHConfigFile)
 		if err == nil {
 			f.WriteString(content)
 			f.Close()
@@ -155,7 +157,7 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		// Create the directory.
 		dir := expandHome(p.Directory, home)
 		if !dryRun {
-			if err := mkdirAll(dir, 0755); err != nil {
+			if err := mkdirAll(dir, config.PermConfigDir); err != nil {
 				result.Warnings = append(result.Warnings,
 					fmt.Sprintf("Failed to create directory %s: %s", dir, err))
 				continue
@@ -184,7 +186,7 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		}
 
 		if !dryRun {
-			if err := writeFile(profileConfigPath, []byte(content.String()), 0600); err != nil {
+			if err := writeFile(profileConfigPath, []byte(content.String()), config.PermGitConfigFile); err != nil {
 				result.Warnings = append(result.Warnings,
 					fmt.Sprintf("Failed to write %s: %s", profileConfigPath, err))
 				continue
@@ -271,7 +273,7 @@ func addIncludeIf(home string, p GitProfileExport) {
 	block := fmt.Sprintf("\n[includeIf \"gitdir:%s\"]\n\tpath = ~/.gitconfig-%s\n", dir, p.Name)
 	content += block
 
-	writeFile(gitconfigPath, []byte(content), 0600)
+	writeFile(gitconfigPath, []byte(content), config.PermGitConfigFile)
 }
 
 // FormatImportResult returns a human-readable summary.

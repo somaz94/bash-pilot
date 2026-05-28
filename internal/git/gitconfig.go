@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/somaz94/bash-pilot/internal/config"
 )
 
 // Profile represents a git identity profile.
@@ -352,7 +354,7 @@ func backupGitConfig(path string) (string, []byte, error) {
 	if err != nil {
 		return "", nil, fmt.Errorf("cannot read %s: %w", path, err)
 	}
-	if err := os.WriteFile(backupPath, data, 0600); err != nil {
+	if err := os.WriteFile(backupPath, data, config.PermGitConfigFile); err != nil {
 		return "", nil, fmt.Errorf("cannot create backup: %w", err)
 	}
 	return backupPath, data, nil
@@ -375,7 +377,7 @@ func filterGitConfigLines(data []byte, removeLines map[int]bool) string {
 // rewriteGitConfig writes content to path with mode 0600. Matches the
 // pre-split Clean() behavior — a direct overwrite, not an atomic rename.
 func rewriteGitConfig(path string, content string) error {
-	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(content), config.PermGitConfigFile); err != nil {
 		return fmt.Errorf("cannot write %s: %w", path, err)
 	}
 	return nil
