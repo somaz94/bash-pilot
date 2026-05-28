@@ -1,10 +1,10 @@
 package snapshot
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/somaz94/bash-pilot/internal/testutil"
 )
 
 func TestCompareField(t *testing.T) {
@@ -450,9 +450,8 @@ func TestDiff_SSHKeysMatch(t *testing.T) {
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
 	// Create SSH key file.
-	sshDir := filepath.Join(tmpDir, ".ssh")
-	os.MkdirAll(sshDir, 0700)
-	os.WriteFile(filepath.Join(sshDir, "id_ed25519"), []byte("key"), 0600)
+	sshDir := testutil.MakeDir(t, tmpDir, ".ssh", 0700)
+	testutil.WriteFile(t, sshDir, "id_ed25519", "key")
 
 	runCommand = func(name string, args ...string) ([]byte, error) {
 		if name == "ssh-keygen" {
@@ -509,9 +508,8 @@ func TestDiff_SSHKeysMismatch(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	sshDir := filepath.Join(tmpDir, ".ssh")
-	os.MkdirAll(sshDir, 0700)
-	os.WriteFile(filepath.Join(sshDir, "id_ed25519"), []byte("key"), 0600)
+	sshDir := testutil.MakeDir(t, tmpDir, ".ssh", 0700)
+	testutil.WriteFile(t, sshDir, "id_ed25519", "key")
 
 	runCommand = func(name string, args ...string) ([]byte, error) {
 		if name == "ssh-keygen" {
