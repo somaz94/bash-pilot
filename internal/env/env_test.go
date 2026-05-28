@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/somaz94/bash-pilot/internal/testutil"
 )
 
 func TestCheck(t *testing.T) {
@@ -386,8 +388,7 @@ func TestCheckSSHAgent_WithKeys(t *testing.T) {
 	}()
 
 	tmpDir := t.TempDir()
-	sockPath := filepath.Join(tmpDir, "agent.sock")
-	os.WriteFile(sockPath, []byte{}, 0600)
+	sockPath := testutil.WriteFile(t, tmpDir, "agent.sock", "")
 	os.Setenv("SSH_AUTH_SOCK", sockPath)
 
 	statFunc = os.Stat
@@ -423,8 +424,7 @@ func TestCheckSSHAgent_NoKeys(t *testing.T) {
 	}()
 
 	tmpDir := t.TempDir()
-	sockPath := filepath.Join(tmpDir, "agent.sock")
-	os.WriteFile(sockPath, []byte{}, 0600)
+	sockPath := testutil.WriteFile(t, tmpDir, "agent.sock", "")
 	os.Setenv("SSH_AUTH_SOCK", sockPath)
 
 	statFunc = os.Stat
@@ -502,8 +502,8 @@ func TestCheckHomeDir_WithTempDir(t *testing.T) {
 	}()
 
 	tmpDir := t.TempDir()
-	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0700)
-	os.MkdirAll(filepath.Join(tmpDir, ".config"), 0755)
+	testutil.MakeDir(t, tmpDir, ".ssh", 0700)
+	testutil.MakeDir(t, tmpDir, ".config", 0755)
 
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 	statFunc = os.Stat
@@ -533,8 +533,8 @@ func TestCheckHomeDir_SSHPermsTooOpen(t *testing.T) {
 	}()
 
 	tmpDir := t.TempDir()
-	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0755)
-	os.MkdirAll(filepath.Join(tmpDir, ".config"), 0755)
+	testutil.MakeDir(t, tmpDir, ".ssh", 0755)
+	testutil.MakeDir(t, tmpDir, ".config", 0755)
 
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 	statFunc = os.Stat
