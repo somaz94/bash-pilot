@@ -174,7 +174,6 @@ func captureGit(snap *Snapshot) {
 		snap.Git.Name = strings.TrimSpace(string(out))
 	}
 
-	// Parse includeIf profiles from gitconfig.
 	home, err := userHomeDir()
 	if err != nil {
 		return
@@ -185,50 +184,57 @@ func captureGit(snap *Snapshot) {
 		return
 	}
 
+	snap.Git.Profiles = append(snap.Git.Profiles, parseIncludeIfProfiles(data, home)...)
+}
+
+// parseIncludeIfProfiles scans a gitconfig payload for [includeIf "gitdir:..."]
+// sections and returns one GitProfile per section, resolving the per-profile
+// email from the referenced included config file when readable.
+func parseIncludeIfProfiles(data []byte, home string) []GitProfile {
+	var profiles []GitProfile
 	lines := strings.Split(string(data), "\n")
 	for _, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		lower := strings.ToLower(trimmed)
-		if strings.HasPrefix(lower, "[includeif \"gitdir:") {
-			// Extract directory.
-			start := strings.Index(trimmed, "gitdir:")
-			if start == -1 {
-				continue
-			}
-			dir := trimmed[start+7:]
-			dir = strings.TrimSuffix(dir, "\"]")
-			dir = strings.TrimSuffix(dir, "/")
+		if !strings.HasPrefix(lower, "[includeif \"gitdir:") {
+			continue
+		}
 
-			// Extract profile name from directory.
-			name := filepath.Base(dir)
+		start := strings.Index(trimmed, "gitdir:")
+		if start == -1 {
+			continue
+		}
+		dir := trimmed[start+7:]
+		dir = strings.TrimSuffix(dir, "\"]")
+		dir = strings.TrimSuffix(dir, "/")
 
-			// Try to read email from the included config.
-			profile := GitProfile{
-				Name:      name,
-				Directory: dir,
-			}
+		name := filepath.Base(dir)
+		profile := GitProfile{
+			Name:      name,
+			Directory: dir,
+		}
 
-			// Find the path line after this includeIf.
-			for _, l2 := range lines {
-				t2 := strings.TrimSpace(l2)
-				if strings.HasPrefix(t2, "path = ") && strings.Contains(t2, name) {
-					includePath := strings.TrimPrefix(t2, "path = ")
-					includePath = expandHome(includePath, home)
-					incData, err := os.ReadFile(includePath)
-					if err == nil {
-						for _, il := range strings.Split(string(incData), "\n") {
-							it := strings.TrimSpace(il)
-							if strings.HasPrefix(it, "email = ") {
-								profile.Email = strings.TrimPrefix(it, "email = ")
-							}
+		// Find the path line associated with this includeIf and pull email.
+		for _, l2 := range lines {
+			t2 := strings.TrimSpace(l2)
+			if strings.HasPrefix(t2, "path = ") && strings.Contains(t2, name) {
+				includePath := strings.TrimPrefix(t2, "path = ")
+				includePath = expandHome(includePath, home)
+				incData, err := os.ReadFile(includePath)
+				if err == nil {
+					for _, il := range strings.Split(string(incData), "\n") {
+						it := strings.TrimSpace(il)
+						if strings.HasPrefix(it, "email = ") {
+							profile.Email = strings.TrimPrefix(it, "email = ")
 						}
 					}
 				}
 			}
-
-			snap.Git.Profiles = append(snap.Git.Profiles, profile)
 		}
+
+		profiles = append(profiles, profile)
 	}
+	return profiles
 }
 
 func captureSSHKeys(snap *Snapshot) {

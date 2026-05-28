@@ -286,6 +286,42 @@ func TestCaptureGit_HomeDirError(t *testing.T) {
 	captureGit(snap) // should not panic
 }
 
+func TestParseIncludeIfProfiles_NoSections(t *testing.T) {
+	data := []byte("[user]\n\temail = a@b.c\n\tname = Default\n")
+	profiles := parseIncludeIfProfiles(data, t.TempDir())
+	if len(profiles) != 0 {
+		t.Errorf("expected 0 profiles, got %d", len(profiles))
+	}
+}
+
+func TestParseIncludeIfProfiles_ResolvesEmailFromIncludedConfig(t *testing.T) {
+	home := t.TempDir()
+	included := filepath.Join(home, ".gitconfig-work")
+	if err := os.WriteFile(included, []byte("[user]\n\temail = work@company.com\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	gitconfig := []byte(`[user]
+	email = default@example.com
+[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig-work
+`)
+
+	profiles := parseIncludeIfProfiles(gitconfig, home)
+	if len(profiles) != 1 {
+		t.Fatalf("expected 1 profile, got %d", len(profiles))
+	}
+	if profiles[0].Name != "work" {
+		t.Errorf("expected profile name 'work', got %q", profiles[0].Name)
+	}
+	if profiles[0].Directory != "~/work" {
+		t.Errorf("expected directory '~/work', got %q", profiles[0].Directory)
+	}
+	if profiles[0].Email != "work@company.com" {
+		t.Errorf("expected email 'work@company.com', got %q", profiles[0].Email)
+	}
+}
+
 func TestCaptureSSHKeys(t *testing.T) {
 	origUserHomeDir := userHomeDir
 	origRunCommand := runCommand
