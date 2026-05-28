@@ -5,20 +5,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-)
 
-func writeTestFile(t *testing.T, dir, name, content string) string {
-	t.Helper()
-	path := filepath.Join(dir, name)
-	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
-		t.Fatal(err)
-	}
-	return path
-}
+	"github.com/somaz94/bash-pilot/internal/testutil"
+)
 
 func TestParseGitConfigFile(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	name = Test User
 	email = test@example.com
 [safe]
@@ -55,7 +48,7 @@ func TestParseGitConfigFile(t *testing.T) {
 
 func TestParseGitConfigFile_Comments(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `# This is a comment
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `# This is a comment
 ; This is also a comment
 [user]
 	email = test@example.com
@@ -82,13 +75,13 @@ func TestGetProfiles_IncludeIf(t *testing.T) {
 	dir := t.TempDir()
 
 	// Create included config.
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 	signingkey = ABC123
 `)
 
 	// Create main config with includeIf.
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	name = Global User
 	email = global@example.com
 [includeIf "gitdir:`+dir+`/work/"]
@@ -121,12 +114,12 @@ func TestGetProfiles_IncludeIf(t *testing.T) {
 func TestGetProfiles_IncludeIF_CaseInsensitive(t *testing.T) {
 	dir := t.TempDir()
 
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 `)
 
 	// Use includeIF (uppercase IF) like real-world gitconfig.
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	name = Test User
 	email = global@example.com
 [includeIF "gitdir:`+dir+`/work/"]
@@ -155,7 +148,7 @@ func TestGetProfiles_IncludeIF_CaseInsensitive(t *testing.T) {
 
 func TestGetProfiles_GlobalOnly(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	name = Solo User
 	email = solo@example.com
 `)
@@ -176,7 +169,7 @@ func TestGetProfiles_GlobalOnly(t *testing.T) {
 
 func TestGetProfiles_NoEmail(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[core]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[core]
 	autocrlf = input
 `)
 
@@ -192,7 +185,7 @@ func TestGetProfiles_NoEmail(t *testing.T) {
 
 func TestDoctor_DuplicateSafeDirs(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[safe]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[safe]
 	directory = /home/user/repo1
 	directory = /home/user/repo1
 	directory = /home/user/repo2
@@ -220,7 +213,7 @@ func TestDoctor_DuplicateSafeDirs(t *testing.T) {
 
 func TestDoctor_MissingIncludeIfTarget(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
 	path = /nonexistent/path/.gitconfig-work
 `)
 
@@ -245,7 +238,7 @@ func TestDoctor_MissingIncludeIfTarget(t *testing.T) {
 
 func TestDoctor_NoUserEmail(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[core]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[core]
 	autocrlf = input
 `)
 
@@ -270,10 +263,10 @@ func TestDoctor_NoUserEmail(t *testing.T) {
 
 func TestDoctor_NoUserEmail_WithIncludeIf(t *testing.T) {
 	dir := t.TempDir()
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@example.com
 `)
-	cfg := writeTestFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
 	path = `+dir+`/.gitconfig-work
 `)
 
@@ -293,7 +286,7 @@ func TestDoctor_NoUserEmail_WithIncludeIf(t *testing.T) {
 
 func TestDoctor_FilePermissions(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = test@example.com
 `)
 
@@ -319,7 +312,7 @@ func TestDoctor_FilePermissions(t *testing.T) {
 
 func TestDoctor_Clean(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = test@example.com
 `)
 
@@ -373,7 +366,7 @@ func TestFindDuplicateSafeDirs(t *testing.T) {
 
 func TestClean_DryRun(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[safe]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[safe]
 	directory = /repo1
 	directory = /repo1
 	directory = /repo2
@@ -400,7 +393,7 @@ func TestClean_DryRun(t *testing.T) {
 
 func TestClean_Actual(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = test@example.com
 [safe]
 	directory = /repo1
@@ -439,7 +432,7 @@ func TestClean_Actual(t *testing.T) {
 func TestClean_NoDuplicates(t *testing.T) {
 	dir := t.TempDir()
 	// Use directories that actually exist to avoid stale removal.
-	cfg := writeTestFile(t, dir, ".gitconfig", `[safe]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[safe]
 	directory = `+dir+`
 	directory = /tmp
 `)
@@ -464,7 +457,7 @@ func TestClean_NonexistentFile(t *testing.T) {
 func TestBackupGitConfig(t *testing.T) {
 	dir := t.TempDir()
 	content := "[user]\n\temail = a@b.c\n"
-	src := writeTestFile(t, dir, ".gitconfig", content)
+	src := testutil.WriteFile(t, dir, ".gitconfig", content)
 
 	backupPath, data, err := backupGitConfig(src)
 	if err != nil {
@@ -502,7 +495,7 @@ func TestBackupGitConfig_NonexistentSource(t *testing.T) {
 
 func TestBackupGitConfig_BackupWriteFails(t *testing.T) {
 	dir := t.TempDir()
-	src := writeTestFile(t, dir, ".gitconfig", "x")
+	src := testutil.WriteFile(t, dir, ".gitconfig", "x")
 	// Pre-create a directory at the backup path so WriteFile fails (EISDIR).
 	if err := os.Mkdir(src+".bak", 0700); err != nil {
 		t.Fatal(err)
@@ -528,7 +521,7 @@ func TestFilterGitConfigLines(t *testing.T) {
 
 func TestRewriteGitConfig(t *testing.T) {
 	dir := t.TempDir()
-	path := writeTestFile(t, dir, ".gitconfig", "old\n")
+	path := testutil.WriteFile(t, dir, ".gitconfig", "old\n")
 
 	if err := rewriteGitConfig(path, "new content\n"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -594,7 +587,7 @@ func TestDefaultGitConfigPath(t *testing.T) {
 
 func TestDoctor_DuplicateRemotes(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[remote "origin"]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[remote "origin"]
 	url = git@github.com:user/repo.git
 [remote "backup"]
 	url = git@github.com:user/repo.git
@@ -621,7 +614,7 @@ func TestDoctor_DuplicateRemotes(t *testing.T) {
 
 func TestGetProfiles_MissingIncludePath(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
 	somekey = somevalue
 `)
 
@@ -640,7 +633,7 @@ func TestGetProfiles_MissingIncludePath(t *testing.T) {
 
 func TestGetProfiles_NonGitdirCondition(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = test@example.com
 [includeIf "onbranch:main"]
 	path = /some/path
@@ -661,14 +654,14 @@ func TestGetProfiles_ActiveProfile(t *testing.T) {
 	dir := t.TempDir()
 
 	// Create work config.
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 `)
 
 	// Use current working directory as the gitdir match.
 	cwd, _ := os.Getwd()
 
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = global@example.com
 [includeIf "gitdir:`+cwd+`/"]
 	path = `+dir+`/.gitconfig-work
@@ -702,7 +695,7 @@ func TestGetProfiles_ActiveProfile(t *testing.T) {
 func TestGetProfiles_ActiveProfileNoPrefixFalsePositive(t *testing.T) {
 	dir := t.TempDir()
 
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 `)
 
@@ -710,7 +703,7 @@ func TestGetProfiles_ActiveProfileNoPrefixFalsePositive(t *testing.T) {
 
 	// gitdir is cwd+"-backup" — a different directory that starts with cwd as prefix.
 	// The work profile should NOT be active.
-	cfg := writeTestFile(t, dir, ".gitconfig", `[user]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = global@example.com
 [includeIf "gitdir:`+cwd+`-backup/"]
 	path = `+dir+`/.gitconfig-work
@@ -763,7 +756,7 @@ func TestFindDuplicateSafeDirs_NonSafeSection(t *testing.T) {
 
 func TestClean_StaleDirectories(t *testing.T) {
 	dir := t.TempDir()
-	cfg := writeTestFile(t, dir, ".gitconfig", `[safe]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[safe]
 	directory = /nonexistent/path/that/does/not/exist
 	directory = /another/nonexistent/path
 `)
@@ -780,10 +773,10 @@ func TestClean_StaleDirectories(t *testing.T) {
 
 func TestCheckIncludeIfs_ValidTarget(t *testing.T) {
 	dir := t.TempDir()
-	writeTestFile(t, dir, ".gitconfig-work", `[user]
+	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@example.com
 `)
-	cfg := writeTestFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
+	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[includeIf "gitdir:~/work/"]
 	path = `+dir+`/.gitconfig-work
 `)
 
