@@ -3,6 +3,7 @@ package git
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -457,6 +458,101 @@ func TestClean_NonexistentFile(t *testing.T) {
 	_, err := Clean("/nonexistent/file", false)
 	if err == nil {
 		t.Fatal("expected error for nonexistent file")
+	}
+}
+
+func TestBackupGitConfig(t *testing.T) {
+	dir := t.TempDir()
+	content := "[user]\n\temail = a@b.c\n"
+	src := writeTestFile(t, dir, ".gitconfig", content)
+
+	backupPath, data, err := backupGitConfig(src)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if backupPath != src+".bak" {
+		t.Errorf("expected backup path %q, got %q", src+".bak", backupPath)
+	}
+	if string(data) != content {
+		t.Errorf("returned data mismatch: got %q", string(data))
+	}
+
+	got, err := os.ReadFile(backupPath)
+	if err != nil {
+		t.Fatalf("backup file missing: %v", err)
+	}
+	if string(got) != content {
+		t.Errorf("backup content mismatch: got %q", string(got))
+	}
+
+	info, err := os.Stat(backupPath)
+	if err != nil {
+		t.Fatalf("stat backup: %v", err)
+	}
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("expected backup mode 0600, got %o", info.Mode().Perm())
+	}
+}
+
+func TestBackupGitConfig_NonexistentSource(t *testing.T) {
+	if _, _, err := backupGitConfig("/nonexistent/path/.gitconfig"); err == nil {
+		t.Fatal("expected error when source is missing")
+	}
+}
+
+func TestBackupGitConfig_BackupWriteFails(t *testing.T) {
+	dir := t.TempDir()
+	src := writeTestFile(t, dir, ".gitconfig", "x")
+	// Pre-create a directory at the backup path so WriteFile fails (EISDIR).
+	if err := os.Mkdir(src+".bak", 0700); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := backupGitConfig(src); err == nil {
+		t.Fatal("expected error when backup path is a directory")
+	}
+}
+
+func TestFilterGitConfigLines(t *testing.T) {
+	data := []byte("[safe]\n\tdirectory = /a\n\tdirectory = /b\n[user]\n\temail = x@y.z\n")
+	// Remove the two safe.directory lines (lines 2 and 3, 1-based).
+	out := filterGitConfigLines(data, map[int]bool{2: true, 3: true})
+
+	// [safe] section should be stripped because it is now empty.
+	if strings.Contains(out, "[safe]") {
+		t.Errorf("expected empty [safe] section to be removed, got:\n%s", out)
+	}
+	if !strings.Contains(out, "email = x@y.z") {
+		t.Errorf("expected user section preserved, got:\n%s", out)
+	}
+}
+
+func TestRewriteGitConfig(t *testing.T) {
+	dir := t.TempDir()
+	path := writeTestFile(t, dir, ".gitconfig", "old\n")
+
+	if err := rewriteGitConfig(path, "new content\n"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "new content\n" {
+		t.Errorf("expected rewritten content, got %q", string(got))
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0600 {
+		t.Errorf("expected mode 0600 after rewrite, got %o", info.Mode().Perm())
+	}
+}
+
+func TestRewriteGitConfig_WriteFails(t *testing.T) {
+	// Target a path under a nonexistent directory so WriteFile fails.
+	if err := rewriteGitConfig("/nonexistent/dir/.gitconfig", "x"); err == nil {
+		t.Fatal("expected error when target directory is missing")
 	}
 }
 

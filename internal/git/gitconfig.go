@@ -329,36 +329,56 @@ func Clean(gitconfigPath string, dryRun bool) (*CleanResult, error) {
 		return result, nil
 	}
 
-	// Create backup.
-	backupPath := path + ".bak"
-	data, err := os.ReadFile(path)
+	backupPath, data, err := backupGitConfig(path)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read %s: %w", path, err)
-	}
-	if err := os.WriteFile(backupPath, data, 0600); err != nil {
-		return nil, fmt.Errorf("cannot create backup: %w", err)
+		return nil, err
 	}
 	result.BackupDir = backupPath
 
-	// Rewrite file without duplicate/stale lines.
+	output := filterGitConfigLines(data, removeLines)
+	if err := rewriteGitConfig(path, output); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// backupGitConfig copies the gitconfig at path to a sibling ".bak" file and
+// returns the backup path along with the original content (so callers can
+// reuse it without a second read). The backup is written with mode 0600.
+func backupGitConfig(path string) (string, []byte, error) {
+	backupPath := path + ".bak"
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", nil, fmt.Errorf("cannot read %s: %w", path, err)
+	}
+	if err := os.WriteFile(backupPath, data, 0600); err != nil {
+		return "", nil, fmt.Errorf("cannot create backup: %w", err)
+	}
+	return backupPath, data, nil
+}
+
+// filterGitConfigLines drops the 1-based line numbers in removeLines from data
+// and strips any [safe] section that becomes empty as a result.
+func filterGitConfigLines(data []byte, removeLines map[int]bool) string {
 	lines := strings.Split(string(data), "\n")
 	var newLines []string
 	for i, line := range lines {
-		lineNum := i + 1
-		if removeLines[lineNum] {
+		if removeLines[i+1] {
 			continue
 		}
 		newLines = append(newLines, line)
 	}
+	return removeEmptySections(strings.Join(newLines, "\n"), "safe")
+}
 
-	// Remove empty [safe] sections.
-	output := removeEmptySections(strings.Join(newLines, "\n"), "safe")
-
-	if err := os.WriteFile(path, []byte(output), 0600); err != nil {
-		return nil, fmt.Errorf("cannot write %s: %w", path, err)
+// rewriteGitConfig writes content to path with mode 0600. Matches the
+// pre-split Clean() behavior — a direct overwrite, not an atomic rename.
+func rewriteGitConfig(path string, content string) error {
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		return fmt.Errorf("cannot write %s: %w", path, err)
 	}
-
-	return result, nil
+	return nil
 }
 
 // Helper functions.
