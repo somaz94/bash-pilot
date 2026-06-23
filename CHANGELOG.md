@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased (2026-06-23)
+
+### Continuous Integration
+
+- add DCO check via shared reusable workflow ([512df00](https://github.com/somaz94/bash-pilot/commit/512df00d1e81bb9a6965f75bb34e1340438e7db9))
+
+### Chores
+
+- **deps:** bump actions/checkout from 6 to 7 (#13) ([#13](https://github.com/somaz94/bash-pilot/pull/13)) ([e49177c](https://github.com/somaz94/bash-pilot/commit/e49177cd2cb052d0869a6b8cff4e004c6544bca3))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.6.2](https://github.com/somaz94/bash-pilot/compare/v0.6.1...v0.6.2) (2026-05-28)
 
 ### Code Refactoring
