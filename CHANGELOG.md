@@ -2,14 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-06-23)
+## Unreleased (2026-07-20)
 
 ### Continuous Integration
 
+- remove DCO workflow ([68062c6](https://github.com/somaz94/bash-pilot/commit/68062c6253273877c31df03a9586e65831d4cfb6))
+- adopt semantic-pr, labels, lock-threads, PR size, and auto-assign reusables ([53318b7](https://github.com/somaz94/bash-pilot/commit/53318b705b2884f1bc0209667fe984e13de4d481))
+- use reusable stale-issues workflow ([cec2232](https://github.com/somaz94/bash-pilot/commit/cec2232c9f86fb780fa52b3cca7eba194ca68341))
+- use reusable issue-greeting workflow ([f65886f](https://github.com/somaz94/bash-pilot/commit/f65886f8726e191a9078d6f1aab725499bae9640))
+- use reusable dependabot-auto-merge workflow ([608dc40](https://github.com/somaz94/bash-pilot/commit/608dc404fda739056a55ec04246971d3ca80f37e))
+- use reusable contributors workflow ([133eebf](https://github.com/somaz94/bash-pilot/commit/133eebf34535f652921aa803edd5508cdfa01665))
+- add ok-to-test workflow stub ([35d8261](https://github.com/somaz94/bash-pilot/commit/35d82613e31e3fb1d70993e4986dd3ed30a23da7))
+- add PR welcome workflow stub ([c9cad12](https://github.com/somaz94/bash-pilot/commit/c9cad1285cf5b10893f0b33ca56b6b757d487265))
 - add DCO check via shared reusable workflow ([512df00](https://github.com/somaz94/bash-pilot/commit/512df00d1e81bb9a6965f75bb34e1340438e7db9))
 
 ### Chores
 
+- **deps:** bump actions/setup-go from 6 to 7 (#14) ([#14](https://github.com/somaz94/bash-pilot/pull/14)) ([5636449](https://github.com/somaz94/bash-pilot/commit/5636449b1c93ea6ceb6f9805ef9dd0698eff1010))
 - **deps:** bump actions/checkout from 6 to 7 (#13) ([#13](https://github.com/somaz94/bash-pilot/pull/13)) ([e49177c](https://github.com/somaz94/bash-pilot/commit/e49177cd2cb052d0869a6b8cff4e004c6544bca3))
 
 ### Contributors
