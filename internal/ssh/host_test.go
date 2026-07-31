@@ -10,7 +10,7 @@ import (
 func TestGroupHosts(t *testing.T) {
 	hosts := []Host{
 		{Name: "github.com-somaz94", Hostname: "github.com", User: "git"},
-		{Name: "test-server", Hostname: "3.65.182.184", User: "ec2-user"},
+		{Name: "test-server", Hostname: "54.123.45.67", User: "ec2-user"},
 		{Name: "nas", Hostname: "192.168.1.5", User: "user"},
 		{Name: "k8s-control-01", Hostname: "192.168.1.17", User: "admin"},
 	}
@@ -45,7 +45,7 @@ func TestGroupHosts(t *testing.T) {
 
 func TestGroupHosts_WithLabel(t *testing.T) {
 	hosts := []Host{
-		{Name: "staging-web", Hostname: "52.78.100.10"},
+		{Name: "staging-web", Hostname: "54.123.45.10"},
 	}
 	cfg := config.SSHConfig{
 		Groups: map[string]config.SSHGroup{
@@ -109,7 +109,7 @@ func TestAutoDetectGroup(t *testing.T) {
 		{Host{Name: "k8s-control-01", Hostname: "192.168.1.17"}, "k8s"},
 		{Host{Name: "kube-master", Hostname: "10.0.0.1"}, "k8s"},
 		// Cloud hosts (public IP).
-		{Host{Name: "test-server", Hostname: "3.65.182.184"}, "cloud"},
+		{Host{Name: "test-server", Hostname: "54.123.45.67"}, "cloud"},
 		// Cloud hosts (FQDN).
 		{Host{Name: "aws-instance", Hostname: "ec2-1-2-3-4.compute.amazonaws.com"}, "cloud"},
 		{Host{Name: "gcp-vm", Hostname: "my-vm.compute.google.com"}, "cloud"},
@@ -178,7 +178,7 @@ func TestIsPrivateIP(t *testing.T) {
 		{"192.168.1.5", true},
 		{"172.16.0.1", true},
 		{"192.168.1.1", true},
-		{"3.65.182.184", false},
+		{"54.123.45.67", false},
 		{"8.8.8.8", false},
 	}
 

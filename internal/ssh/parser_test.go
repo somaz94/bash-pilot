@@ -14,7 +14,7 @@ Host github.com-somaz94
   IdentityFile ~/.ssh/id_rsa_somaz94
 
 Host test-server
-  Hostname 3.65.182.184
+  Hostname 54.123.45.67
   User ec2-user
   IdentityFile ~/.ssh/test.pem
 
@@ -52,8 +52,8 @@ Host *
 	if h.Name != "test-server" {
 		t.Errorf("host[1].Name = %q, want %q", h.Name, "test-server")
 	}
-	if h.Hostname != "3.65.182.184" {
-		t.Errorf("host[1].Hostname = %q, want %q", h.Hostname, "3.65.182.184")
+	if h.Hostname != "54.123.45.67" {
+		t.Errorf("host[1].Hostname = %q, want %q", h.Hostname, "54.123.45.67")
 	}
 }
 

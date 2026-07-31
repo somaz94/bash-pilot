@@ -84,17 +84,17 @@ Host gitlab-internal
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
 Host staging-web
-  Hostname 52.78.100.10
+  Hostname 54.123.45.10
   User ec2-user
   IdentityFile DEMO_DIR/.ssh/staging.pem
 
 Host staging-api
-  Hostname 52.78.100.11
+  Hostname 54.123.45.11
   User ec2-user
   IdentityFile DEMO_DIR/.ssh/staging.pem
 
 Host staging-db
-  Hostname 52.78.100.12
+  Hostname 54.123.45.12
   User ec2-user
   IdentityFile DEMO_DIR/.ssh/staging.pem
 
