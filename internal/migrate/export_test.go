@@ -41,7 +41,7 @@ func TestExport_Basic(t *testing.T) {
 		return []ssh.Host{
 			{Name: "github.com-personal", Hostname: "github.com", User: "git",
 				IdentityFile: tmpDir + "/.ssh/id_ed25519"},
-			{Name: "server1", Hostname: "10.10.10.10", User: "deploy",
+			{Name: "server1", Hostname: "192.168.1.10", User: "deploy",
 				Port: "2222", IdentityFile: tmpDir + "/.ssh/id_rsa_work"},
 		}, nil
 	}

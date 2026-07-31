@@ -79,7 +79,7 @@ Host github.com-work
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
 Host gitlab-internal
-  Hostname 10.10.10.60
+  Hostname 192.168.1.60
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
@@ -99,37 +99,37 @@ Host staging-db
   IdentityFile DEMO_DIR/.ssh/staging.pem
 
 Host nas
-  Hostname 10.10.10.5
+  Hostname 192.168.1.5
   User admin
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
 Host server1
-  Hostname 10.10.10.10
+  Hostname 192.168.1.10
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
 Host server2
-  Hostname 10.10.10.12
+  Hostname 192.168.1.12
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_work
 
 Host k8s-control-01
-  Hostname 10.10.10.17
+  Hostname 192.168.1.17
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_deploy
 
 Host k8s-compute-01
-  Hostname 10.10.10.18
+  Hostname 192.168.1.18
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_deploy
 
 Host k8s-compute-02
-  Hostname 10.10.10.19
+  Hostname 192.168.1.19
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_deploy
 
 Host k8s-compute-03
-  Hostname 10.10.10.22
+  Hostname 192.168.1.22
   User deploy
   IdentityFile DEMO_DIR/.ssh/id_rsa_deploy
 

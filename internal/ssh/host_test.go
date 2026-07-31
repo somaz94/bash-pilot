@@ -9,10 +9,10 @@ import (
 
 func TestGroupHosts(t *testing.T) {
 	hosts := []Host{
-		{Name: "github.com-somaz94", Hostname: "github.com", User: "somaz"},
+		{Name: "github.com-somaz94", Hostname: "github.com", User: "git"},
 		{Name: "test-server", Hostname: "3.65.182.184", User: "ec2-user"},
-		{Name: "nas", Hostname: "10.10.10.5", User: "somaz"},
-		{Name: "k8s-control-01", Hostname: "10.10.10.17", User: "concrit"},
+		{Name: "nas", Hostname: "192.168.1.5", User: "user"},
+		{Name: "k8s-control-01", Hostname: "192.168.1.17", User: "admin"},
 	}
 
 	cfg := config.SSHConfig{
@@ -85,7 +85,7 @@ func TestGroupHosts_CustomGroup(t *testing.T) {
 func TestGroupHosts_EmptyConfig(t *testing.T) {
 	hosts := []Host{
 		{Name: "github.com-test", Hostname: "github.com"},
-		{Name: "server1", Hostname: "10.10.10.1"},
+		{Name: "server1", Hostname: "192.168.1.1"},
 	}
 	cfg := config.SSHConfig{}
 
@@ -102,11 +102,11 @@ func TestAutoDetectGroup(t *testing.T) {
 	}{
 		// Git hosts.
 		{Host{Name: "github.com-somaz94", Hostname: "github.com"}, "git"},
-		{Host{Name: "gitlab", Hostname: "10.10.10.60"}, "git"},
+		{Host{Name: "gitlab", Hostname: "192.168.1.60"}, "git"},
 		{Host{Name: "my-bitbucket", Hostname: "bitbucket.org"}, "git"},
 		{Host{Name: "codecommit-repo", Hostname: "git-codecommit.us-east-1.amazonaws.com"}, "git"},
 		// Kubernetes hosts.
-		{Host{Name: "k8s-control-01", Hostname: "10.10.10.17"}, "k8s"},
+		{Host{Name: "k8s-control-01", Hostname: "192.168.1.17"}, "k8s"},
 		{Host{Name: "kube-master", Hostname: "10.0.0.1"}, "k8s"},
 		// Cloud hosts (public IP).
 		{Host{Name: "test-server", Hostname: "3.65.182.184"}, "cloud"},
@@ -115,7 +115,7 @@ func TestAutoDetectGroup(t *testing.T) {
 		{Host{Name: "gcp-vm", Hostname: "my-vm.compute.google.com"}, "cloud"},
 		{Host{Name: "azure-vm", Hostname: "my-vm.azure.com"}, "cloud"},
 		// On-prem hosts.
-		{Host{Name: "nas", Hostname: "10.10.10.5"}, "on-prem"},
+		{Host{Name: "nas", Hostname: "192.168.1.5"}, "on-prem"},
 		{Host{Name: "server1", Hostname: "192.168.1.100"}, "on-prem"},
 		{Host{Name: "internal", Hostname: "172.16.0.50"}, "on-prem"},
 		// Other (no hostname).
@@ -175,7 +175,7 @@ func TestIsPrivateIP(t *testing.T) {
 		ip   string
 		want bool
 	}{
-		{"10.10.10.5", true},
+		{"192.168.1.5", true},
 		{"172.16.0.1", true},
 		{"192.168.1.1", true},
 		{"3.65.182.184", false},

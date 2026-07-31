@@ -10,7 +10,7 @@ func TestParseConfig(t *testing.T) {
 	content := `# Test SSH config
 Host github.com-somaz94
   Hostname github.com
-  User somaz
+  User git
   IdentityFile ~/.ssh/id_rsa_somaz94
 
 Host test-server
@@ -44,8 +44,8 @@ Host *
 	if h.Hostname != "github.com" {
 		t.Errorf("host[0].Hostname = %q, want %q", h.Hostname, "github.com")
 	}
-	if h.User != "somaz" {
-		t.Errorf("host[0].User = %q, want %q", h.User, "somaz")
+	if h.User != "git" {
+		t.Errorf("host[0].User = %q, want %q", h.User, "git")
 	}
 
 	h = hosts[1]
