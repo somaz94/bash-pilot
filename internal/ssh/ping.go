@@ -69,7 +69,8 @@ func pingHost(h Host, timeout time.Duration) PingResult {
 		}
 		return result
 	}
-	conn.Close()
+	// The dial succeeded, which is the whole check; the close cannot change it.
+	_ = conn.Close()
 
 	result.OK = true
 	return result

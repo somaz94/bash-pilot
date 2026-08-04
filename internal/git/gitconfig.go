@@ -64,7 +64,7 @@ func ParseGitConfigFile(path string) ([]Section, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot open %s: %w", path, err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var sections []Section
 	var current *Section
