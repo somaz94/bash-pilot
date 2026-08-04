@@ -72,7 +72,8 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 	// Ensure ~/.ssh exists.
 	if !dryRun {
-		mkdirAll(sshDir, config.PermSSHDir)
+		// A failure here surfaces when the config file below cannot be opened.
+		_ = mkdirAll(sshDir, config.PermSSHDir)
 	}
 
 	// Read existing SSH config to detect duplicates.
@@ -98,11 +99,25 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		// Append to existing config.
 		content := "\n# Imported by bash-pilot migrate\n" + strings.Join(newBlocks, "\n")
 
+		// Only report the config as written once it actually is. Reporting
+		// success on a failed open or write would tell the user their hosts were
+		// imported while the file was left untouched.
 		f, err := os.OpenFile(sshConfigPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, config.PermSSHConfigFile)
-		if err == nil {
-			f.WriteString(content)
-			f.Close()
-			result.SSHConfigWritten = true
+		if err != nil {
+			result.Warnings = append(result.Warnings,
+				fmt.Sprintf("could not open SSH config %s: %v", sshConfigPath, err))
+		} else {
+			_, writeErr := f.WriteString(content)
+			closeErr := f.Close()
+			if writeErr == nil {
+				writeErr = closeErr
+			}
+			if writeErr != nil {
+				result.Warnings = append(result.Warnings,
+					fmt.Sprintf("could not write SSH config %s: %v", sshConfigPath, writeErr))
+			} else {
+				result.SSHConfigWritten = true
+			}
 		}
 	} else if len(newBlocks) > 0 {
 		result.SSHConfigWritten = true // would be written
@@ -196,7 +211,10 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 		// Add includeIf to ~/.gitconfig if not already present.
 		if !dryRun {
-			addIncludeIf(home, p)
+			if err := addIncludeIf(home, p); err != nil {
+				result.Warnings = append(result.Warnings,
+					fmt.Sprintf("Failed to add includeIf for profile %s: %s", p.Name, err))
+			}
 		}
 	}
 }
@@ -233,7 +251,7 @@ func parseExistingHosts(path string) map[string]bool {
 	if err != nil {
 		return hosts
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -249,7 +267,11 @@ func parseExistingHosts(path string) map[string]bool {
 	return hosts
 }
 
-func addIncludeIf(home string, p GitProfileExport) {
+// addIncludeIf appends an includeIf block for the profile to ~/.gitconfig.
+// It returns nil when the block is already present or was written; a write
+// failure is returned so the caller can surface it rather than leaving the
+// profile silently unconfigured.
+func addIncludeIf(home string, p GitProfileExport) error {
 	gitconfigPath := filepath.Join(home, ".gitconfig")
 	data, err := readFile(gitconfigPath)
 	if err != nil {
@@ -266,14 +288,14 @@ func addIncludeIf(home string, p GitProfileExport) {
 	// Check if already present.
 	checkStr := fmt.Sprintf("gitdir:%s", dir)
 	if strings.Contains(content, checkStr) {
-		return
+		return nil
 	}
 
 	// Append includeIf block.
 	block := fmt.Sprintf("\n[includeIf \"gitdir:%s\"]\n\tpath = ~/.gitconfig-%s\n", dir, p.Name)
 	content += block
 
-	writeFile(gitconfigPath, []byte(content), config.PermGitConfigFile)
+	return writeFile(gitconfigPath, []byte(content), config.PermGitConfigFile)
 }
 
 // FormatImportResult returns a human-readable summary.
