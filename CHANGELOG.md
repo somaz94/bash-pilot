@@ -2,10 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased (2026-07-20)
+## [v0.6.3](https://github.com/somaz94/bash-pilot/compare/v0.6.2...v0.6.3) (2026-08-14)
+
+### Bug Fixes
+
+- report a failed SSH or gitconfig write instead of claiming success ([a12bda6](https://github.com/somaz94/bash-pilot/commit/a12bda6d128e7a9ac9bd321dc9cdc03ea91016e0))
+
+### Tests
+
+- replace real cloud host IPs in fixtures with example values ([19e1020](https://github.com/somaz94/bash-pilot/commit/19e10206553dd5e522a79a826c599a0e8be1a23c))
+- replace real host inventory in fixtures with example values ([3e14db3](https://github.com/somaz94/bash-pilot/commit/3e14db39df5e7bab58e24ac2438d31da92d3aa68))
 
 ### Continuous Integration
 
+- add a golangci-lint config scoped to defect-finding linters ([c92cd9c](https://github.com/somaz94/bash-pilot/commit/c92cd9c6f9731b023f460e7428e37091993b7603))
 - remove DCO workflow ([68062c6](https://github.com/somaz94/bash-pilot/commit/68062c6253273877c31df03a9586e65831d4cfb6))
 - adopt semantic-pr, labels, lock-threads, PR size, and auto-assign reusables ([53318b7](https://github.com/somaz94/bash-pilot/commit/53318b705b2884f1bc0209667fe984e13de4d481))
 - use reusable stale-issues workflow ([cec2232](https://github.com/somaz94/bash-pilot/commit/cec2232c9f86fb780fa52b3cca7eba194ca68341))
@@ -18,6 +28,7 @@ All notable changes to this project will be documented in this file.
 
 ### Chores
 
+- publish the Homebrew package as a cask instead of a deprecated formula ([159c072](https://github.com/somaz94/bash-pilot/commit/159c07276476164898ea44aea9795dee996e9f48))
 - **deps:** bump actions/setup-go from 6 to 7 (#14) ([#14](https://github.com/somaz94/bash-pilot/pull/14)) ([5636449](https://github.com/somaz94/bash-pilot/commit/5636449b1c93ea6ceb6f9805ef9dd0698eff1010))
 - **deps:** bump actions/checkout from 6 to 7 (#13) ([#13](https://github.com/somaz94/bash-pilot/pull/13)) ([e49177c](https://github.com/somaz94/bash-pilot/commit/e49177cd2cb052d0869a6b8cff4e004c6544bca3))
 
