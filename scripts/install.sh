@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Re-exec under bash if invoked via zsh (`zsh install.sh` or `... | zsh`).
+# Re-exec under bash for `zsh install.sh` (piping into zsh is not supported).
 if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
@@ -10,7 +10,6 @@ REPO="somaz94/bash-pilot"
 BINARY="bash-pilot"
 INSTALL_DIR="/usr/local/bin"
 
-# Colors
 RED='\033[31m'
 GREEN='\033[32m'
 CYAN='\033[36m'
@@ -21,7 +20,6 @@ info()  { printf '%b\n' "${CYAN}▶ $*${RESET}"; }
 ok()    { printf '%b\n' "${GREEN}✓ $*${RESET}"; }
 fail()  { printf '%b\n' "${RED}✗ $*${RESET}"; exit 1; }
 
-# Detect OS and architecture.
 detect_platform() {
   OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
   ARCH="$(uname -m)"
@@ -39,7 +37,7 @@ detect_platform() {
   esac
 }
 
-# Get latest release tag from GitHub.
+# Sets VERSION to the latest release tag without its leading v.
 get_latest_version() {
   VERSION=$(curl -sSL "https://api.github.com/repos/${REPO}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
   if [ -z "$VERSION" ]; then
