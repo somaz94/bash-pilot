@@ -166,11 +166,11 @@ func TestNormalizePath(t *testing.T) {
 	tests := []struct {
 		path, home, expected string
 	}{
-		{"/Users/somaz/.ssh/id_rsa", "/Users/somaz", "~/.ssh/id_rsa"},
-		{"~/.ssh/id_rsa", "/Users/somaz", "~/.ssh/id_rsa"},
-		{"/etc/ssh/key", "/Users/somaz", "/etc/ssh/key"},
-		{"", "/Users/somaz", ""},
-		{"/Users/somaz/.ssh/key", "", "/Users/somaz/.ssh/key"},
+		{"/Users/user/.ssh/id_rsa", "/Users/user", "~/.ssh/id_rsa"},
+		{"~/.ssh/id_rsa", "/Users/user", "~/.ssh/id_rsa"},
+		{"/etc/ssh/key", "/Users/user", "/etc/ssh/key"},
+		{"", "/Users/user", ""},
+		{"/Users/user/.ssh/key", "", "/Users/user/.ssh/key"},
 	}
 
 	for _, tt := range tests {

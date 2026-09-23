@@ -202,7 +202,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_work
 ```
 
 **What makes this different from `cp ~/.ssh/config`:**
-- Paths are automatically translated (`/Users/somaz/` → `/home/somaz/`)
+- Paths are automatically translated (`/Users/user/` → `/home/user/`)
 - Existing hosts are not overwritten
 - SSH keys are not copied (security) — only generation commands are provided
 - Git includeIf profiles and directories are auto-created

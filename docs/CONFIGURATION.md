@@ -48,11 +48,11 @@ ssh:
 git:
   profiles:
     work:
-      directory: ~/gitlab-project
+      directory: ~/work
       email: user@company.com
       key: ~/.ssh/id_rsa_work
     personal:
-      directory: ~/PrivateWork
+      directory: ~/personal
       email: user@gmail.com
       key: ~/.ssh/id_rsa_personal
 ```

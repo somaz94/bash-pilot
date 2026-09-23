@@ -156,8 +156,8 @@ bash-pilot ssh list
 #   git-codecommit...         git-codecommit...        AKID...       id_rsa_codecommit
 #
 # AWS Cloud (2 hosts)
-#   web-server                54.123.45.67             ec2-user      my-region.pem
-#   ci-server                 54.123.45.68             ec2-user      my-region.pem
+#   web-server                198.51.100.67            ec2-user      my-region.pem
+#   ci-server                 198.51.100.68            ec2-user      my-region.pem
 #
 # Kubernetes Cluster (4 hosts)
 #   k8s-control-01            10.0.1.10                admin         id_rsa_infra
@@ -217,8 +217,8 @@ A typical SSH environment might look like this:
 │   └── git-codecommit.*         → AWS CodeCommit
 │
 ├── Cloud (2 hosts)
-│   ├── web-server               → 54.123.45.67 (AWS)
-│   └── ci-server                → 54.123.45.68 (AWS)
+│   ├── web-server               → 198.51.100.67 (AWS)
+│   └── ci-server                → 198.51.100.68 (AWS)
 │
 ├── Kubernetes (4 hosts)
 │   ├── k8s-control-01           → 10.0.1.10

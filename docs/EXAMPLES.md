@@ -93,8 +93,8 @@ $ bash-pilot ssh list
 └────────────────────────────────────────────────────
 
 ┌─ CLOUD ────────────────────────────────────────────
-│   web-server              54.123.45.67         ec2-user        my-region.pem
-│   ci-server               54.123.45.68         ec2-user        my-region.pem
+│   web-server              198.51.100.67        ec2-user        my-region.pem
+│   ci-server               198.51.100.68        ec2-user        my-region.pem
 └────────────────────────────────────────────────────
 
 ┌─ K8S ──────────────────────────────────────────────
@@ -135,7 +135,7 @@ $ bash-pilot ssh list -o json | jq '.[].name'
 $ bash-pilot ssh ping
 ✓ github.com-personal   0.12s
 ✓ nas                    0.02s
-✗ web-server             timeout (54.123.45.67)
+✗ web-server             timeout (198.51.100.67)
 ✓ k8s-control-01         0.01s
 ```
 

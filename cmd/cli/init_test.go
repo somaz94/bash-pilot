@@ -16,7 +16,7 @@ func TestInitCmd_GeneratesConfig(t *testing.T) {
   IdentityFile ~/.ssh/id_rsa_personal
 
 Host web-server
-  Hostname 54.123.45.67
+  Hostname 198.51.100.67
   User ec2-user
 
 Host k8s-control-01
