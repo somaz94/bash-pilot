@@ -21,7 +21,6 @@ func TestNewFormatter(t *testing.T) {
 func TestColor(t *testing.T) {
 	var buf bytes.Buffer
 
-	// With color enabled.
 	f := NewFormatter(&buf, "color", false)
 	got := f.Color(Green, "test")
 	if !strings.Contains(got, "test") {
@@ -31,21 +30,18 @@ func TestColor(t *testing.T) {
 		t.Error("Color() should contain ANSI codes when color enabled")
 	}
 
-	// With color disabled.
 	f2 := NewFormatter(&buf, "plain", false)
 	got2 := f2.Color(Green, "test")
 	if got2 != "test" {
 		t.Errorf("Color() with plain = %q, want %q", got2, "test")
 	}
 
-	// With NoColor flag.
 	f3 := NewFormatter(&buf, "color", true)
 	got3 := f3.Color(Green, "test")
 	if got3 != "test" {
 		t.Errorf("Color() with NoColor = %q, want %q", got3, "test")
 	}
 
-	// JSON format should strip color.
 	f4 := NewFormatter(&buf, "json", false)
 	got4 := f4.Color(Green, "test")
 	if got4 != "test" {
@@ -98,7 +94,6 @@ func TestHeaderFooterRow_JSON(t *testing.T) {
 	var buf bytes.Buffer
 	f := NewFormatter(&buf, "json", false)
 
-	// JSON format should suppress Header/Footer/Row.
 	f.Header("Test")
 	f.Row("data")
 	f.Footer()
@@ -154,7 +149,6 @@ func TestTable(t *testing.T) {
 	if !strings.Contains(output, "longname") {
 		t.Error("Table should contain all rows")
 	}
-	// Check alignment — separator line should exist.
 	if !strings.Contains(output, "──") {
 		t.Error("Table should contain separator")
 	}

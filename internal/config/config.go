@@ -86,7 +86,7 @@ func Load(path string) (*Config, error) {
 		return nil, err
 	}
 
-	// Apply defaults for zero values.
+	// Default() covers omitted keys; this catches an explicit "0s" / 0 in the file.
 	if cfg.SSH.Ping.Timeout == 0 {
 		cfg.SSH.Ping.Timeout = 5 * time.Second
 	}

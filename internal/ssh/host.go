@@ -42,7 +42,6 @@ func GroupHosts(hosts []Host, sshCfg config.SSHConfig) []HostGroup {
 	labels := make(map[string]string)
 	matched := make(map[int]bool)
 
-	// First pass: match hosts against configured patterns.
 	for i, h := range hosts {
 		for groupName, group := range sshCfg.Groups {
 			for _, pattern := range group.Pattern {
@@ -61,7 +60,6 @@ func GroupHosts(hosts []Host, sshCfg config.SSHConfig) []HostGroup {
 		}
 	}
 
-	// Second pass: auto-group unmatched hosts.
 	for i, h := range hosts {
 		if matched[i] {
 			continue
@@ -70,7 +68,7 @@ func GroupHosts(hosts []Host, sshCfg config.SSHConfig) []HostGroup {
 		grouped[group] = append(grouped[group], h)
 	}
 
-	// Build sorted group list.
+	// Built-in groups in fixed display order first, then custom groups alphabetically.
 	order := []string{"git", "cloud", "k8s", "on-prem", "other"}
 	var result []HostGroup
 	seen := make(map[string]bool)
@@ -86,7 +84,6 @@ func GroupHosts(hosts []Host, sshCfg config.SSHConfig) []HostGroup {
 		}
 	}
 
-	// Add any remaining groups not in the predefined order.
 	var remaining []string
 	for name := range grouped {
 		if !seen[name] {
@@ -110,19 +107,16 @@ func autoDetectGroup(h Host) string {
 	name := strings.ToLower(h.Name)
 	hostname := strings.ToLower(h.Hostname)
 
-	// Git hosts.
 	if strings.Contains(name, "github") || strings.Contains(name, "gitlab") ||
 		strings.Contains(name, "codecommit") || strings.Contains(name, "bitbucket") {
 		return "git"
 	}
 
-	// Kubernetes hosts.
 	if strings.HasPrefix(name, "k8s-") || strings.Contains(name, "kube") ||
 		strings.Contains(name, "master") || strings.Contains(name, "node") {
 		return "k8s"
 	}
 
-	// Cloud vs on-prem based on IP.
 	if hostname != "" {
 		ip := net.ParseIP(hostname)
 		if ip != nil {
@@ -131,7 +125,6 @@ func autoDetectGroup(h Host) string {
 			}
 			return "cloud"
 		}
-		// If hostname is a FQDN with cloud provider keywords.
 		if strings.Contains(hostname, "amazonaws.com") || strings.Contains(hostname, "compute.google") ||
 			strings.Contains(hostname, "azure") {
 			return "cloud"

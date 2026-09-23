@@ -16,8 +16,8 @@ const (
 	// profiles, and gitconfig backup files.
 	PermGitConfigFile os.FileMode = 0600
 
-	// PermConfigDir is the mode for bash-pilot's config directory and other
-	// non-secret config directories created by the tool.
+	// PermConfigDir is the mode for non-secret directories the tool creates:
+	// its own config directory and git profile working directories.
 	PermConfigDir os.FileMode = 0755
 
 	// PermConfigFile is the mode for bash-pilot's main config file and other

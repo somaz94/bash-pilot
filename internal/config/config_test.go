@@ -84,7 +84,7 @@ git:
 }
 
 func TestLoad_Defaults(t *testing.T) {
-	// Config with zero values should get defaults applied.
+	// Omitted ping keys keep Default()'s values.
 	content := `
 ssh:
   groups:
@@ -131,8 +131,7 @@ func TestLoad_InvalidYAML(t *testing.T) {
 }
 
 func TestLoad_DefaultPath(t *testing.T) {
-	// Load with empty path should try default location (~/.config/bash-pilot/config.yaml).
-	// This will fail since the file doesn't exist, but it shouldn't panic.
+	// Empty path reads the real ~/.config/bash-pilot/config.yaml, which may exist; only no-panic is checked.
 	_, err := Load("")
 	if err == nil {
 		t.Log("default config exists (unexpected but not an error)")

@@ -113,19 +113,16 @@ func (f *Formatter) Table(headers []string, rows [][]string) {
 		}
 	}
 
-	// Print headers.
 	for i, h := range headers {
 		fmt.Fprintf(f.Writer, "%-*s  ", widths[i], f.Color(Bold, h))
 	}
 	fmt.Fprintln(f.Writer)
 
-	// Print separator.
 	for i := range headers {
 		fmt.Fprintf(f.Writer, "%s  ", strings.Repeat("─", widths[i]))
 	}
 	fmt.Fprintln(f.Writer)
 
-	// Print rows.
 	for _, row := range rows {
 		for i, cell := range row {
 			if i < len(widths) {

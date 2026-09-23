@@ -90,7 +90,6 @@ func AnalyzePath() *PathResult {
 
 		result.Entries = append(result.Entries, entry)
 
-		// Track duplicates.
 		canonical := filepath.Clean(expanded)
 		if firstIdx, exists := seen[canonical]; exists {
 			dup := fmt.Sprintf("%s (index %d and %d)", dir, firstIdx, i+1)
@@ -113,8 +112,6 @@ func AnalyzePath() *PathResult {
 	return result
 }
 
-// Helper functions.
-
 func checkShell(result *CheckResult) {
 	shell := os.Getenv("SHELL")
 	if shell == "" {
@@ -132,7 +129,6 @@ func checkShell(result *CheckResult) {
 		Message:  fmt.Sprintf("Shell: %s", shell),
 	})
 
-	// Check bash version if using bash.
 	if strings.Contains(shell, "bash") {
 		out, err := runCommand(shell, "--version")
 		if err == nil {
@@ -217,7 +213,6 @@ func checkSSHAgent(result *CheckResult) {
 		return
 	}
 
-	// Check loaded keys.
 	out, err := runCommand("ssh-add", "-l")
 	if err != nil {
 		result.Findings = append(result.Findings, Finding{
@@ -279,7 +274,6 @@ func checkHomeDir(result *CheckResult) {
 		return
 	}
 
-	// Check common config dirs.
 	dirs := []string{
 		filepath.Join(home, ".ssh"),
 		filepath.Join(home, ".config"),

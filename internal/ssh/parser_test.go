@@ -195,19 +195,16 @@ func TestParseKeyValue(t *testing.T) {
 }
 
 func TestExpandPath(t *testing.T) {
-	// Tilde path should expand.
 	expanded := expandPath("~/test/key")
 	if expanded == "~/test/key" {
 		t.Error("expandPath should expand ~ prefix")
 	}
 
-	// Absolute path should remain unchanged.
 	abs := expandPath("/absolute/path/key")
 	if abs != "/absolute/path/key" {
 		t.Errorf("expandPath(%q) = %q, should be unchanged", "/absolute/path/key", abs)
 	}
 
-	// Relative path should remain unchanged.
 	rel := expandPath("relative/path")
 	if rel != "relative/path" {
 		t.Errorf("expandPath(%q) = %q, should be unchanged", "relative/path", rel)

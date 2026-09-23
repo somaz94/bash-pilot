@@ -31,7 +31,6 @@ type AuditResult struct {
 func Audit(hosts []Host) AuditResult {
 	var result AuditResult
 
-	// Check for shared identity files.
 	keyUsage := make(map[string][]string)
 	for _, h := range hosts {
 		if h.IdentityFile != "" {
@@ -56,7 +55,6 @@ func Audit(hosts []Host) AuditResult {
 		}
 	}
 
-	// Check file permissions on key files.
 	checkedFiles := make(map[string]bool)
 	for _, h := range hosts {
 		if h.IdentityFile == "" || checkedFiles[h.IdentityFile] {
@@ -92,7 +90,6 @@ func Audit(hosts []Host) AuditResult {
 		}
 	}
 
-	// Check for hosts without identity files.
 	for _, h := range hosts {
 		if h.IdentityFile == "" {
 			result.Findings = append(result.Findings, AuditFinding{

@@ -18,7 +18,6 @@ func TestCheck(t *testing.T) {
 		t.Error("expected at least some findings")
 	}
 
-	// Should have shell finding.
 	found := false
 	for _, f := range result.Findings {
 		if f.Category == "shell" {
@@ -177,7 +176,6 @@ func TestGroupFindingsByCategory(t *testing.T) {
 		t.Errorf("expected 3 keys, got %d", len(keys))
 	}
 
-	// Keys should be sorted.
 	for i := 1; i < len(keys); i++ {
 		if keys[i] < keys[i-1] {
 			t.Error("keys should be sorted")
@@ -322,8 +320,6 @@ func TestAnalyzePath_AllExist(t *testing.T) {
 		t.Errorf("expected no missing dirs, got %d", len(result.Missing))
 	}
 }
-
-// --- Tests using function variable overrides ---
 
 func TestCheckCommonTools_AllFound(t *testing.T) {
 	origLookPath := lookPath
@@ -514,11 +510,9 @@ func TestCheckHomeDir_WithTempDir(t *testing.T) {
 	if len(result.Findings) < 2 {
 		t.Fatalf("expected at least 2 findings, got %d", len(result.Findings))
 	}
-	// .ssh should be ok (0700)
 	if result.Findings[0].Severity != "ok" {
 		t.Errorf("expected ok for .ssh, got %s: %s", result.Findings[0].Severity, result.Findings[0].Message)
 	}
-	// .config should be ok
 	if result.Findings[1].Severity != "ok" {
 		t.Errorf("expected ok for .config, got %s: %s", result.Findings[1].Severity, result.Findings[1].Message)
 	}
@@ -667,7 +661,6 @@ func TestCheckShell_VersionError(t *testing.T) {
 	result := &CheckResult{}
 	checkShell(result)
 
-	// Should still have the shell finding, just no version
 	if len(result.Findings) != 1 {
 		t.Errorf("expected 1 finding (shell only, no version), got %d", len(result.Findings))
 	}

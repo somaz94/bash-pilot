@@ -94,17 +94,14 @@ func TestShowComponents_WithGit(t *testing.T) {
 		t.Fatalf("expected at least 3 components, got %d", len(components))
 	}
 
-	// user@host
 	if components[0].Value != "testuser@testhost" {
 		t.Errorf("expected testuser@testhost, got %s", components[0].Value)
 	}
 
-	// directory
 	if components[1].Name != "directory" {
 		t.Errorf("expected directory component, got %s", components[1].Name)
 	}
 
-	// git
 	if components[2].Name != "git" {
 		t.Errorf("expected git component, got %s", components[2].Name)
 	}
@@ -137,7 +134,6 @@ func TestShowComponents_NoGit(t *testing.T) {
 
 	components := ShowComponents(Options{Theme: ThemeMinimal})
 
-	// Should have user@host and directory only
 	if len(components) != 2 {
 		t.Errorf("expected 2 components (no git), got %d", len(components))
 	}
