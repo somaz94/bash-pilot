@@ -226,7 +226,6 @@ func TestCaptureGit_WithProfiles(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	// Create a gitconfig with includeIf.
 	gitconfig := `[user]
 	email = default@example.com
 	name = Default User
@@ -235,7 +234,6 @@ func TestCaptureGit_WithProfiles(t *testing.T) {
 `
 	testutil.WriteFile(t, tmpDir, ".gitconfig", gitconfig)
 
-	// Create the included config.
 	workConfig := `[user]
 	email = work@company.com
 `
@@ -328,7 +326,6 @@ func TestCaptureSSHKeys(t *testing.T) {
 
 	sshDir := testutil.MakeDir(t, tmpDir, ".ssh", 0700)
 
-	// Create key files.
 	testutil.WriteFile(t, sshDir, "id_ed25519", "key")
 	testutil.WriteFile(t, sshDir, "id_ed25519.pub", "pub")
 	testutil.WriteFile(t, sshDir, "config", "config")

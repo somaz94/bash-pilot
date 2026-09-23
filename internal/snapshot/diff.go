@@ -66,7 +66,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 	current := Capture()
 	result := &DiffResult{}
 
-	// System
 	if sectionEnabled(only, "system") {
 		sys := DiffSection{Name: "System"}
 		sys.Entries = append(sys.Entries, compareField("OS", saved.OS, current.OS))
@@ -76,7 +75,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, sys)
 	}
 
-	// Tools
 	tools := DiffSection{Name: "Tools"}
 	savedTools := make(map[string]ToolInfo)
 	for _, t := range saved.Tools {
@@ -87,7 +85,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		currentTools[t.Name] = t
 	}
 
-	// Check all saved tools.
 	for _, st := range saved.Tools {
 		ct, exists := currentTools[st.Name]
 		if !exists {
@@ -114,7 +111,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 			})
 		}
 	}
-	// Check for extra tools in current.
 	for _, ct := range current.Tools {
 		if _, exists := savedTools[ct.Name]; !exists {
 			tools.Entries = append(tools.Entries, DiffEntry{
@@ -128,7 +124,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, tools)
 	}
 
-	// Git
 	if sectionEnabled(only, "git") {
 		git := DiffSection{Name: "Git"}
 		git.Entries = append(git.Entries, compareField("user.email", saved.Git.Email, current.Git.Email))
@@ -136,7 +131,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, git)
 	}
 
-	// SSH Keys
 	ssh := DiffSection{Name: "SSH Keys"}
 	savedKeys := make(map[string]SSHKeyInfo)
 	for _, k := range saved.SSHKeys {
@@ -181,7 +175,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, ssh)
 	}
 
-	// K8s Contexts
 	if (len(saved.K8s) > 0 || len(current.K8s) > 0) && sectionEnabled(only, "k8s") {
 		k8s := DiffSection{Name: "K8s Contexts"}
 		savedCtx := make(map[string]bool)
@@ -207,7 +200,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, k8s)
 	}
 
-	// Brew packages
 	if (len(saved.Brew) > 0 || len(current.Brew) > 0) && sectionEnabled(only, "brew") {
 		brew := DiffSection{Name: "Brew Packages"}
 		savedPkgs := make(map[string]bool)
@@ -233,7 +225,6 @@ func Diff(saved *Snapshot, onlyOpts ...map[string]bool) *DiffResult {
 		result.Sections = append(result.Sections, brew)
 	}
 
-	// Compute summary.
 	for _, sec := range result.Sections {
 		for _, e := range sec.Entries {
 			switch e.Status {

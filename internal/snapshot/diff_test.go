@@ -76,7 +76,6 @@ func TestDiff_System(t *testing.T) {
 
 	result := Diff(saved)
 
-	// Find System section.
 	var sys *DiffSection
 	for i := range result.Sections {
 		if result.Sections[i].Name == "System" {
@@ -88,7 +87,6 @@ func TestDiff_System(t *testing.T) {
 		t.Fatal("System section not found")
 	}
 
-	// Check Shell field shows mismatch.
 	shellFound := false
 	for _, e := range sys.Entries {
 		if e.Key == "Shell" && e.Status == "mismatch" {
@@ -449,7 +447,6 @@ func TestDiff_SSHKeysMatch(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	// Create SSH key file.
 	sshDir := testutil.MakeDir(t, tmpDir, ".ssh", 0700)
 	testutil.WriteFile(t, sshDir, "id_ed25519", "key")
 
@@ -732,7 +729,6 @@ func TestDiff_OnlyFilter(t *testing.T) {
 		Brew: []string{"wget"},
 	}
 
-	// Only tools
 	only := map[string]bool{"tools": true}
 	result := Diff(saved, only)
 
@@ -757,7 +753,6 @@ func TestDiff_OnlyFilter(t *testing.T) {
 		t.Error("did not expect Brew Packages section with --only tools")
 	}
 
-	// Only ssh,git
 	only2 := map[string]bool{"ssh": true, "git": true}
 	result2 := Diff(saved, only2)
 

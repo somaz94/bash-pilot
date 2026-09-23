@@ -94,7 +94,6 @@ func Plan(saved *Snapshot, onlyOpts ...map[string]bool) *SetupResult {
 	result := &SetupResult{}
 	osName := runtime.GOOS
 
-	// Find missing tools from diff.
 	for _, sec := range diff.Sections {
 		if sec.Name != "Tools" {
 			continue
@@ -125,7 +124,6 @@ func Plan(saved *Snapshot, onlyOpts ...map[string]bool) *SetupResult {
 		}
 	}
 
-	// Find missing brew packages.
 	for _, sec := range diff.Sections {
 		if sec.Name != "Brew Packages" {
 			continue

@@ -152,7 +152,6 @@ func captureTools(snap *Snapshot) {
 		out, err := runCommand(tool.name, args...)
 		if err == nil {
 			version := strings.TrimSpace(string(out))
-			// Take first line only.
 			if idx := strings.IndexByte(version, '\n'); idx != -1 {
 				version = version[:idx]
 			}
@@ -187,9 +186,8 @@ func captureGit(snap *Snapshot) {
 	snap.Git.Profiles = append(snap.Git.Profiles, parseIncludeIfProfiles(data, home)...)
 }
 
-// parseIncludeIfProfiles scans a gitconfig payload for [includeIf "gitdir:..."]
-// sections and returns one GitProfile per section, resolving the per-profile
-// email from the referenced included config file when readable.
+// parseIncludeIfProfiles returns one GitProfile per [includeIf "gitdir:..."]
+// section, with the email guessed from a path line naming the profile.
 func parseIncludeIfProfiles(data []byte, home string) []GitProfile {
 	var profiles []GitProfile
 	lines := strings.Split(string(data), "\n")
@@ -214,7 +212,7 @@ func parseIncludeIfProfiles(data []byte, home string) []GitProfile {
 			Directory: dir,
 		}
 
-		// Find the path line associated with this includeIf and pull email.
+		// Heuristic: any "path = " line containing the profile name; the last match wins.
 		for _, l2 := range lines {
 			t2 := strings.TrimSpace(l2)
 			if strings.HasPrefix(t2, "path = ") && strings.Contains(t2, name) {
@@ -254,7 +252,6 @@ func captureSSHKeys(snap *Snapshot) {
 			continue
 		}
 		name := entry.Name()
-		// Skip public keys, config, known_hosts, etc.
 		if strings.HasSuffix(name, ".pub") ||
 			name == "config" ||
 			name == "known_hosts" ||
@@ -287,14 +284,12 @@ func captureK8s(snap *Snapshot) {
 		return
 	}
 
-	// Get current context.
 	currentCtx := ""
 	out, err := runCommand("kubectl", "config", "current-context")
 	if err == nil {
 		currentCtx = strings.TrimSpace(string(out))
 	}
 
-	// Get all contexts.
 	out, err = runCommand("kubectl", "config", "get-contexts", "-o", "name")
 	if err != nil {
 		return

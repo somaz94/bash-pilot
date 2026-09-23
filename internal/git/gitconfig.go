@@ -159,10 +159,8 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 			continue
 		}
 
-		// Parse the included config for email and signing key.
 		email, signKey := parseIncludedConfig(includePath)
 
-		// Determine profile name from directory.
 		name := filepath.Base(expandPath(dir))
 
 		active := false
@@ -183,7 +181,6 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 		})
 	}
 
-	// Also check global user config.
 	globalEmail := getGitConfigValue(sections, "user", "email")
 	globalName := getGitConfigValue(sections, "user", "name")
 	if globalEmail != "" {
@@ -205,7 +202,6 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 		if !hasActive {
 			p.Active = true
 		}
-		// Prepend global profile.
 		profiles = append([]Profile{p}, profiles...)
 	}
 
@@ -227,19 +223,14 @@ func Doctor(gitconfigPath string) (*DoctorResult, error) {
 		return result, nil
 	}
 
-	// Check 1: Duplicate safe.directory entries.
 	checkDuplicateSafeDirs(sections, path, result)
 
-	// Check 2: Missing or invalid includeIf targets.
 	checkIncludeIfs(sections, path, result)
 
-	// Check 3: No user.email configured.
 	checkUserIdentity(sections, path, result)
 
-	// Check 4: Duplicate remote URLs.
 	checkDuplicateRemotes(sections, path, result)
 
-	// Check 5: File permissions.
 	checkFilePermissions(path, result)
 
 	if len(result.Issues) == 0 {
@@ -285,7 +276,7 @@ func FindDuplicateSafeDirs(sections []Section) []SafeDirEntry {
 	return duplicates
 }
 
-// Clean removes duplicate safe.directory entries from gitconfig.
+// Clean removes duplicate safe.directory entries, and entries whose directory no longer exists, from gitconfig.
 func Clean(gitconfigPath string, dryRun bool) (*CleanResult, error) {
 	path := expandPath(gitconfigPath)
 	result := &CleanResult{
@@ -298,7 +289,6 @@ func Clean(gitconfigPath string, dryRun bool) (*CleanResult, error) {
 		return nil, fmt.Errorf("cannot parse %s: %w", path, err)
 	}
 
-	// Find duplicate safe.directory lines.
 	removeLines := make(map[int]bool)
 	duplicates := FindDuplicateSafeDirs(sections)
 	for _, d := range duplicates {
@@ -306,7 +296,6 @@ func Clean(gitconfigPath string, dryRun bool) (*CleanResult, error) {
 		result.Removed = append(result.Removed, fmt.Sprintf("safe.directory=%s (line %d)", d.Directory, d.Line))
 	}
 
-	// Also find and remove stale safe.directory entries (dirs that don't exist).
 	for _, sec := range sections {
 		if sec.Header != "safe" {
 			continue
@@ -382,8 +371,6 @@ func rewriteGitConfig(path string, content string) error {
 	}
 	return nil
 }
-
-// Helper functions.
 
 func checkDuplicateSafeDirs(sections []Section, file string, result *DoctorResult) {
 	seen := make(map[string]int)
@@ -589,9 +576,8 @@ func removeEmptySections(content, sectionName string) string {
 	return strings.Join(result, "\n")
 }
 
-// DefaultGitConfigPath returns the default gitconfig path.
+// DefaultGitConfigPath returns the global gitconfig path git reports, falling back to ~/.gitconfig.
 func DefaultGitConfigPath() string {
-	// Try git config --list --show-origin to find the global config.
 	out, err := exec.Command("git", "config", "--global", "--list", "--show-origin").Output()
 	if err == nil {
 		lines := strings.Split(string(out), "\n")

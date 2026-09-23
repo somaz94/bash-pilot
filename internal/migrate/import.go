@@ -70,17 +70,14 @@ func Import(cfg *MigrateConfig, dryRun bool, onlyOpts ...map[string]bool) (*Impo
 func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResult) {
 	sshDir := filepath.Join(home, ".ssh")
 
-	// Ensure ~/.ssh exists.
 	if !dryRun {
 		// A failure here surfaces when the config file below cannot be opened.
 		_ = mkdirAll(sshDir, config.PermSSHDir)
 	}
 
-	// Read existing SSH config to detect duplicates.
 	sshConfigPath := filepath.Join(sshDir, "config")
 	existingHosts := parseExistingHosts(sshConfigPath)
 
-	// Build new host blocks.
 	var newBlocks []string
 	for _, h := range cfg.SSH.Hosts {
 		if _, exists := existingHosts[h.Name]; exists {
@@ -96,7 +93,6 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 	}
 
 	if len(newBlocks) > 0 && !dryRun {
-		// Append to existing config.
 		content := "\n# Imported by bash-pilot migrate\n" + strings.Join(newBlocks, "\n")
 
 		// Only report the config as written once it actually is. Reporting
@@ -144,7 +140,6 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 }
 
 func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResult) {
-	// Set global user.name and user.email.
 	if cfg.Git.UserName != "" && !dryRun {
 		if err := runGitConfig("user.name", cfg.Git.UserName); err != nil {
 			result.Warnings = append(result.Warnings,
@@ -167,9 +162,7 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		result.GitConfigWritten = true
 	}
 
-	// Create includeIf profiles.
 	for _, p := range cfg.Git.Profiles {
-		// Create the directory.
 		dir := expandHome(p.Directory, home)
 		if !dryRun {
 			if err := mkdirAll(dir, config.PermConfigDir); err != nil {
@@ -180,7 +173,6 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		}
 		result.DirsCreated = append(result.DirsCreated, p.Directory)
 
-		// Write profile config file (e.g., ~/.gitconfig-work).
 		profileConfigPath := filepath.Join(home, ".gitconfig-"+p.Name)
 		if _, err := statFile(profileConfigPath); err == nil {
 			result.Warnings = append(result.Warnings,
@@ -209,7 +201,6 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		}
 		result.ProfilesWritten = append(result.ProfilesWritten, "~/.gitconfig-"+p.Name)
 
-		// Add includeIf to ~/.gitconfig if not already present.
 		if !dryRun {
 			if err := addIncludeIf(home, p); err != nil {
 				result.Warnings = append(result.Warnings,
@@ -232,7 +223,6 @@ func buildHostBlock(h SSHHostEntry, home string) string {
 		b.WriteString(fmt.Sprintf("  Port %s\n", h.Port))
 	}
 	if h.IdentityFile != "" {
-		// Expand ~/ to local home.
 		path := expandHome(h.IdentityFile, home)
 		b.WriteString(fmt.Sprintf("  IdentityFile %s\n", path))
 	}
@@ -285,13 +275,11 @@ func addIncludeIf(home string, p GitProfileExport) error {
 		dir += "/"
 	}
 
-	// Check if already present.
 	checkStr := fmt.Sprintf("gitdir:%s", dir)
 	if strings.Contains(content, checkStr) {
 		return nil
 	}
 
-	// Append includeIf block.
 	block := fmt.Sprintf("\n[includeIf \"gitdir:%s\"]\n\tpath = ~/.gitconfig-%s\n", dir, p.Name)
 	content += block
 
@@ -302,7 +290,6 @@ func addIncludeIf(home string, p GitProfileExport) error {
 func FormatImportResult(result *ImportResult) string {
 	var b strings.Builder
 
-	// SSH section.
 	b.WriteString("  SSH:\n")
 	if result.SSHHostsAdded > 0 || result.SSHHostsSkipped > 0 {
 		b.WriteString(fmt.Sprintf("    %d host(s) added, %d skipped\n", result.SSHHostsAdded, result.SSHHostsSkipped))
@@ -317,7 +304,6 @@ func FormatImportResult(result *ImportResult) string {
 		}
 	}
 
-	// Git section.
 	b.WriteString("  Git:\n")
 	if result.GitConfigWritten {
 		b.WriteString("    global user.name/email configured\n")
@@ -331,7 +317,6 @@ func FormatImportResult(result *ImportResult) string {
 		}
 	}
 
-	// Warnings.
 	if len(result.Warnings) > 0 {
 		b.WriteString("  Warnings:\n")
 		for _, w := range result.Warnings {

@@ -140,7 +140,6 @@ func TestPlan_NoMissingTools(t *testing.T) {
 
 	result := Plan(saved)
 
-	// git matches, so no actions for tools.
 	for _, a := range result.Actions {
 		if a.Tool == "git" {
 			t.Error("did not expect action for git when it already exists")
@@ -228,7 +227,6 @@ func TestExecute_DryRun(t *testing.T) {
 
 	result := Execute(saved, true)
 
-	// Dry run should not change status from pending.
 	for _, a := range result.Actions {
 		if a.Tool == "git" && a.Status != "pending" && a.Status != "skipped" {
 			t.Errorf("expected pending or skipped in dry run, got %s", a.Status)
@@ -257,7 +255,6 @@ func TestExecute_InstallSuccess(t *testing.T) {
 
 	installCalled := false
 	runCommand = func(name string, args ...string) ([]byte, error) {
-		// The install command execution.
 		if name == "brew" || name == "sudo" {
 			installCalled = true
 			return []byte("installed"), nil
@@ -274,7 +271,7 @@ func TestExecute_InstallSuccess(t *testing.T) {
 	result := Execute(saved, false)
 
 	if !installCalled {
-		// On non-darwin, the install command might differ.
+		// installCommands has entries only for darwin and linux.
 		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
 			t.Error("expected install command to be called")
 		}
@@ -322,7 +319,6 @@ func TestExecute_InstallFailure(t *testing.T) {
 		}
 	}
 
-	// On supported OS, should have a failed action.
 	if (runtime.GOOS == "darwin" || runtime.GOOS == "linux") && !hasFailed {
 		t.Error("expected at least one failed action")
 	}

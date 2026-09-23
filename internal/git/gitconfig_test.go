@@ -74,13 +74,11 @@ func TestParseGitConfigFile_NotFound(t *testing.T) {
 func TestGetProfiles_IncludeIf(t *testing.T) {
 	dir := t.TempDir()
 
-	// Create included config.
 	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 	signingkey = ABC123
 `)
 
-	// Create main config with includeIf.
 	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	name = Global User
 	email = global@example.com
@@ -97,12 +95,10 @@ func TestGetProfiles_IncludeIf(t *testing.T) {
 		t.Fatalf("expected at least 2 profiles, got %d", len(profiles))
 	}
 
-	// First should be global.
 	if profiles[0].Email != "global@example.com" {
 		t.Errorf("expected global email, got %q", profiles[0].Email)
 	}
 
-	// Second should be work profile.
 	if profiles[1].Email != "work@company.com" {
 		t.Errorf("expected work email, got %q", profiles[1].Email)
 	}
@@ -290,7 +286,6 @@ func TestDoctor_FilePermissions(t *testing.T) {
 	email = test@example.com
 `)
 
-	// Set overly permissive.
 	os.Chmod(cfg, 0644)
 
 	result, err := Doctor(cfg)
@@ -323,7 +318,6 @@ func TestDoctor_Clean(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Should have no issues (only ok).
 	for _, issue := range result.Issues {
 		if issue.Severity != "ok" {
 			t.Errorf("unexpected issue: %v", issue)
@@ -384,7 +378,6 @@ func TestClean_DryRun(t *testing.T) {
 		t.Error("expected entries to be marked for removal")
 	}
 
-	// File should not be modified.
 	data, _ := os.ReadFile(cfg)
 	if len(data) == 0 {
 		t.Error("file should not be empty")
@@ -416,12 +409,10 @@ func TestClean_Actual(t *testing.T) {
 		t.Error("expected backup path")
 	}
 
-	// Verify backup exists.
 	if _, err := os.Stat(result.BackupDir); os.IsNotExist(err) {
 		t.Error("backup file should exist")
 	}
 
-	// Verify file was modified - should have fewer lines.
 	data, _ := os.ReadFile(cfg)
 	content := string(data)
 	if content == "" {
@@ -510,7 +501,6 @@ func TestFilterGitConfigLines(t *testing.T) {
 	// Remove the two safe.directory lines (lines 2 and 3, 1-based).
 	out := filterGitConfigLines(data, map[int]bool{2: true, 3: true})
 
-	// [safe] section should be stripped because it is now empty.
 	if strings.Contains(out, "[safe]") {
 		t.Errorf("expected empty [safe] section to be removed, got:\n%s", out)
 	}
@@ -543,7 +533,6 @@ func TestRewriteGitConfig(t *testing.T) {
 }
 
 func TestRewriteGitConfig_WriteFails(t *testing.T) {
-	// Target a path under a nonexistent directory so WriteFile fails.
 	if err := rewriteGitConfig("/nonexistent/dir/.gitconfig", "x"); err == nil {
 		t.Fatal("expected error when target directory is missing")
 	}
@@ -644,7 +633,6 @@ func TestGetProfiles_NonGitdirCondition(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Should only have global profile, not onbranch.
 	if len(profiles) != 1 {
 		t.Errorf("expected 1 profile (global only), got %d", len(profiles))
 	}
@@ -653,7 +641,6 @@ func TestGetProfiles_NonGitdirCondition(t *testing.T) {
 func TestGetProfiles_ActiveProfile(t *testing.T) {
 	dir := t.TempDir()
 
-	// Create work config.
 	testutil.WriteFile(t, dir, ".gitconfig-work", `[user]
 	email = work@company.com
 `)
@@ -672,7 +659,6 @@ func TestGetProfiles_ActiveProfile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Work profile should be active.
 	workActive := false
 	globalActive := false
 	for _, p := range profiles {

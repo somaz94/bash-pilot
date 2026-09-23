@@ -62,7 +62,6 @@ func exportSSH(cfg *MigrateConfig, sshConfigPath, home string) {
 		cfg.SSH.Hosts = append(cfg.SSH.Hosts, entry)
 	}
 
-	// Scan SSH keys.
 	sshDir := filepath.Join(home, ".ssh")
 	entries, err := readDir(sshDir)
 	if err != nil {
@@ -102,7 +101,6 @@ func exportSSH(cfg *MigrateConfig, sshConfigPath, home string) {
 }
 
 func exportGit(cfg *MigrateConfig, home string) {
-	// Global user.name and user.email.
 	out, err := runCommand("git", "config", "--global", "user.name")
 	if err == nil {
 		cfg.Git.UserName = strings.TrimSpace(string(out))
@@ -136,7 +134,6 @@ func exportGit(cfg *MigrateConfig, home string) {
 		dir = strings.TrimSuffix(dir, "\"]")
 		dir = strings.TrimSuffix(dir, "/")
 
-		// Normalize to tilde path.
 		dir = normalizePath(dir, home)
 
 		name := filepath.Base(dir)
@@ -146,7 +143,7 @@ func exportGit(cfg *MigrateConfig, home string) {
 			Directory: dir,
 		}
 
-		// Find the path = line after this includeIf and read the included config.
+		// "path = " must sit within 4 lines of the header; a new section ends the search.
 		for j := i + 1; j < len(lines) && j < i+5; j++ {
 			t := strings.TrimSpace(lines[j])
 			if strings.HasPrefix(t, "path = ") {
@@ -170,7 +167,6 @@ func exportGit(cfg *MigrateConfig, home string) {
 				}
 				break
 			}
-			// Stop if we hit another section.
 			if strings.HasPrefix(t, "[") {
 				break
 			}
@@ -185,7 +181,6 @@ func normalizePath(path, home string) string {
 	if home == "" {
 		return path
 	}
-	// Handle paths that already use ~/.
 	if strings.HasPrefix(path, "~/") {
 		return path
 	}

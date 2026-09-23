@@ -25,7 +25,6 @@ func TestImport_SSHHosts(t *testing.T) {
 		return nil, fmt.Errorf("not needed")
 	}
 
-	// Create empty SSH dir.
 	sshDir := filepath.Join(tmpDir, ".ssh")
 	os.MkdirAll(sshDir, 0700)
 
@@ -56,7 +55,6 @@ func TestImport_SSHHosts(t *testing.T) {
 		t.Error("expected SSH config written")
 	}
 
-	// Verify config file content.
 	data, err := os.ReadFile(filepath.Join(sshDir, "config"))
 	if err != nil {
 		t.Fatal(err)
@@ -98,7 +96,6 @@ func TestImport_SSHHostDuplicate(t *testing.T) {
 		return nil, fmt.Errorf("not needed")
 	}
 
-	// Create SSH config with existing host.
 	sshDir := filepath.Join(tmpDir, ".ssh")
 	os.MkdirAll(sshDir, 0700)
 	os.WriteFile(filepath.Join(sshDir, "config"), []byte("Host server1\n  Hostname old.host\n"), 0600)
@@ -145,7 +142,6 @@ func TestImport_SSHKeyExists(t *testing.T) {
 		return nil, fmt.Errorf("not needed")
 	}
 
-	// Create SSH dir and key.
 	sshDir := filepath.Join(tmpDir, ".ssh")
 	os.MkdirAll(sshDir, 0700)
 	os.WriteFile(filepath.Join(sshDir, "id_ed25519"), []byte("key"), 0600)
@@ -202,7 +198,6 @@ func TestImport_GitConfig(t *testing.T) {
 		return nil
 	}
 
-	// Create empty gitconfig.
 	os.WriteFile(filepath.Join(tmpDir, ".gitconfig"), []byte(""), 0600)
 	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0700)
 
@@ -225,7 +220,6 @@ func TestImport_GitConfig(t *testing.T) {
 		t.Error("expected git config written")
 	}
 
-	// Check git config calls.
 	if len(gitConfigCalls) != 2 {
 		t.Fatalf("expected 2 git config calls, got %d", len(gitConfigCalls))
 	}
@@ -233,17 +227,14 @@ func TestImport_GitConfig(t *testing.T) {
 		t.Error("expected user.name config call")
 	}
 
-	// Check profile directory created.
 	if len(result.DirsCreated) != 1 {
 		t.Fatalf("expected 1 dir created, got %d", len(result.DirsCreated))
 	}
 
-	// Check profile config written.
 	if len(result.ProfilesWritten) != 1 {
 		t.Fatalf("expected 1 profile written, got %d", len(result.ProfilesWritten))
 	}
 
-	// Verify profile config file.
 	profileData, err := os.ReadFile(filepath.Join(tmpDir, ".gitconfig-work"))
 	if err != nil {
 		t.Fatal(err)
@@ -255,7 +246,6 @@ func TestImport_GitConfig(t *testing.T) {
 		t.Error("expected signing key in profile config")
 	}
 
-	// Verify includeIf added to gitconfig.
 	gitconfigData, err := os.ReadFile(filepath.Join(tmpDir, ".gitconfig"))
 	if err != nil {
 		t.Fatal(err)
@@ -295,7 +285,6 @@ func TestImport_GitProfileExists(t *testing.T) {
 	runGitConfig = func(args ...string) error { return nil }
 
 	os.MkdirAll(filepath.Join(tmpDir, ".ssh"), 0700)
-	// Profile config already exists.
 	os.WriteFile(filepath.Join(tmpDir, ".gitconfig-work"), []byte("existing"), 0600)
 	os.WriteFile(filepath.Join(tmpDir, ".gitconfig"), []byte(""), 0600)
 
@@ -312,7 +301,6 @@ func TestImport_GitProfileExists(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Should warn and skip.
 	if len(result.ProfilesWritten) != 0 {
 		t.Error("expected no profiles written when file exists")
 	}
@@ -364,7 +352,6 @@ func TestImport_DryRun(t *testing.T) {
 		t.Errorf("expected 1 host added in dry-run, got %d", result.SSHHostsAdded)
 	}
 
-	// Verify no files were actually created.
 	sshConfigPath := filepath.Join(tmpDir, ".ssh", "config")
 	if _, err := os.Stat(sshConfigPath); err == nil {
 		t.Error("expected no SSH config file in dry-run")
@@ -418,7 +405,6 @@ func TestImport_SSHKeyNoType(t *testing.T) {
 	if len(result.SSHKeysNeeded) != 1 {
 		t.Fatalf("expected 1 key needed, got %d", len(result.SSHKeysNeeded))
 	}
-	// Should default to ed25519.
 	if !strings.Contains(result.SSHKeysNeeded[0].Command, "ed25519") {
 		t.Errorf("expected ed25519 default, got %s", result.SSHKeysNeeded[0].Command)
 	}

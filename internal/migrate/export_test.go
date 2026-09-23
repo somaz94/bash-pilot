@@ -25,7 +25,6 @@ func TestExport_Basic(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	// Create gitconfig.
 	gitconfig := fmt.Sprintf(`[user]
 	name = Test User
 	email = test@example.com
@@ -61,7 +60,6 @@ func TestExport_Basic(t *testing.T) {
 		return nil, fmt.Errorf("unknown")
 	}
 
-	// Create SSH key files.
 	sshDir := filepath.Join(tmpDir, ".ssh")
 	os.MkdirAll(sshDir, 0700)
 	os.WriteFile(filepath.Join(sshDir, "id_ed25519"), []byte("key"), 0600)
@@ -81,7 +79,6 @@ func TestExport_Basic(t *testing.T) {
 		t.Errorf("expected source home %s, got %s", tmpDir, cfg.SourceHome)
 	}
 
-	// SSH hosts.
 	if len(cfg.SSH.Hosts) != 2 {
 		t.Fatalf("expected 2 SSH hosts, got %d", len(cfg.SSH.Hosts))
 	}
@@ -92,7 +89,6 @@ func TestExport_Basic(t *testing.T) {
 		t.Errorf("expected port 2222, got %s", cfg.SSH.Hosts[1].Port)
 	}
 
-	// SSH keys.
 	if len(cfg.SSH.Keys) != 1 {
 		t.Fatalf("expected 1 SSH key, got %d", len(cfg.SSH.Keys))
 	}
@@ -103,7 +99,6 @@ func TestExport_Basic(t *testing.T) {
 		t.Errorf("expected key type ED25519, got %s", cfg.SSH.Keys[0].Type)
 	}
 
-	// Git.
 	if cfg.Git.UserName != "Test User" {
 		t.Errorf("expected git user name, got %s", cfg.Git.UserName)
 	}
@@ -213,7 +208,6 @@ func TestExport_TildePath(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	// SSH host already has tilde path.
 	parseSSHConf = func(path string) ([]ssh.Host, error) {
 		return []ssh.Host{
 			{Name: "test", IdentityFile: "~/.ssh/id_rsa"},
@@ -251,7 +245,6 @@ func TestExport_GitProfileWithTildePath(t *testing.T) {
 	tmpDir := t.TempDir()
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 
-	// Gitconfig with tilde path in includeIf.
 	gitconfig := `[includeIf "gitdir:~/personal/"]
 	path = ~/.gitconfig-personal
 `
