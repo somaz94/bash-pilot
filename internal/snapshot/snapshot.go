@@ -263,7 +263,7 @@ func captureSSHKeys(snap *Snapshot) {
 		keyPath := filepath.Join(sshDir, name)
 		info := SSHKeyInfo{Name: name}
 
-		// Get fingerprint and type.
+		// ssh-keygen -l prints "<bits> <fingerprint> <comment> (<TYPE>)".
 		out, err := runCommand("ssh-keygen", "-l", "-f", keyPath)
 		if err == nil {
 			parts := strings.Fields(strings.TrimSpace(string(out)))

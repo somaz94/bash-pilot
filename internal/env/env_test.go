@@ -556,7 +556,6 @@ func TestCheckHomeDir_MissingDirs(t *testing.T) {
 	}()
 
 	tmpDir := t.TempDir()
-	// Don't create .ssh or .config
 
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 	statFunc = os.Stat

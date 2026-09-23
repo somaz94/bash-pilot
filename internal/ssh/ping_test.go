@@ -7,7 +7,6 @@ import (
 )
 
 func TestPingHosts_Reachable(t *testing.T) {
-	// Start a local TCP listener to simulate a reachable SSH host.
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -127,7 +126,7 @@ func TestPingHosts_Parallel(t *testing.T) {
 }
 
 func TestPingHosts_ZeroParallel(t *testing.T) {
-	// parallel=0 should default to 10.
+	// Without the default, a zero-capacity semaphore would deadlock every goroutine.
 	hosts := []Host{
 		{Name: "test", Hostname: "192.0.2.1"},
 	}

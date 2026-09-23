@@ -687,8 +687,7 @@ func TestGetProfiles_ActiveProfileNoPrefixFalsePositive(t *testing.T) {
 
 	cwd, _ := os.Getwd()
 
-	// gitdir is cwd+"-backup" — a different directory that starts with cwd as prefix.
-	// The work profile should NOT be active.
+	// cwd+"-backup" has cwd as a string prefix but is a different directory.
 	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
 	email = global@example.com
 [includeIf "gitdir:`+cwd+`-backup/"]

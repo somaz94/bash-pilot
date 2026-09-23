@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Re-exec under bash if invoked via zsh; must precede `set -u` because of BASH_SOURCE below.
+# BASH_SOURCE below is bash-only: re-exec under bash when run via zsh.
 if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 

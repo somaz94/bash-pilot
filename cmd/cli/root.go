@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 		var err error
 		appCfg, err = config.Load(cfgFile)
 		if err != nil {
-			// Config file is optional; use defaults if not found
+			// Config is optional: any load error, including bad YAML, falls back to defaults.
 			appCfg = config.Default()
 		}
 		return nil

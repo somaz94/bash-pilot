@@ -34,7 +34,7 @@ func TestAudit_KeyPermissions(t *testing.T) {
 	tmpDir := t.TempDir()
 	keyPath := filepath.Join(tmpDir, "test_key")
 
-	// Create a key file with bad permissions.
+	// 0644 relies on umask 022; a 077 umask yields 0600 and this test fails.
 	if err := os.WriteFile(keyPath, []byte("fake-key"), 0644); err != nil {
 		t.Fatal(err)
 	}

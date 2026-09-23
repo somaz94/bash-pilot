@@ -1,5 +1,4 @@
 # shellcheck shell=bash
-# Common settings sourced by demo.sh and demo-clean.sh.
-# Not directly executable; safe to source from bash or zsh.
+# Sourced by demo.sh and demo-clean.sh so the rm -rf target always matches the demo dir.
 
 DEMO_DIR="${DEMO_DIR:-/tmp/bash-pilot-demo}"

@@ -176,12 +176,9 @@ func TestParseKeyValue(t *testing.T) {
 		{"Hostname github.com", "Hostname", "github.com"},
 		{"User ec2-user", "User", "ec2-user"},
 		{"IdentityFile ~/.ssh/id_rsa", "IdentityFile", "~/.ssh/id_rsa"},
-		// Equals-separated.
 		{"Host=myserver", "Host", "myserver"},
 		{"User=deploy", "User", "deploy"},
-		// Single keyword with no value.
 		{"OnlyKeyword", "OnlyKeyword", ""},
-		// Tab-separated.
 		{"Host\tmyhost", "Host", "myhost"},
 	}
 

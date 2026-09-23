@@ -3,7 +3,6 @@
 if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
-# bash-pilot installer
 # Usage: curl -sSL https://raw.githubusercontent.com/somaz94/bash-pilot/main/scripts/install.sh | bash
 
 REPO="somaz94/bash-pilot"

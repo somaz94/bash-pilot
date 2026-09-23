@@ -134,7 +134,7 @@ func autoDetectGroup(h Host) string {
 	return "other"
 }
 
-// isPrivateIP checks if an IP is in a private range.
+// isPrivateIP matches IPv4 RFC 1918 only: CGNAT (100.64/10) and IPv6 ULA fall through to "cloud".
 func isPrivateIP(ip net.IP) bool {
 	privateRanges := []string{
 		"10.0.0.0/8",
@@ -156,7 +156,7 @@ func matchPattern(name, pattern string) bool {
 	if matched {
 		return true
 	}
-	// Also try matching with the pattern as a prefix.
+	// Match's * stops at '/' and fails on malformed patterns; a trailing * still means prefix.
 	if strings.HasSuffix(pattern, "*") {
 		return strings.HasPrefix(name, pattern[:len(pattern)-1])
 	}

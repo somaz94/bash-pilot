@@ -34,7 +34,7 @@ func ParseConfig(path string) ([]Host, error) {
 			continue
 		}
 
-		// Handle Include directives (skip for now).
+		// Include is not followed: hosts defined in included files are not listed.
 		if strings.HasPrefix(strings.ToLower(line), "include ") {
 			continue
 		}

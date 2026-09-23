@@ -3,8 +3,7 @@ package report
 import "strings"
 
 // Severity values used across modules (ssh.Audit, git.Doctor, env.Check).
-// "fail" is an alias for "error" kept for backward compatibility with ssh.AuditSeverity,
-// which predates this unified set.
+// "fail" aliases "error": ssh.AuditSeverity predates this set.
 const (
 	SeverityOK    = "ok"
 	SeverityWarn  = "warn"

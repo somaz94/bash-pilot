@@ -304,7 +304,7 @@ func checkHomeDir(result *CheckResult) {
 		}
 	}
 
-	// Check OS-specific profile.
+	// macOS terminals open login shells (.bash_profile); Linux ones open non-login shells (.bashrc).
 	var profileFile string
 	if runtime.GOOS == "darwin" {
 		profileFile = filepath.Join(home, ".bash_profile")

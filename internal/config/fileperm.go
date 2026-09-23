@@ -2,9 +2,7 @@ package config
 
 import "os"
 
-// File-permission constants used across the codebase when creating files or
-// directories. Centralized here so callers reference intent (e.g. "this is a
-// gitconfig file") rather than a raw octal literal.
+// File modes the tool creates files/dirs with; callers name the intent, not an octal literal.
 const (
 	// PermSSHDir is the mode for the user's ~/.ssh directory (owner-only).
 	PermSSHDir os.FileMode = 0700

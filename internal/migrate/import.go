@@ -95,9 +95,7 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 	if len(newBlocks) > 0 && !dryRun {
 		content := "\n# Imported by bash-pilot migrate\n" + strings.Join(newBlocks, "\n")
 
-		// Only report the config as written once it actually is. Reporting
-		// success on a failed open or write would tell the user their hosts were
-		// imported while the file was left untouched.
+		// Mark the config written only after the write and close succeed, never on a failed open.
 		f, err := os.OpenFile(sshConfigPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, config.PermSSHConfigFile)
 		if err != nil {
 			result.Warnings = append(result.Warnings,
@@ -119,7 +117,6 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 		result.SSHConfigWritten = true // would be written
 	}
 
-	// Check which SSH keys need to be generated.
 	for _, key := range cfg.SSH.Keys {
 		keyPath := expandHome(key.Path, home)
 		if _, err := statFile(keyPath); err == nil {
@@ -265,7 +262,7 @@ func addIncludeIf(home string, p GitProfileExport) error {
 	gitconfigPath := filepath.Join(home, ".gitconfig")
 	data, err := readFile(gitconfigPath)
 	if err != nil {
-		// Create new gitconfig.
+		// No readable gitconfig: start a new one.
 		data = []byte{}
 	}
 

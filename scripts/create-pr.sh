@@ -2,7 +2,6 @@
 if [ -n "${ZSH_VERSION:-}" ]; then exec bash "$0" "$@"; fi
 set -euo pipefail
 
-# Usage: ./scripts/create-pr.sh "PR title"
 # Generates PR body from commit history and creates a GitHub PR.
 
 TITLE="${1:?Usage: create-pr.sh \"PR title\"}"

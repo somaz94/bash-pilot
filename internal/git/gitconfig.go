@@ -125,7 +125,6 @@ func GetProfiles(gitconfigPath string) ([]Profile, error) {
 		return nil, err
 	}
 
-	// Get current working directory for active detection.
 	cwd, _ := os.Getwd()
 
 	var profiles []Profile
@@ -334,9 +333,8 @@ func Clean(gitconfigPath string, dryRun bool) (*CleanResult, error) {
 	return result, nil
 }
 
-// backupGitConfig copies the gitconfig at path to a sibling ".bak" file and
-// returns the backup path along with the original content (so callers can
-// reuse it without a second read). The backup is written with mode 0600.
+// backupGitConfig copies path to path+".bak" (mode 0600) and returns the backup
+// path plus the original bytes so the caller need not re-read the file.
 func backupGitConfig(path string) (string, []byte, error) {
 	backupPath := path + ".bak"
 	data, err := os.ReadFile(path)
@@ -363,8 +361,7 @@ func filterGitConfigLines(data []byte, removeLines map[int]bool) string {
 	return removeEmptySections(strings.Join(newLines, "\n"), "safe")
 }
 
-// rewriteGitConfig writes content to path with mode 0600. Matches the
-// pre-split Clean() behavior — a direct overwrite, not an atomic rename.
+// rewriteGitConfig overwrites path in place (mode 0600), not via atomic rename.
 func rewriteGitConfig(path string, content string) error {
 	if err := os.WriteFile(path, []byte(content), config.PermGitConfigFile); err != nil {
 		return fmt.Errorf("cannot write %s: %w", path, err)
@@ -436,7 +433,7 @@ func checkUserIdentity(sections []Section, file string, result *DoctorResult) {
 	}
 
 	if !hasEmail {
-		// Check if there are includeIf profiles that provide email.
+		// Without a global email, includeIf profiles are assumed to supply one.
 		hasIncludeIf := false
 		for _, sec := range sections {
 			if strings.HasPrefix(strings.ToLower(sec.Header), "includeif ") {
@@ -558,13 +555,12 @@ func removeEmptySections(content, sectionName string) string {
 	i := 0
 	for i < len(lines) {
 		if sectionRe.MatchString(lines[i]) {
-			// Check if next non-empty lines are another section or EOF.
+			// Empty section (only blank lines before the next header or EOF): drop it and its blank lines.
 			j := i + 1
 			for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
 				j++
 			}
 			if j >= len(lines) || (len(strings.TrimSpace(lines[j])) > 0 && strings.TrimSpace(lines[j])[0] == '[') {
-				// Empty section — skip it and trailing blank lines.
 				i = j
 				continue
 			}

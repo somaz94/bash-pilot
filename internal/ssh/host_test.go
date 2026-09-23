@@ -100,27 +100,20 @@ func TestAutoDetectGroup(t *testing.T) {
 		host Host
 		want string
 	}{
-		// Git hosts.
 		{Host{Name: "github.com-somaz94", Hostname: "github.com"}, "git"},
 		{Host{Name: "gitlab", Hostname: "192.168.1.60"}, "git"},
 		{Host{Name: "my-bitbucket", Hostname: "bitbucket.org"}, "git"},
 		{Host{Name: "codecommit-repo", Hostname: "git-codecommit.us-east-1.amazonaws.com"}, "git"},
-		// Kubernetes hosts.
 		{Host{Name: "k8s-control-01", Hostname: "192.168.1.17"}, "k8s"},
 		{Host{Name: "kube-master", Hostname: "10.0.0.1"}, "k8s"},
-		// Cloud hosts (public IP).
 		{Host{Name: "test-server", Hostname: "54.123.45.67"}, "cloud"},
-		// Cloud hosts (FQDN).
 		{Host{Name: "aws-instance", Hostname: "ec2-1-2-3-4.compute.amazonaws.com"}, "cloud"},
 		{Host{Name: "gcp-vm", Hostname: "my-vm.compute.google.com"}, "cloud"},
 		{Host{Name: "azure-vm", Hostname: "my-vm.azure.com"}, "cloud"},
-		// On-prem hosts.
 		{Host{Name: "nas", Hostname: "192.168.1.5"}, "on-prem"},
 		{Host{Name: "server1", Hostname: "192.168.1.100"}, "on-prem"},
 		{Host{Name: "internal", Hostname: "172.16.0.50"}, "on-prem"},
-		// Other (no hostname).
 		{Host{Name: "random", Hostname: ""}, "other"},
-		// Other (non-IP, non-cloud FQDN).
 		{Host{Name: "myhost", Hostname: "myhost.local"}, "other"},
 	}
 
@@ -143,10 +136,8 @@ func TestMatchPattern(t *testing.T) {
 		{"test-server", "k8s-*", false},
 		{"nas", "nas*", true},
 		{"nas", "nas", true},
-		// Exact match via filepath.Match.
 		{"server1", "server1", true},
 		{"server1", "server2", false},
-		// Non-matching wildcard.
 		{"prod-web", "staging-*", false},
 	}
 

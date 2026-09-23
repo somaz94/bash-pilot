@@ -77,8 +77,7 @@ var installCommands = map[string]map[string][]string{
 
 // Plan returns the list of actions needed to match the snapshot, without executing.
 func Plan(saved *Snapshot, onlyOpts ...map[string]bool) *SetupResult {
-	// Setup only cares about "tools" and "brew" sections.
-	// Build a filter that includes only those sections requested.
+	// Setup only acts on tools and brew, so narrow the caller's filter to those.
 	var only map[string]bool
 	if len(onlyOpts) > 0 && onlyOpts[0] != nil {
 		only = make(map[string]bool)

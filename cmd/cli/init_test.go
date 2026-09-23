@@ -36,8 +36,7 @@ Host nas
 
 	rootCmd.SetArgs([]string{"init", "--config", sshConfig})
 
-	// We can't easily test the full flow since init uses UserHomeDir,
-	// but we can verify the command exists and is wired up.
+	// init writes under os.UserHomeDir, so only the command wiring is asserted here.
 	cmd, _, err := rootCmd.Find([]string{"init"})
 	if err != nil {
 		t.Fatalf("init command not found: %v", err)

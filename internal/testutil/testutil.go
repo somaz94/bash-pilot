@@ -20,10 +20,8 @@ func WriteFile(t *testing.T, dir, name, content string) string {
 	return path
 }
 
-// MakeDir creates parent/name with the given mode and returns the full path.
-// Callers pass the mode explicitly because some tests intentionally set
-// stricter or laxer modes (e.g. 0700 for ~/.ssh, 0755 for .config). It fails
-// the test via t.Fatal on error.
+// MakeDir creates parent/name with mode (callers vary it, e.g. 0700 vs 0755) and
+// returns the full path. It fails the test via t.Fatal on error.
 func MakeDir(t *testing.T, parent, name string, mode os.FileMode) string {
 	t.Helper()
 	path := filepath.Join(parent, name)

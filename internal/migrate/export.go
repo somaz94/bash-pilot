@@ -87,7 +87,7 @@ func exportSSH(cfg *MigrateConfig, sshConfigPath, home string) {
 			Path: "~/.ssh/" + name,
 		}
 
-		// Get key type.
+		// ssh-keygen -l prints "<bits> <fingerprint> <comment> (<TYPE>)".
 		out, err := runCommand("ssh-keygen", "-l", "-f", keyPath)
 		if err == nil {
 			parts := strings.Fields(strings.TrimSpace(string(out)))
@@ -111,7 +111,6 @@ func exportGit(cfg *MigrateConfig, home string) {
 		cfg.Git.UserEmail = strings.TrimSpace(string(out))
 	}
 
-	// Parse includeIf profiles from gitconfig.
 	gitconfigPath := filepath.Join(home, ".gitconfig")
 	data, err := os.ReadFile(gitconfigPath)
 	if err != nil {
