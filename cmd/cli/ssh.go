@@ -75,7 +75,6 @@ var sshPingCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse SSH config: %w", err)
 		}
 
-		// Filter by pattern if provided.
 		if len(args) > 0 {
 			pattern := args[0]
 			var filtered []ssh.Host

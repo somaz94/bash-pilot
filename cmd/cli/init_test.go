@@ -8,7 +8,6 @@ import (
 )
 
 func TestInitCmd_GeneratesConfig(t *testing.T) {
-	// Create a temp SSH config.
 	tmpDir := t.TempDir()
 	sshConfig := filepath.Join(tmpDir, "ssh_config")
 	content := `Host github.com-personal
@@ -32,11 +31,9 @@ Host nas
 		t.Fatal(err)
 	}
 
-	// Create a temp config dir (so init writes there).
 	cfgDir := filepath.Join(tmpDir, ".config", "bash-pilot")
 	cfgPath := filepath.Join(cfgDir, "config.yaml")
 
-	// Set up the root command with our test SSH config.
 	rootCmd.SetArgs([]string{"init", "--config", sshConfig})
 
 	// We can't easily test the full flow since init uses UserHomeDir,
@@ -49,13 +46,11 @@ Host nas
 		t.Errorf("expected 'init', got %q", cmd.Use)
 	}
 
-	// Verify --force flag exists.
 	f := cmd.Flags().Lookup("force")
 	if f == nil {
 		t.Error("--force flag not found")
 	}
 
-	// Verify config path doesn't exist yet.
 	if _, err := os.Stat(cfgPath); err == nil {
 		t.Error("config should not exist yet")
 	}

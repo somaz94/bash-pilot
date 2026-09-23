@@ -30,11 +30,9 @@ var initCmd = &cobra.Command{
 			return nil
 		}
 
-		// Auto-detect groups from hosts.
 		defaultCfg := config.Default()
 		groups := ssh.GroupHosts(hosts, defaultCfg.SSH)
 
-		// Build config from detected groups.
 		cfg := config.Config{
 			SSH: config.SSHConfig{
 				Groups: make(map[string]config.SSHGroup),
@@ -63,7 +61,6 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("failed to generate config: %w", err)
 		}
 
-		// Determine output path.
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return err
@@ -71,7 +68,6 @@ var initCmd = &cobra.Command{
 		cfgDir := filepath.Join(home, ".config", "bash-pilot")
 		cfgPath := filepath.Join(cfgDir, "config.yaml")
 
-		// Check if config already exists.
 		if _, err := os.Stat(cfgPath); err == nil {
 			fmt.Printf("Config already exists: %s\n", cfgPath)
 			fmt.Println("Use --force to overwrite.")
@@ -84,7 +80,6 @@ var initCmd = &cobra.Command{
 			}
 		}
 
-		// Create directory and write config.
 		if err := os.MkdirAll(cfgDir, config.PermConfigDir); err != nil {
 			return fmt.Errorf("failed to create config directory: %w", err)
 		}
@@ -104,12 +99,9 @@ var initCmd = &cobra.Command{
 	},
 }
 
-// toWildcardPatterns groups host names by common prefix and returns
-// wildcard patterns where possible. For example:
-//
-//	["k8s-control-01", "k8s-compute-01", "k8s-compute-02"] → ["k8s-*"]
-//	["nas", "nas-svn"] → ["nas*"]
-//	["gitlab"] → ["gitlab"]
+// toWildcardPatterns folds names sharing an extractPrefix into one "<prefix>*"
+// pattern ("k8s-control-01", "k8s-compute-01" → "k8s-*") and keeps the rest
+// as-is: "nas" and "nas-svn" stay separate because their prefixes differ.
 func toWildcardPatterns(names []string) []string {
 	if len(names) <= 1 {
 		return names
@@ -117,7 +109,6 @@ func toWildcardPatterns(names []string) []string {
 
 	sort.Strings(names)
 
-	// Group names by common prefix (split on '-' or '.').
 	prefixGroups := make(map[string][]string)
 	for _, name := range names {
 		prefix := extractPrefix(name)
@@ -129,14 +120,12 @@ func toWildcardPatterns(names []string) []string {
 
 	for prefix, group := range prefixGroups {
 		if len(group) >= 2 && prefix != "" {
-			// Multiple hosts share this prefix → wildcard.
 			pattern := prefix + "*"
 			if !seen[pattern] {
 				patterns = append(patterns, pattern)
 				seen[pattern] = true
 			}
 		} else {
-			// Single host or no clear prefix → keep as-is.
 			for _, name := range group {
 				if !seen[name] {
 					patterns = append(patterns, name)
@@ -150,19 +139,15 @@ func toWildcardPatterns(names []string) []string {
 	return patterns
 }
 
-// extractPrefix returns the portion before the first '-' or '.' separator.
-// For names like "k8s-control-01" → "k8s-", "github.com-somaz94" → "github.com-",
-// "nas" → "nas", "server1" → "server".
+// extractPrefix returns name up to and including its first '-' (preferred over an
+// earlier '.'), else its first '.', else name minus trailing digits ("server1" → "server").
 func extractPrefix(name string) string {
-	// Try splitting on '-'.
 	if idx := strings.Index(name, "-"); idx > 0 {
 		return name[:idx+1]
 	}
-	// Try splitting on '.'.
 	if idx := strings.Index(name, "."); idx > 0 {
 		return name[:idx+1]
 	}
-	// Strip trailing digits: "server1" → "server", "nas" → "nas".
 	i := len(name)
 	for i > 0 && name[i-1] >= '0' && name[i-1] <= '9' {
 		i--

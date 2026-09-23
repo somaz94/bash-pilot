@@ -26,7 +26,6 @@ var doctorCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
-		// --- SSH Audit ---
 		var sshResult ssh.AuditResult
 		configFile := ""
 		if appCfg != nil {
@@ -35,10 +34,8 @@ var doctorCmd = &cobra.Command{
 		hosts, _ := ssh.ParseConfig(configFile)
 		sshResult = ssh.Audit(hosts)
 
-		// --- Git Doctor ---
 		gitResult, _ := git.Doctor(resolveGitConfigPath())
 
-		// --- Env Check ---
 		envResult := env.Check()
 
 		if output == "json" {
@@ -49,7 +46,6 @@ var doctorCmd = &cobra.Command{
 			})
 		}
 
-		// SSH section
 		f.Header("DOCTOR: SSH")
 		if len(sshResult.Findings) == 0 {
 			f.Println(f.OK("No SSH issues found"))
@@ -60,7 +56,6 @@ var doctorCmd = &cobra.Command{
 		f.Footer()
 		fmt.Println()
 
-		// Git section
 		f.Header("DOCTOR: GIT")
 		if len(gitResult.Issues) == 0 {
 			f.Println(f.OK("No Git issues found"))
@@ -71,7 +66,6 @@ var doctorCmd = &cobra.Command{
 		f.Footer()
 		fmt.Println()
 
-		// Env section
 		groups, keys := env.GroupFindingsByCategory(envResult.Findings)
 		for _, category := range keys {
 			f.Header(fmt.Sprintf("DOCTOR: ENV (%s)", strings.ToUpper(category)))
@@ -82,7 +76,6 @@ var doctorCmd = &cobra.Command{
 			fmt.Println()
 		}
 
-		// Summary
 		sshIssues := 0
 		for _, finding := range sshResult.Findings {
 			if finding.Severity != ssh.SeverityOK {
