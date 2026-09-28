@@ -138,16 +138,7 @@ make lint            # golangci-lint (config in .golangci.yml)
 
 ### Test Coverage
 
-| Package | Coverage |
-|---------|----------|
-| `internal/ssh` | 96.1% |
-| `internal/git` | 94.2% |
-| `internal/env` | 99.2% |
-| `internal/prompt` | 99.0% |
-| `internal/snapshot` | 95.0% |
-| `internal/migrate` | 91.7% |
-| `internal/config` | 82.4% |
-| `internal/report` | 100% |
+Total coverage is kept at 90% or above. Run `make cover` for the current per-package and total figures; CI prints the same summary in its "Display coverage summary" step.
 
 <br/>
 

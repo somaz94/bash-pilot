@@ -60,7 +60,7 @@ bash-pilot ssh list --no-color
 
 ### ssh ping
 
-Test TCP connectivity to SSH hosts in parallel.
+Test TCP connectivity to SSH hosts in parallel. Takes at most one glob pattern; quote it so the shell does not expand it.
 
 ```bash
 # Ping all hosts
@@ -449,7 +449,7 @@ bash-pilot migrate import my-config.json -o json
 
 | Item | Action |
 |------|--------|
-| SSH hosts | Appended to `~/.ssh/config` (existing hosts skipped) |
+| SSH hosts | Appended to `~/.ssh/config`; a host is skipped with a warning when any of its names is already on a `Host` line |
 | SSH keys | Lists keys to generate with `ssh-keygen` commands |
 | Git identity | Sets global user.name/email via `git config --global` |
 | Git profiles | Creates directory, writes profile config, adds includeIf to `~/.gitconfig` |
