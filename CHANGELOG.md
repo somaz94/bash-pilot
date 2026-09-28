@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.9.1](https://github.com/somaz94/bash-pilot/compare/v0.9.0...v0.9.1) (2026-09-28)
+
+### Bug Fixes
+
+- **ssh:** read every ForwardAgent form and carry agent sockets through migrate ([563d838](https://github.com/somaz94/bash-pilot/commit/563d83895ad969f51c20bfbd944ec8fb56c53692))
+
+### Documentation
+
+- describe ForwardAgent socket export in USAGE ([394009d](https://github.com/somaz94/bash-pilot/commit/394009d23d1b6581d368279ecc79e5016c54e784))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.9.0](https://github.com/somaz94/bash-pilot/compare/v0.8.0...v0.9.0) (2026-09-28)
 
 ### Bug Fixes
