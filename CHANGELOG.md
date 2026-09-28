@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.7.1](https://github.com/somaz94/bash-pilot/compare/v0.7.0...v0.7.1) (2026-09-28)
+
+### Bug Fixes
+
+- **cli:** reject more than one pattern in ssh ping ([2f801bb](https://github.com/somaz94/bash-pilot/commit/2f801bb35ffa6379a5d01dec3a206f73d528d6c7))
+- **migrate:** detect existing SSH hosts with the ssh_config parser and match each pattern ([bb80b28](https://github.com/somaz94/bash-pilot/commit/bb80b28ab07f79c25a37c4411ecf14ba26c1bd83))
+- **git:** keep the final newline when clean drops a trailing empty [safe] section ([c4d9cf2](https://github.com/somaz94/bash-pilot/commit/c4d9cf29917ba39745c7b613edbe1e88344b8249))
+
+### Documentation
+
+- replace the hand-written coverage table and document ping and import rules ([b6ea6ad](https://github.com/somaz94/bash-pilot/commit/b6ea6ad479a7484a52b33a052cbe27a27cfa8fe6))
+- sync CLAUDE.md and docs with the current CLI commands, output format and JSON fields ([6527869](https://github.com/somaz94/bash-pilot/commit/65278694cabfb05b29f2a1877cdc55fddb7c79fa))
+
+### Continuous Integration
+
+- run golangci-lint pinned to v2.13 in the unit-tests job ([e8be78f](https://github.com/somaz94/bash-pilot/commit/e8be78f63f318b0f81190be94a02b001fef803cc))
+
+### Chores
+
+- add make lint target for golangci-lint ([1281717](https://github.com/somaz94/bash-pilot/commit/1281717f7d647819d498fa6a8be63bbe89a955b2))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.7.0](https://github.com/somaz94/bash-pilot/compare/v0.6.3...v0.7.0) (2026-09-28)
 
 ### Bug Fixes
