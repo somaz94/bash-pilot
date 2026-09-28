@@ -548,7 +548,9 @@ func expandPath(path string) string {
 }
 
 func removeEmptySections(content, sectionName string) string {
-	lines := strings.Split(content, "\n")
+	// The final newline is split off first so dropping a trailing empty section cannot take it along.
+	trailingNewline := strings.HasSuffix(content, "\n")
+	lines := strings.Split(strings.TrimSuffix(content, "\n"), "\n")
 	var result []string
 	sectionRe := regexp.MustCompile(`^\s*\[` + regexp.QuoteMeta(sectionName) + `\]\s*$`)
 
@@ -561,6 +563,12 @@ func removeEmptySections(content, sectionName string) string {
 				j++
 			}
 			if j >= len(lines) || (len(strings.TrimSpace(lines[j])) > 0 && strings.TrimSpace(lines[j])[0] == '[') {
+				if j >= len(lines) {
+					// Blank lines that separated a dropped trailing section would otherwise dangle at EOF.
+					for len(result) > 0 && strings.TrimSpace(result[len(result)-1]) == "" {
+						result = result[:len(result)-1]
+					}
+				}
 				i = j
 				continue
 			}
@@ -569,7 +577,11 @@ func removeEmptySections(content, sectionName string) string {
 		i++
 	}
 
-	return strings.Join(result, "\n")
+	out := strings.Join(result, "\n")
+	if trailingNewline && len(result) > 0 {
+		out += "\n"
+	}
+	return out
 }
 
 // DefaultGitConfigPath returns the global gitconfig path git reports, falling back to ~/.gitconfig.

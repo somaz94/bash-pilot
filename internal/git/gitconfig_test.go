@@ -571,11 +571,42 @@ func TestExpandPath(t *testing.T) {
 }
 
 func TestRemoveEmptySections(t *testing.T) {
-	input := "[safe]\n\n[user]\n\temail = test@example.com\n"
-	result := removeEmptySections(input, "safe")
+	tests := []struct {
+		name, input, want string
+	}{
+		{"empty section before another", "[safe]\n\n[user]\n\temail = a@example.com\n", "[user]\n\temail = a@example.com\n"},
+		{"empty section at end keeps final newline", "[user]\n\temail = a@example.com\n[safe]\n", "[user]\n\temail = a@example.com\n"},
+		{"empty section and blank lines at end", "[user]\n\temail = a@example.com\n[safe]\n\n\n", "[user]\n\temail = a@example.com\n"},
+		{"no final newline stays without one", "[user]\n\temail = a@example.com\n[safe]", "[user]\n\temail = a@example.com"},
+		{"non-empty section is kept", "[safe]\n\tdirectory = /r\n", "[safe]\n\tdirectory = /r\n"},
+		{"only an empty section", "[safe]\n", ""},
+		{"blank-separated empty section at end", "[user]\n\temail = a@example.com\n\n[safe]\n", "[user]\n\temail = a@example.com\n"},
+		{"CRLF line endings preserved", "[user]\r\n\temail = a@example.com\r\n[safe]\r\n", "[user]\r\n\temail = a@example.com\r\n"},
+		{"lone newline is kept", "\n", "\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := removeEmptySections(tt.input, "safe"); got != tt.want {
+				t.Errorf("removeEmptySections(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
 
-	if result == input {
-		t.Error("empty [safe] section should be removed")
+func TestClean_RemovesTrailingSafeSectionKeepsNewline(t *testing.T) {
+	stale := filepath.Join(t.TempDir(), "gone")
+	cfg := testutil.WriteFile(t, t.TempDir(), ".gitconfig",
+		"[user]\n\temail = test@example.com\n[safe]\n\tdirectory = "+stale+"\n")
+
+	if _, err := Clean(cfg, false); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got, err := os.ReadFile(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "[user]\n\temail = test@example.com\n"; string(got) != want {
+		t.Errorf("cleaned file = %q, want %q", got, want)
 	}
 }
 
