@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/somaz94/bash-pilot/internal/ssh"
 )
 
 func TestImport_SSHHosts(t *testing.T) {
@@ -462,7 +464,7 @@ func TestBuildHostBlock(t *testing.T) {
 		ForwardAgent: true,
 	}
 
-	block := buildHostBlock(h, "/home/user")
+	block := buildHostBlock(h, "/home/user", true)
 
 	checks := []string{
 		"Host server1",
@@ -493,7 +495,7 @@ func TestBuildHostBlock_ProxyCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			block := buildHostBlock(tt.entry, "/home/user")
+			block := buildHostBlock(tt.entry, "/home/user", false)
 			if !strings.Contains(block, tt.want) {
 				t.Errorf("block =\n%s\nwant line %q", block, tt.want)
 			}
@@ -680,5 +682,91 @@ func TestImport_SSHHostSharesExistingPattern(t *testing.T) {
 	}
 	if strings.Join(result.Warnings, "\n") != strings.Join(want, "\n") {
 		t.Errorf("warnings = %q, want %q", result.Warnings, want)
+	}
+}
+
+func TestSSHArg(t *testing.T) {
+	tests := []struct{ in, want string }{
+		{"192.0.2.5", "192.0.2.5"},
+		{"/keys/my key", `"/keys/my key"`},
+		{`o'brien`, `"o'brien"`},
+		{"web#1", `"web#1"`},
+		{`a"b\c`, `"a\"b\\c"`},
+		{"=foo", `"=foo"`},
+	}
+	for _, tt := range tests {
+		if got := sshArg(tt.in); got != tt.want {
+			t.Errorf("sshArg(%q) = %s, want %s", tt.in, got, tt.want)
+		}
+	}
+}
+
+// A source config with quoting must survive export, import and a re-parse unchanged.
+func TestExportImport_QuotedValuesRoundTrip(t *testing.T) {
+	oldHome, newHome := t.TempDir(), t.TempDir()
+	t.Setenv("HOME", oldHome)
+	src := filepath.Join(oldHome, "config")
+	content := "Host \"a'b\" odd\n  HostName 192.0.2.5\n  User o\\'brien\n  IdentityFile \"~/.ssh/my key #1\"\n  ProxyJump jump\n"
+	if err := os.WriteFile(src, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg := &MigrateConfig{}
+	exportSSH(cfg, src, oldHome)
+	if len(cfg.SSH.Hosts) != 1 {
+		t.Fatalf("exported hosts = %+v", cfg.SSH.Hosts)
+	}
+
+	t.Setenv("HOME", newHome)
+	dst := filepath.Join(newHome, "config")
+	if err := os.WriteFile(dst, []byte(buildHostBlock(cfg.SSH.Hosts[0], newHome, true)), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ssh.ParseConfig(dst)
+	if err != nil || len(hosts) != 1 {
+		t.Fatalf("re-parse: hosts = %+v, err = %v", hosts, err)
+	}
+	h := hosts[0]
+	if want := filepath.Join(newHome, ".ssh", "my key #1"); h.IdentityFile != want {
+		t.Errorf("IdentityFile = %q, want %q", h.IdentityFile, want)
+	}
+	if h.Name != "a'b odd" || h.User != "o'brien" || h.Hostname != "192.0.2.5" || h.ProxyJump != "jump" {
+		t.Errorf("host = %+v", h)
+	}
+}
+
+// Version 1 exports hold raw ssh_config text, so quoting it would turn a trailing
+// comment into part of the value; version 2 values are words that need quoting.
+func TestImport_QuotesOnlyFormat2Values(t *testing.T) {
+	origUserHomeDir := userHomeDir
+	defer func() { userHomeDir = origUserHomeDir }()
+	for _, tt := range []struct {
+		version, hostname, want string
+		wantWarning             bool
+	}{
+		{version: "1", hostname: "192.0.2.5 # primary", want: "  Hostname 192.0.2.5 # primary\n"},
+		{version: "", hostname: "192.0.2.5 # primary", want: "  Hostname 192.0.2.5 # primary\n"},
+		{version: FormatVersion, hostname: "my host", want: "  Hostname \"my host\"\n"},
+		{version: "3", hostname: "my host", want: "  Hostname \"my host\"\n", wantWarning: true},
+	} {
+		t.Run("version "+tt.version, func(t *testing.T) {
+			home := t.TempDir()
+			userHomeDir = func() (string, error) { return home, nil }
+			cfg := &MigrateConfig{Version: tt.version, SSH: SSHExport{Hosts: []SSHHostEntry{{Name: "h", Hostname: tt.hostname}}}}
+			result, err := Import(cfg, false, map[string]bool{"ssh": true})
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := os.ReadFile(filepath.Join(home, ".ssh", "config"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(got), tt.want) {
+				t.Errorf("config =\n%s\nwant line %q", got, tt.want)
+			}
+			warned := strings.Contains(strings.Join(result.Warnings, "\n"), "unknown export format version")
+			if warned != tt.wantWarning {
+				t.Errorf("warnings = %q, want unknown-version warning: %v", result.Warnings, tt.wantWarning)
+			}
+		})
 	}
 }

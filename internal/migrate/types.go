@@ -1,5 +1,9 @@
 package migrate
 
+// FormatVersion is written by Export. Version 2 stores SSH values as parsed words,
+// with ssh_config quotes, escapes and comments removed; version 1 stored the raw text.
+const FormatVersion = "2"
+
 // MigrateConfig is the portable format for cross-machine migration.
 type MigrateConfig struct {
 	Version    string    `json:"version"`

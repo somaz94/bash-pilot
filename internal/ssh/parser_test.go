@@ -3,6 +3,7 @@ package ssh
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -266,22 +267,32 @@ func TestParseConfig_FirstProxyDirectiveWins(t *testing.T) {
 	}
 }
 
-func TestStripTrailingComment(t *testing.T) {
-	tests := []struct{ in, want string }{
-		{"192.0.2.10", "192.0.2.10"},
-		{"192.0.2.10 # primary", "192.0.2.10"},
-		{"192.0.2.10\t#primary", "192.0.2.10"},
-		{"web#1", "web#1"},
-		{`"~/.ssh/key #1"`, `"~/.ssh/key #1"`},
-		{`'a # b' # c`, `'a # b'`},
-		{"# only a comment", ""},
-		{`o\'brien # c`, `o\'brien`},
-		{`~/x\ #2`, `~/x\ #2`},
-		{`"a\" # b" # c`, `"a\" # b"`},
+// Expected words match what `ssh -G` reports for the same argument.
+func TestSplitArgs(t *testing.T) {
+	tests := []struct {
+		in   string
+		want []string
+	}{
+		{"192.0.2.10", []string{"192.0.2.10"}},
+		{"a  b\tc", []string{"a", "b", "c"}},
+		{"192.0.2.10 # primary", []string{"192.0.2.10"}},
+		{"web#1", []string{"web#1"}},
+		{"# only a comment", nil},
+		{`"/tmp/my key"`, []string{"/tmp/my key"}},
+		{`"~/.ssh/key #1"`, []string{"~/.ssh/key #1"}},
+		{`'a # b' # c`, []string{"a # b"}},
+		{`"a"b'c'`, []string{"abc"}},
+		{`'it''s'`, []string{"its"}},
+		{`o\'brien # c`, []string{"o'brien"}},
+		{`/tmp/x\ #2`, []string{"/tmp/x #2"}},
+		{`"a\" # b" # c`, []string{`a" # b`}},
+		{`/tmp/back\\slash`, []string{`/tmp/back\slash`}},
+		{`/tmp/lone\x`, []string{`/tmp/lone\x`}},
+		{`"in quotes\ stays"`, []string{`in quotes\ stays`}},
 	}
 	for _, tt := range tests {
-		if got := stripTrailingComment(tt.in); got != tt.want {
-			t.Errorf("stripTrailingComment(%q) = %q, want %q", tt.in, got, tt.want)
+		if got := splitArgs(tt.in); !slices.Equal(got, tt.want) {
+			t.Errorf("splitArgs(%q) = %q, want %q", tt.in, got, tt.want)
 		}
 	}
 }
@@ -364,5 +375,69 @@ func TestParseConfig_FirstValueWins(t *testing.T) {
 	}
 	if hosts[1].User != "again" {
 		t.Errorf("next.User = %q; a new Host must start with no parameters set", hosts[1].User)
+	}
+}
+
+func TestParseConfig_QuotedValues(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host 'multi a' b # c\n" +
+		"  IdentityFile \"~/.ssh/my key\"\n" +
+		"  User o\\'brien\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 1 {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	h := hosts[0]
+	if want := filepath.Join(home, ".ssh", "my key"); h.IdentityFile != want {
+		t.Errorf("IdentityFile = %q, want %q (unquoted, then ~ expanded)", h.IdentityFile, want)
+	}
+	if h.User != "o'brien" || h.Name != "multi a b" {
+		t.Errorf("User = %q, Name = %q", h.User, h.Name)
+	}
+}
+
+// Expected values match `ssh -G`: ProxyJump is read raw and ends at any '#'.
+func TestParseConfig_ProxyJumpIsRaw(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host q\n  ProxyJump \"jump\"\n" +
+		"Host h\n  ProxyJump j#x\n" +
+		"Host c\n  ProxyJump jump # office\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, h := range hosts {
+		got = append(got, h.ProxyJump)
+	}
+	if want := []string{`"jump"`, "j", "jump"}; !slices.Equal(got, want) {
+		t.Errorf("ProxyJump values = %q, want %q", got, want)
+	}
+}
+
+func TestParseConfig_EmptyArgumentsClaimNothing(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host \"\"\n  User ghost\n" +
+		"Host a\n  User \"\" bob\n  User carol\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 1 || hosts[0].Name != "a" || hosts[0].User != "carol" {
+		t.Errorf("hosts = %+v, want only a with User carol", hosts)
 	}
 }

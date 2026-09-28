@@ -76,6 +76,11 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 	sshConfigPath := filepath.Join(sshDir, "config")
 	existingHosts := parseExistingHosts(sshConfigPath)
+	parsedValues := cfg.Version != "" && cfg.Version != "1"
+	if parsedValues && cfg.Version != FormatVersion {
+		result.Warnings = append(result.Warnings, fmt.Sprintf(
+			"unknown export format version %q (this release writes %q); SSH values may be written incorrectly", cfg.Version, FormatVersion))
+	}
 
 	var newBlocks []string
 	for _, h := range cfg.SSH.Hosts {
@@ -89,7 +94,7 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 			continue
 		}
 
-		block := buildHostBlock(h, home)
+		block := buildHostBlock(h, home, parsedValues)
 		newBlocks = append(newBlocks, block)
 		result.SSHHostsAdded++
 	}
@@ -209,25 +214,42 @@ func importGit(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 	}
 }
 
-func buildHostBlock(h SSHHostEntry, home string) string {
+// buildHostBlock renders h as an ssh_config Host block. parsedValues marks a
+// format 2 export, whose values must be quoted again where ssh would split them;
+// older exports hold raw ssh_config text and are written as-is.
+func buildHostBlock(h SSHHostEntry, home string, parsedValues bool) string {
+	arg := func(v string) string {
+		if parsedValues {
+			return sshArg(v)
+		}
+		return v
+	}
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Host %s\n", h.Name))
+	name := h.Name
+	if parsedValues {
+		patterns := strings.Fields(h.Name)
+		for i, p := range patterns {
+			patterns[i] = sshArg(p)
+		}
+		name = strings.Join(patterns, " ")
+	}
+	b.WriteString(fmt.Sprintf("Host %s\n", name))
 	if h.Hostname != "" {
-		b.WriteString(fmt.Sprintf("  Hostname %s\n", h.Hostname))
+		b.WriteString(fmt.Sprintf("  Hostname %s\n", arg(h.Hostname)))
 	}
 	if h.User != "" {
-		b.WriteString(fmt.Sprintf("  User %s\n", h.User))
+		b.WriteString(fmt.Sprintf("  User %s\n", arg(h.User)))
 	}
 	if h.Port != "" {
 		b.WriteString(fmt.Sprintf("  Port %s\n", h.Port))
 	}
 	if h.IdentityFile != "" {
 		path := expandHome(h.IdentityFile, home)
-		b.WriteString(fmt.Sprintf("  IdentityFile %s\n", path))
+		b.WriteString(fmt.Sprintf("  IdentityFile %s\n", arg(path)))
 	}
 	proxyJump, proxyCommand := h.ProxyJump, h.ProxyCommand
 	// Older exports stored ProxyCommand in proxy_jump; a jump spec is one token plus an optional "# comment".
-	if f := strings.Fields(proxyJump); proxyCommand == "" && len(f) > 1 && !strings.HasPrefix(f[1], "#") {
+	if f := strings.Fields(proxyJump); !parsedValues && proxyCommand == "" && len(f) > 1 && !strings.HasPrefix(f[1], "#") {
 		proxyJump, proxyCommand = "", proxyJump
 	}
 	if proxyJump != "" {
@@ -240,6 +262,16 @@ func buildHostBlock(h SSHHostEntry, home string) string {
 		b.WriteString("  ForwardAgent yes\n")
 	}
 	return b.String()
+}
+
+// sshArg quotes v for ssh_config when ssh would otherwise split, unquote or
+// comment it; ssh strips the quotes again when it reads the file.
+func sshArg(v string) string {
+	// A leading '=' would be read as the keyword separator.
+	if !strings.ContainsAny(v, " \t\"'#\\") && !strings.HasPrefix(v, "=") {
+		return v
+	}
+	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(v) + `"`
 }
 
 // parseExistingHosts returns every pattern named on a Host line of the SSH

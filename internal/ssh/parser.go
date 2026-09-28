@@ -47,9 +47,17 @@ func ParseConfig(path string) ([]Host, error) {
 			continue
 		}
 		lower := strings.ToLower(key)
-		// ssh hands ProxyCommand to the shell verbatim; every other keyword parsed here ends at a "# comment".
-		if lower != "proxycommand" {
-			value = stripTrailingComment(value)
+		var args []string
+		switch lower {
+		case "proxycommand":
+			// ssh hands ProxyCommand to the shell verbatim.
+		case "proxyjump":
+			// OpenSSH's parse_jump reads the raw text: no unquoting, and any '#' starts a comment.
+			value, _, _ = strings.Cut(value, "#")
+			value = strings.TrimSpace(value)
+		default:
+			args = splitArgs(value)
+			value = strings.Join(args, " ")
 		}
 
 		switch lower {
@@ -59,7 +67,7 @@ func ParseConfig(path string) ([]Host, error) {
 			continue
 		case "host":
 			// "Host *" holds defaults and a comment-only Host matches nothing; neither is a host.
-			if value == "*" || value == "" {
+			if len(args) == 0 || args[0] == "" || len(args) == 1 && args[0] == "*" {
 				current = nil
 				continue
 			}
@@ -67,6 +75,10 @@ func ParseConfig(path string) ([]Host, error) {
 			current = &hosts[len(hosts)-1]
 			seen = map[string]bool{}
 			continue
+		}
+		// Every keyword parsed here other than Host takes a single argument.
+		if len(args) > 0 {
+			value = args[0]
 		}
 		if current == nil || value == "" {
 			continue
@@ -117,31 +129,43 @@ func parseKeyValue(line string) (string, string) {
 	return line[:idx], strings.TrimSpace(rest)
 }
 
-// stripTrailingComment cuts value at an unquoted '#' that starts a word, as
-// OpenSSH's argument splitter does; a '#' inside a word or quotes is kept.
-func stripTrailingComment(value string) string {
-	var quote byte
-	wordStart := true
-	for i := 0; i < len(value); i++ {
-		c := value[i]
-		switch {
-		case c == '\\' && i+1 < len(value) &&
-			(strings.IndexByte(`'"\`, value[i+1]) >= 0 || quote == 0 && value[i+1] == ' '):
-			i++ // an escaped quote or space neither toggles quoting nor ends the word
-			wordStart = false
+// splitArgs splits an ssh_config argument list as OpenSSH's argv_split does:
+// quotes group words and are removed, \' \" \\ and an unquoted "\ " are escapes,
+// and an unquoted '#' that starts a word begins a comment. Unlike ssh, it
+// accepts an unterminated quote, which runs to the end of the line.
+func splitArgs(s string) []string {
+	var args []string
+	i := 0
+	for i < len(s) {
+		if s[i] == ' ' || s[i] == '\t' {
+			i++
 			continue
-		case quote != 0:
-			if c == quote {
-				quote = 0
-			}
-		case c == '"' || c == '\'':
-			quote = c
-		case c == '#' && wordStart:
-			return strings.TrimSpace(value[:i])
 		}
-		wordStart = quote == 0 && (c == ' ' || c == '\t')
+		if s[i] == '#' {
+			break
+		}
+		var arg strings.Builder
+		var quote byte
+	word:
+		for ; i < len(s); i++ {
+			c := s[i]
+			switch {
+			case c == '\\' && i+1 < len(s) && (strings.IndexByte(`'"\`, s[i+1]) >= 0 || quote == 0 && s[i+1] == ' '):
+				i++
+				arg.WriteByte(s[i])
+			case quote == 0 && (c == ' ' || c == '\t'):
+				break word
+			case quote == 0 && (c == '"' || c == '\''):
+				quote = c
+			case quote != 0 && c == quote:
+				quote = 0
+			default:
+				arg.WriteByte(c)
+			}
+		}
+		args = append(args, arg.String())
 	}
-	return value
+	return args
 }
 
 // expandPath replaces ~ with the home directory.

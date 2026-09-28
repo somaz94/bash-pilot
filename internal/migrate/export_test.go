@@ -74,8 +74,8 @@ func TestExport_Basic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if cfg.Version != "1" {
-		t.Errorf("expected version 1, got %s", cfg.Version)
+	if cfg.Version != "2" {
+		t.Errorf("expected version 2, got %s", cfg.Version)
 	}
 	if cfg.SourceHome != tmpDir {
 		t.Errorf("expected source home %s, got %s", tmpDir, cfg.SourceHome)

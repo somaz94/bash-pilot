@@ -31,7 +31,7 @@ func Export(sshConfigPath string) (*MigrateConfig, error) {
 	}
 
 	cfg := &MigrateConfig{
-		Version:    "1",
+		Version:    FormatVersion,
 		Timestamp:  time.Now().UTC().Format(time.RFC3339),
 		SourceOS:   runtime.GOOS,
 		SourceHome: home,
