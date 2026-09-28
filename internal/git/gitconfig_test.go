@@ -358,65 +358,77 @@ func TestFindDuplicateSafeDirs(t *testing.T) {
 	}
 }
 
-func TestClean_DryRun(t *testing.T) {
+// cleanFixture returns a gitconfig with one live safe.directory, its duplicate,
+// and one stale entry, plus the live directory path.
+func cleanFixture(t *testing.T) (content, kept string) {
+	t.Helper()
 	dir := t.TempDir()
-	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[safe]
-	directory = /repo1
-	directory = /repo1
-	directory = /repo2
-`)
+	kept = testutil.MakeDir(t, dir, "repo1", 0o755)
+	stale := filepath.Join(dir, "gone")
+	content = "[user]\n\temail = test@example.com\n[safe]\n" +
+		"\tdirectory = " + kept + "\n" +
+		"\tdirectory = " + kept + "\n" +
+		"\tdirectory = " + stale + "\n"
+	return content, kept
+}
+
+func TestClean_DryRun(t *testing.T) {
+	original, _ := cleanFixture(t)
+	cfg := testutil.WriteFile(t, t.TempDir(), ".gitconfig", original)
 
 	result, err := Clean(cfg, true)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
 	if !result.DryRun {
 		t.Error("expected dry run mode")
 	}
-	if len(result.Removed) == 0 {
-		t.Error("expected entries to be marked for removal")
+	if len(result.Removed) != 2 {
+		t.Errorf("Removed = %v, want the duplicate and the stale entry", result.Removed)
 	}
 
-	data, _ := os.ReadFile(cfg)
-	if len(data) == 0 {
-		t.Error("file should not be empty")
+	got, err := os.ReadFile(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != original {
+		t.Errorf("dry run modified the file:\n%s", got)
+	}
+	if _, err := os.Stat(cfg + ".bak"); !os.IsNotExist(err) {
+		t.Errorf("dry run created a backup (stat err = %v)", err)
 	}
 }
 
 func TestClean_Actual(t *testing.T) {
-	dir := t.TempDir()
-	cfg := testutil.WriteFile(t, dir, ".gitconfig", `[user]
-	email = test@example.com
-[safe]
-	directory = /repo1
-	directory = /repo1
-	directory = /repo2
-`)
+	original, kept := cleanFixture(t)
+	cfg := testutil.WriteFile(t, t.TempDir(), ".gitconfig", original)
 
 	result, err := Clean(cfg, false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
 	if result.DryRun {
 		t.Error("should not be dry run")
 	}
-	if len(result.Removed) == 0 {
-		t.Error("expected entries to be removed")
-	}
-	if result.BackupDir == "" {
-		t.Error("expected backup path")
+	if len(result.Removed) != 2 {
+		t.Errorf("Removed = %v, want the duplicate and the stale entry", result.Removed)
 	}
 
-	if _, err := os.Stat(result.BackupDir); os.IsNotExist(err) {
-		t.Error("backup file should exist")
+	backup, err := os.ReadFile(result.BackupDir)
+	if err != nil {
+		t.Fatalf("backup: %v", err)
+	}
+	if string(backup) != original {
+		t.Error("backup does not match the original file")
 	}
 
-	data, _ := os.ReadFile(cfg)
-	content := string(data)
-	if content == "" {
-		t.Error("file should not be empty after clean")
+	got, err := os.ReadFile(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "[user]\n\temail = test@example.com\n[safe]\n\tdirectory = " + kept + "\n"
+	if string(got) != want {
+		t.Errorf("cleaned file =\n%s\nwant\n%s", got, want)
 	}
 }
 

@@ -20,12 +20,16 @@ func WriteFile(t *testing.T, dir, name, content string) string {
 	return path
 }
 
-// MakeDir creates parent/name with mode (callers vary it, e.g. 0700 vs 0755) and
-// returns the full path. It fails the test via t.Fatal on error.
+// MakeDir creates parent/name with exactly mode (callers vary it, e.g. 0700 vs
+// 0755) and returns the full path. It fails the test via t.Fatal on error.
 func MakeDir(t *testing.T, parent, name string, mode os.FileMode) string {
 	t.Helper()
 	path := filepath.Join(parent, name)
 	if err := os.MkdirAll(path, mode); err != nil {
+		t.Fatal(err)
+	}
+	// MkdirAll's mode is filtered by umask; permission tests need the exact bits.
+	if err := os.Chmod(path, mode); err != nil {
 		t.Fatal(err)
 	}
 	return path
