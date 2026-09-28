@@ -41,6 +41,8 @@ Verify installation:
 bash-pilot version
 ```
 
+<br/>
+
 ### Shell Completion (optional)
 
 Enable tab auto-completion for commands and flags:
@@ -77,6 +79,8 @@ bash-pilot init --force
 ```
 
 This analyzes your `~/.ssh/config`, auto-detects host groups (git, cloud, k8s, on-prem), and writes the result to `~/.config/bash-pilot/config.yaml`.
+
+<br/>
 
 ### Manual Setup
 
@@ -126,6 +130,8 @@ ssh:
     parallel: 10
 ```
 
+<br/>
+
 ### What Each Group Does
 
 | Group | Pattern | Matches |
@@ -143,32 +149,43 @@ ssh:
 
 Run these commands to verify everything works:
 
+<br/>
+
 ### 1. List hosts
 
 ```bash
 # Color output (default)
 bash-pilot ssh list
-
-# Expected output:
-# Git Services (3 hosts)
-#   github.com-personal       github.com               user1         id_rsa_personal
-#   github.com-work           github.com               user2         id_rsa_work
-#   git-codecommit...         git-codecommit...        AKID...       id_rsa_codecommit
-#
-# AWS Cloud (2 hosts)
-#   web-server                198.51.100.67            ec2-user      my-region.pem
-#   ci-server                 198.51.100.68            ec2-user      my-region.pem
-#
-# Kubernetes Cluster (4 hosts)
-#   k8s-control-01            10.0.1.10                admin         id_rsa_infra
-#   k8s-worker-01             10.0.1.11                admin         id_rsa_infra
-#   ...
-#
-# On-Premise Servers (5 hosts)
-#   nas                       192.168.1.10             user          id_rsa_office
-#   server1                   192.168.1.20             admin         id_rsa_office
-#   ...
 ```
+
+With the example config above, the output looks like this:
+
+```
+┌─ GIT (Git Services) ────────────────────────────────
+│   github.com-personal       github.com           user1           id_rsa_personal
+│   github.com-work           github.com           user2           id_rsa_work
+│   git-codecommit.my-region  git-codecommit.my-region.amazonaws.com AKIDEXAMPLE     id_rsa_codecommit
+└───────────────────────────────────────────────────────
+
+┌─ CLOUD (AWS Cloud) ─────────────────────────────────
+│   web-server                198.51.100.67        ec2-user        my-region.pem
+│   ci-server                 198.51.100.68        ec2-user        my-region.pem
+└───────────────────────────────────────────────────────
+
+┌─ K8S (Kubernetes Cluster) ──────────────────────────
+│   k8s-control-01            10.0.1.10            admin           id_rsa_infra
+│   k8s-worker-01             10.0.1.11            admin           id_rsa_infra
+│   ...
+└───────────────────────────────────────────────────────
+
+┌─ ON-PREM (On-Premise Servers) ──────────────────────
+│   nas                       192.168.1.10         user            id_rsa_office
+│   server1                   192.168.1.20         admin           id_rsa_office
+│   ...
+└───────────────────────────────────────────────────────
+```
+
+<br/>
 
 ### 2. Test connectivity
 
@@ -177,11 +194,13 @@ bash-pilot ssh list
 bash-pilot ssh ping
 
 # Ping only Kubernetes nodes
-bash-pilot ssh ping k8s-*
+bash-pilot ssh ping "k8s-*"
 
-# Ping only cloud instances
-bash-pilot ssh ping web-server ci-server
+# Ping only cloud instances (one glob pattern per call)
+bash-pilot ssh ping "*-server"
 ```
+
+<br/>
 
 ### 3. Security audit
 
@@ -193,14 +212,16 @@ bash-pilot ssh audit
 # ! some_key: permissions 0644 (should be 0600)
 ```
 
+<br/>
+
 ### 4. JSON output for scripting
 
 ```bash
 # Export host inventory
-bash-pilot ssh list -o json | jq '.[] | .name'
+bash-pilot ssh list -o json | jq -r '.[].hosts[].name'
 
 # Get unreachable hosts
-bash-pilot ssh ping -o json | jq '.[] | select(.reachable == false) | .name'
+bash-pilot ssh ping -o json | jq -r '.[] | select(.ok == false) | .host.name'
 ```
 
 <br/>
@@ -239,6 +260,8 @@ Without any config, bash-pilot auto-detects these groups by analyzing hostnames 
 
 ## Troubleshooting
 
+<br/>
+
 ### Config not loading
 
 ```bash
@@ -249,21 +272,27 @@ bash-pilot ssh list --config ~/.config/bash-pilot/config.yaml
 cat ~/.config/bash-pilot/config.yaml | python3 -c "import sys,yaml; yaml.safe_load(sys.stdin)"
 ```
 
+<br/>
+
 ### Hosts not appearing
 
 - Ensure `~/.ssh/config` exists and has valid `Host` blocks
 - Wildcard-only entries (`Host *`) are skipped by design
 - Check that host names match your group patterns
 
+<br/>
+
 ### Ping timeouts
 
-```bash
+```yaml
 # Increase timeout for slow networks
 # In config.yaml:
 ssh:
   ping:
     timeout: 10s
 ```
+
+<br/>
 
 ### Permission warnings in audit
 

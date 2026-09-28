@@ -81,12 +81,16 @@ git:
 
 The git module reads profiles directly from `~/.gitconfig` `includeIf` directives. No additional config is needed in `config.yaml`.
 
-### CLI Flags
+<br/>
+
+### Git Command Flags
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--gitconfig` | string | auto-detect | Path to gitconfig file |
 | `--dry-run` | bool | `false` | Preview changes without modifying (clean only) |
+
+<br/>
 
 ### How Profiles Are Detected
 

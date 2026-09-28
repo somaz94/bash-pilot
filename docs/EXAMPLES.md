@@ -6,6 +6,7 @@ Hands-on examples for bash-pilot.
 
 ## Table of Contents
 
+- [Init](#init)
 - [Quick Demo](#quick-demo)
 - [SSH List](#ssh-list)
 - [SSH Ping](#ssh-ping)
@@ -29,6 +30,8 @@ Hands-on examples for bash-pilot.
 
 ## Init
 
+<br/>
+
 ### Auto-generate config
 
 ```bash
@@ -42,6 +45,8 @@ Detected 4 groups from 14 hosts:
 
 Edit the config to customize group patterns and labels.
 ```
+
+<br/>
 
 ### Preview without overwriting
 
@@ -175,6 +180,8 @@ $ bash-pilot ssh audit
 
 ## Git Profiles
 
+<br/>
+
 ### List profiles with active indicator
 
 ```bash
@@ -214,6 +221,8 @@ $ bash-pilot git profiles -o json
 
 ## Git Doctor
 
+<br/>
+
 ### Diagnose gitconfig issues
 
 ```bash
@@ -230,6 +239,8 @@ $ bash-pilot git doctor
 
 ## Git Clean
 
+<br/>
+
 ### Dry run (preview)
 
 ```bash
@@ -239,6 +250,8 @@ $ bash-pilot git clean --dry-run
 !   safe.directory=/old/project (line 22, directory not found)
 └────────────────────────────────────────────────────
 ```
+
+<br/>
 
 ### Actual cleanup
 
@@ -255,67 +268,72 @@ $ bash-pilot git clean
 
 ## Env Check
 
+<br/>
+
 ### Shell environment health scan
 
 ```bash
 $ bash-pilot env check
 ┌─ ENV CHECK: editor ───────────────────────────────
-│ ✓ Editor: vim
+✓ Editor: vim
 └────────────────────────────────────────────────────
 
 ┌─ ENV CHECK: git ──────────────────────────────────
-│ ✓ git user.email: user@gmail.com
-│ ✓ git user.name: Demo User
+✓ git user.email: user@gmail.com
+✓ git user.name: Demo User
 └────────────────────────────────────────────────────
 
 ┌─ ENV CHECK: home ─────────────────────────────────
-│ ✓ /home/user/.ssh: OK
-│ ✓ /home/user/.config: OK
-│ ✓ /home/user/.bashrc: exists
+✓ /home/user/.ssh: OK
+✓ /home/user/.config: OK
+✓ /home/user/.bashrc: exists
 └────────────────────────────────────────────────────
 
 ┌─ ENV CHECK: shell ────────────────────────────────
-│ ✓ Shell: /bin/bash
-│ ✓ Bash version: GNU bash, version 5.2.15...
+✓ Shell: /bin/bash
+✓ Bash version: GNU bash, version 5.2.15...
 └────────────────────────────────────────────────────
 
 ┌─ ENV CHECK: ssh-agent ────────────────────────────
-│ ✓ ssh-agent: 2 key(s) loaded
+✓ ssh-agent: 2 key(s) loaded
 └────────────────────────────────────────────────────
 
 ┌─ ENV CHECK: tools ────────────────────────────────
-│ ✓ git: /usr/bin/git
-│ ✓ ssh: /usr/bin/ssh
-│ ✓ curl: /usr/bin/curl
-│ ✓ docker: /usr/bin/docker
-│ ! kubectl: not found
-│ ! helm: not found
+✓ git: /usr/bin/git
+✓ ssh: /usr/bin/ssh
+✓ curl: /usr/bin/curl
+✓ docker: /usr/bin/docker
+! kubectl: not found
+! helm: not found
+...
 └────────────────────────────────────────────────────
 
-✓ Summary: 12 ok, 2 warnings, 0 errors
+! Summary: 18 ok, 2 warnings, 0 errors
 ```
 
 <br/>
 
 ## Env Path
 
+<br/>
+
 ### PATH analysis
 
 ```bash
 $ bash-pilot env path
 ┌─ PATH ENTRIES (8 total) ──────────────────────────
-│ ✓ [ 1] /usr/local/bin
-│ ✓ [ 2] /usr/bin
-│ ✓ [ 3] /bin
-│ ✓ [ 4] /usr/sbin
-│ ✓ [ 5] /sbin
-│ ✓ [ 6] /home/user/.local/bin
-│ ✓ [ 7] /usr/local/go/bin
-│ ✗ [ 8] /old/removed/path
+✓ [ 1] /usr/local/bin
+✓ [ 2] /usr/bin
+✓ [ 3] /bin
+✓ [ 4] /usr/sbin
+✓ [ 5] /sbin
+✓ [ 6] /home/user/.local/bin
+✓ [ 7] /usr/local/go/bin
+✗ [ 8] /old/removed/path (not found)
 └────────────────────────────────────────────────────
 
 ┌─ MISSING DIRECTORIES ────────────────────────────
-│ ✗ /old/removed/path
+✗ /old/removed/path
 └────────────────────────────────────────────────────
 
 ! 8 entries, 0 duplicates, 1 missing
@@ -324,6 +342,8 @@ $ bash-pilot env path
 <br/>
 
 ## Prompt Init
+
+<br/>
 
 ### Generate and apply smart prompt
 
@@ -341,6 +361,8 @@ $ eval "$(bash-pilot prompt init --theme full)"
 user@host ~/project [prod-cluster:monitoring] (main *) ❯
 ```
 
+<br/>
+
 ### Persist in shell profile
 
 ```bash
@@ -353,28 +375,32 @@ source ~/.bashrc
 
 ## Prompt Show
 
+<br/>
+
 ### Preview prompt components
 
 ```bash
 $ bash-pilot prompt show
 ┌─ PROMPT COMPONENTS ──────────────────────────────
-│ ✓ user@host:   user@hostname
-│ ✓ directory:   ~/projects/bash-pilot
-│ ✓ git:         main *
+✓ user@host:   user@hostname
+✓ directory:   ~/projects/bash-pilot
+✓ git:         main *
 └────────────────────────────────────────────────────
 
 $ bash-pilot prompt show --theme full
 ┌─ PROMPT COMPONENTS ──────────────────────────────
-│ ✓ user@host:   user@hostname
-│ ✓ directory:   ~/projects/bash-pilot
-│ ✓ git:         main *
-│ ✓ k8s:         prod-cluster:monitoring
+✓ user@host:   user@hostname
+✓ directory:   ~/projects/bash-pilot
+✓ git:         main *
+✓ k8s:         prod-cluster:monitoring
 └────────────────────────────────────────────────────
 ```
 
 <br/>
 
 ## Snapshot
+
+<br/>
 
 ### Capture environment snapshot
 
@@ -388,6 +414,8 @@ $ cat my-env.json | jq '.tools[] | .name + " " + .version'
 "go go1.22.0"
 "node v20.10.0"
 ```
+
+<br/>
 
 ### Preview snapshot summary
 
@@ -410,6 +438,8 @@ Captured:  2024-01-15T10:30:00Z
 
 ## Diff
 
+<br/>
+
 ### Compare environments
 
 ```bash
@@ -429,6 +459,8 @@ $ bash-pilot diff my-env.json
 ! 15 match, 1 changed, 2 missing, 1 new
 ```
 
+<br/>
+
 ### Filter by section
 
 ```bash
@@ -438,6 +470,8 @@ $ bash-pilot diff my-env.json --only ssh
 # Compare only git and tools
 $ bash-pilot diff my-env.json --only git,tools
 ```
+
+<br/>
 
 ### JSON diff for CI
 
@@ -449,6 +483,8 @@ bash-pilot diff baseline.json -o json | jq '.summary.mismatch + .summary.missing
 <br/>
 
 ## Setup
+
+<br/>
 
 ### Preview install plan
 
@@ -466,6 +502,8 @@ $ bash-pilot setup teammate-env.json --dry-run
 Run without --dry-run to install.
 ```
 
+<br/>
+
 ### Install missing tools
 
 ```bash
@@ -480,6 +518,8 @@ $ bash-pilot setup teammate-env.json
 ✓ 4 installed, 0 skipped, 0 failed
 ```
 
+<br/>
+
 ### Install only specific categories
 
 ```bash
@@ -489,6 +529,8 @@ $ bash-pilot setup teammate-env.json --only tools
 # Install only missing brew packages
 $ bash-pilot setup teammate-env.json --only brew
 ```
+
+<br/>
 
 ### Onboarding workflow
 
@@ -507,6 +549,8 @@ bash-pilot setup team-baseline.json
 
 ## Migrate Export
 
+<br/>
+
 ### Export config for migration
 
 ```bash
@@ -517,6 +561,8 @@ $ cat my-config.json | jq '.ssh.hosts[].name'
 "server1"
 "k8s-control-01"
 ```
+
+<br/>
 
 ### Check what will be exported
 
@@ -536,6 +582,8 @@ $ bash-pilot migrate export | jq '{
 <br/>
 
 ## Migrate Import
+
+<br/>
 
 ### Preview import on new machine
 
@@ -558,6 +606,8 @@ $ bash-pilot migrate import my-config.json --dry-run
 Run without --dry-run to apply.
 ```
 
+<br/>
+
 ### Import only specific sections
 
 ```bash
@@ -567,6 +617,8 @@ $ bash-pilot migrate import my-config.json --only ssh
 # Import only Git profiles
 $ bash-pilot migrate import my-config.json --only git
 ```
+
+<br/>
 
 ### Full machine migration workflow
 
@@ -586,31 +638,36 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519
 
 ## Doctor
 
+<br/>
+
 ### Full system diagnostics
+
+Abridged: `doctor` prints every env category that `env check` prints.
 
 ```bash
 $ bash-pilot doctor
 ┌─ DOCTOR: SSH ─────────────────────────────────────
-│ ✓ id_rsa_personal: used by 1 host(s)
-│ ! id_rsa_office: used by 14 hosts (consider per-host keys)
-│ ✓ id_rsa_personal: permissions OK (0600)
-│ ✓ id_rsa_office: permissions OK (0600)
+✓ id_rsa_personal: used by 1 host(s)
+! id_rsa_office: used by 14 hosts (consider per-host keys)
+✓ id_rsa_personal: permissions OK (0600)
+✓ id_rsa_office: permissions OK (0600)
 └────────────────────────────────────────────────────
 
 ┌─ DOCTOR: GIT ─────────────────────────────────────
-│ ✓ No issues found in gitconfig
+✓ No issues found in gitconfig
 └────────────────────────────────────────────────────
 
 ┌─ DOCTOR: ENV (SHELL) ─────────────────────────────
-│ ✓ Shell: /bin/bash
-│ ✓ Bash version: GNU bash, version 5.2.15...
+✓ Shell: /bin/bash
+✓ Bash version: GNU bash, version 5.2.15...
 └────────────────────────────────────────────────────
 
 ┌─ DOCTOR: ENV (TOOLS) ─────────────────────────────
-│ ✓ git: /usr/bin/git
-│ ✓ ssh: /usr/bin/ssh
-│ ✓ curl: /usr/bin/curl
-│ ! kubectl: not found
+✓ git: /usr/bin/git
+✓ ssh: /usr/bin/ssh
+✓ curl: /usr/bin/curl
+! kubectl: not found
+...
 └────────────────────────────────────────────────────
 
 ! Total: 2 issue(s) — SSH: 1, Git: 0, Env: 1
