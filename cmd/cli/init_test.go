@@ -1,57 +1,75 @@
 package cli
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func TestInitCmd_GeneratesConfig(t *testing.T) {
-	tmpDir := t.TempDir()
-	sshConfig := filepath.Join(tmpDir, "ssh_config")
-	content := `Host github.com-personal
-  Hostname github.com
-  User git
-  IdentityFile ~/.ssh/id_rsa_personal
-
-Host web-server
-  Hostname 198.51.100.67
-  User ec2-user
-
-Host k8s-control-01
-  Hostname 10.0.1.10
-  User admin
-
-Host nas
-  Hostname 192.168.1.10
-  User user
-`
-	if err := os.WriteFile(sshConfig, []byte(content), 0644); err != nil {
+// captureStdout runs fn with os.Stdout redirected, since init prints via fmt.Printf.
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+	r, w, err := os.Pipe()
+	if err != nil {
 		t.Fatal(err)
 	}
+	orig := os.Stdout
+	os.Stdout = w
+	defer func() { os.Stdout = orig }()
+	// Drain concurrently so output larger than the pipe buffer cannot block fn.
+	done := make(chan string)
+	go func() {
+		defer func() { _ = r.Close() }()
+		var buf bytes.Buffer
+		_, _ = io.Copy(&buf, r)
+		done <- buf.String()
+	}()
+	fn()
+	_ = w.Close()
+	return <-done
+}
 
-	cfgDir := filepath.Join(tmpDir, ".config", "bash-pilot")
-	cfgPath := filepath.Join(cfgDir, "config.yaml")
-
-	rootCmd.SetArgs([]string{"init", "--config", sshConfig})
-
-	// init writes under os.UserHomeDir, so only the command wiring is asserted here.
-	cmd, _, err := rootCmd.Find([]string{"init"})
-	if err != nil {
-		t.Fatalf("init command not found: %v", err)
+func TestInitCmd_Run(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	sshCfg := filepath.Join(t.TempDir(), "ssh_config")
+	hosts := "Host k8s-control-01\n  Hostname 192.0.2.10\nHost k8s-compute-01\n  Hostname 192.0.2.11\nHost k8s-compute-02\n  Hostname 192.0.2.12\n"
+	if err := os.WriteFile(sshCfg, []byte(hosts), 0o600); err != nil {
+		t.Fatal(err)
 	}
-	if cmd.Use != "init" {
-		t.Errorf("expected 'init', got %q", cmd.Use)
+	bpCfg := filepath.Join(t.TempDir(), "bp.yaml")
+	if err := os.WriteFile(bpCfg, []byte("ssh:\n  config_file: "+sshCfg+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = initCmd.Flags().Set("force", "false")
+		rootCmd.SetArgs(nil)
+		cfgFile, appCfg = "", nil
+		initCmd.SilenceUsage = false
+	})
+
+	run := func(args ...string) string {
+		return captureStdout(t, func() {
+			rootCmd.SetArgs(append([]string{"init", "--config", bpCfg}, args...))
+			if err := rootCmd.Execute(); err != nil {
+				t.Fatalf("init %v: %v", args, err)
+			}
+		})
 	}
 
-	f := cmd.Flags().Lookup("force")
-	if f == nil {
-		t.Error("--force flag not found")
+	first := run()
+	if !strings.Contains(first, "k8s        3 hosts") {
+		t.Errorf("first run should count 3 hosts for one k8s-* pattern:\n%s", first)
 	}
-
-	if _, err := os.Stat(cfgPath); err == nil {
-		t.Error("config should not exist yet")
+	if second := run(); !strings.Contains(second, "Use --force to overwrite.") {
+		t.Errorf("second run should suggest --force:\n%s", second)
+	}
+	if forced := run("--force"); strings.Contains(forced, "Use --force") {
+		t.Errorf("--force run should not suggest --force:\n%s", forced)
 	}
 }
 

@@ -68,16 +68,14 @@ var initCmd = &cobra.Command{
 		cfgDir := filepath.Join(home, ".config", "bash-pilot")
 		cfgPath := filepath.Join(cfgDir, "config.yaml")
 
-		if _, err := os.Stat(cfgPath); err == nil {
+		force, _ := cmd.Flags().GetBool("force")
+		if _, err := os.Stat(cfgPath); err == nil && !force {
 			fmt.Printf("Config already exists: %s\n", cfgPath)
 			fmt.Println("Use --force to overwrite.")
-			force, _ := cmd.Flags().GetBool("force")
-			if !force {
-				fmt.Println("\nGenerated config (preview):")
-				fmt.Println("---")
-				fmt.Print(string(data))
-				return nil
-			}
+			fmt.Println("\nGenerated config (preview):")
+			fmt.Println("---")
+			fmt.Print(string(data))
+			return nil
 		}
 
 		if err := os.MkdirAll(cfgDir, config.PermConfigDir); err != nil {
@@ -90,8 +88,10 @@ var initCmd = &cobra.Command{
 
 		fmt.Printf("Config generated: %s\n", cfgPath)
 		fmt.Printf("Detected %d groups from %d hosts:\n", len(cfg.SSH.Groups), len(hosts))
-		for name, group := range cfg.SSH.Groups {
-			fmt.Printf("  %-10s %d hosts\n", name, len(group.Pattern))
+		for _, g := range groups {
+			if len(g.Hosts) > 0 {
+				fmt.Printf("  %-10s %d hosts\n", g.Name, len(g.Hosts))
+			}
 		}
 		fmt.Println("\nEdit the config to customize group patterns and labels.")
 

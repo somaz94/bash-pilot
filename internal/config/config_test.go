@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -131,9 +133,47 @@ func TestLoad_InvalidYAML(t *testing.T) {
 }
 
 func TestLoad_DefaultPath(t *testing.T) {
-	// Empty path reads the real ~/.config/bash-pilot/config.yaml, which may exist; only no-panic is checked.
-	_, err := Load("")
-	if err == nil {
-		t.Log("default config exists (unexpected but not an error)")
+	// Isolated HOME so the empty-path branch never reads the developer's real config.
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	if _, err := Load(""); !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("Load(\"\") with no default file: err = %v, want fs.ErrNotExist", err)
+	}
+
+	dir := filepath.Join(home, ".config", "bash-pilot")
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "config.yaml"), []byte("ssh:\n  ping:\n    parallel: 3\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load("")
+	if err != nil {
+		t.Fatalf("Load(\"\") with default file: %v", err)
+	}
+	if cfg.SSH.Ping.Parallel != 3 {
+		t.Errorf("Parallel = %d, want 3 from the default path", cfg.SSH.Ping.Parallel)
+	}
+}
+
+func TestLoad_NoHome(t *testing.T) {
+	t.Setenv("HOME", "")
+	if _, err := Load(""); err == nil {
+		t.Fatal("expected an error when HOME is unset")
+	}
+}
+
+func TestLoad_ExplicitZeroUsesDefaults(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(cfgPath, []byte("ssh:\n  ping:\n    timeout: 0s\n    parallel: 0\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(cfgPath)
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if cfg.SSH.Ping.Timeout != 5*time.Second || cfg.SSH.Ping.Parallel != 10 {
+		t.Errorf("ping = %+v, want timeout 5s and parallel 10", cfg.SSH.Ping)
 	}
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -83,7 +84,7 @@ func Load(path string) (*Config, error) {
 
 	cfg := Default()
 	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse %s: %w", path, err)
 	}
 
 	// Default() covers omitted keys; this catches an explicit "0s" / 0 in the file.

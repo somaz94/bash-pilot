@@ -26,13 +26,11 @@ var doctorCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		f := report.NewFormatter(os.Stdout, output, noColor)
 
-		var sshResult ssh.AuditResult
 		configFile := ""
 		if appCfg != nil {
 			configFile = appCfg.SSH.ConfigFile
 		}
-		hosts, _ := ssh.ParseConfig(configFile)
-		sshResult = ssh.Audit(hosts)
+		sshResult := auditSSHConfig(configFile)
 
 		gitResult, _ := git.Doctor(resolveGitConfigPath())
 
@@ -101,6 +99,20 @@ var doctorCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// auditSSHConfig reports an unreadable SSH config as a finding, as git.Doctor
+// does for gitconfig, instead of auditing an empty host list.
+func auditSSHConfig(path string) ssh.AuditResult {
+	hosts, err := ssh.ParseConfig(path)
+	if err != nil {
+		return ssh.AuditResult{Findings: []ssh.AuditFinding{{
+			Severity: ssh.SeverityFail,
+			Key:      "config",
+			Message:  fmt.Sprintf("Cannot read SSH config: %s", err),
+		}}}
+	}
+	return ssh.Audit(hosts)
 }
 
 func init() {
