@@ -223,8 +223,16 @@ func buildHostBlock(h SSHHostEntry, home string) string {
 		path := expandHome(h.IdentityFile, home)
 		b.WriteString(fmt.Sprintf("  IdentityFile %s\n", path))
 	}
-	if h.ProxyJump != "" {
-		b.WriteString(fmt.Sprintf("  ProxyJump %s\n", h.ProxyJump))
+	proxyJump, proxyCommand := h.ProxyJump, h.ProxyCommand
+	// Older exports stored ProxyCommand in proxy_jump; a jump spec is one token plus an optional "# comment".
+	if f := strings.Fields(proxyJump); proxyCommand == "" && len(f) > 1 && !strings.HasPrefix(f[1], "#") {
+		proxyJump, proxyCommand = "", proxyJump
+	}
+	if proxyJump != "" {
+		b.WriteString(fmt.Sprintf("  ProxyJump %s\n", proxyJump))
+	}
+	if proxyCommand != "" {
+		b.WriteString(fmt.Sprintf("  ProxyCommand %s\n", proxyCommand))
 	}
 	if h.ForwardAgent {
 		b.WriteString("  ForwardAgent yes\n")
@@ -272,7 +280,8 @@ func addIncludeIf(home string, p GitProfileExport) error {
 		dir += "/"
 	}
 
-	checkStr := fmt.Sprintf("gitdir:%s", dir)
+	// The closing quote stops a nested "gitdir:~/work/sub/" from matching "gitdir:~/work/".
+	checkStr := fmt.Sprintf("gitdir:%s\"", dir)
 	if strings.Contains(content, checkStr) {
 		return nil
 	}

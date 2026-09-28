@@ -106,8 +106,8 @@ Host proxy-host
 	}
 
 	h2 := hosts[1]
-	if h2.ProxyJump != "ssh -W %h:%p bastion" {
-		t.Errorf("ProxyCommand = %q", h2.ProxyJump)
+	if h2.ProxyCommand != "ssh -W %h:%p bastion" || h2.ProxyJump != "" {
+		t.Errorf("ProxyCommand = %q, ProxyJump = %q; want the command kept out of ProxyJump", h2.ProxyCommand, h2.ProxyJump)
 	}
 	if h2.ForwardAgent {
 		t.Error("ForwardAgent should be false for 'no'")
@@ -180,6 +180,12 @@ func TestParseKeyValue(t *testing.T) {
 		{"User=deploy", "User", "deploy"},
 		{"OnlyKeyword", "OnlyKeyword", ""},
 		{"Host\tmyhost", "Host", "myhost"},
+		{"Host = myserver", "Host", "myserver"},
+		{"Host \t= \tmyserver", "Host", "myserver"},
+		{"ProxyCommand ssh -o StrictHostKeyChecking=no -W %h:%p bastion", "ProxyCommand", "ssh -o StrictHostKeyChecking=no -W %h:%p bastion"},
+		{"ProxyCommand=ssh -o StrictHostKeyChecking=no -W %h:%p bastion", "ProxyCommand", "ssh -o StrictHostKeyChecking=no -W %h:%p bastion"},
+		{"OnlyKeyword ", "OnlyKeyword", ""},
+		{"=orphan", "", "orphan"},
 	}
 
 	for _, tt := range tests {
@@ -205,5 +211,57 @@ func TestExpandPath(t *testing.T) {
 	rel := expandPath("relative/path")
 	if rel != "relative/path" {
 		t.Errorf("expandPath(%q) = %q, should be unchanged", "relative/path", rel)
+	}
+}
+
+func TestParseConfig_ProxyCommandWithEquals(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "=orphan\nHost proxy-host\n  ProxyCommand ssh -o StrictHostKeyChecking=no -W %h:%p bastion\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 1 || hosts[0].ProxyCommand != "ssh -o StrictHostKeyChecking=no -W %h:%p bastion" {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+}
+
+func TestParseConfig_TildePath(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	if err := os.WriteFile(filepath.Join(home, "ssh_config"), []byte("Host a\n  Hostname 192.0.2.1\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig("~/ssh_config")
+	if err != nil {
+		t.Fatalf("ParseConfig(~/ssh_config): %v", err)
+	}
+	if len(hosts) != 1 || hosts[0].Name != "a" {
+		t.Errorf("hosts = %+v", hosts)
+	}
+}
+
+func TestParseConfig_FirstProxyDirectiveWins(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host cmd-first\n  ProxyCommand ssh -W %h:%p b1\n  ProxyJump b2\n" +
+		"Host jump-first\n  ProxyJump b3\n  ProxyCommand ssh -W %h:%p b4\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 2 {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	if h := hosts[0]; h.ProxyCommand != "ssh -W %h:%p b1" || h.ProxyJump != "" {
+		t.Errorf("cmd-first: ProxyCommand = %q, ProxyJump = %q", h.ProxyCommand, h.ProxyJump)
+	}
+	if h := hosts[1]; h.ProxyJump != "b3" || h.ProxyCommand != "" {
+		t.Errorf("jump-first: ProxyJump = %q, ProxyCommand = %q", h.ProxyJump, h.ProxyCommand)
 	}
 }

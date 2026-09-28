@@ -57,6 +57,7 @@ func exportSSH(cfg *MigrateConfig, sshConfigPath, home string) {
 			Port:         h.Port,
 			IdentityFile: normalizePath(h.IdentityFile, home),
 			ProxyJump:    h.ProxyJump,
+			ProxyCommand: h.ProxyCommand,
 			ForwardAgent: h.ForwardAgent,
 		}
 		cfg.SSH.Hosts = append(cfg.SSH.Hosts, entry)
@@ -142,8 +143,8 @@ func exportGit(cfg *MigrateConfig, home string) {
 			Directory: dir,
 		}
 
-		// "path = " must sit within 4 lines of the header; a new section ends the search.
-		for j := i + 1; j < len(lines) && j < i+5; j++ {
+		// The next section header ends the search for this includeIf's "path = ".
+		for j := i + 1; j < len(lines); j++ {
 			t := strings.TrimSpace(lines[j])
 			if strings.HasPrefix(t, "path = ") {
 				includePath := strings.TrimPrefix(t, "path = ")
@@ -183,7 +184,7 @@ func normalizePath(path, home string) string {
 	if strings.HasPrefix(path, "~/") {
 		return path
 	}
-	if strings.HasPrefix(path, home) {
+	if path == home || strings.HasPrefix(path, home+"/") {
 		return "~" + path[len(home):]
 	}
 	return path

@@ -480,6 +480,30 @@ func TestBuildHostBlock(t *testing.T) {
 	}
 }
 
+func TestBuildHostBlock_ProxyCommand(t *testing.T) {
+	tests := []struct {
+		name  string
+		entry SSHHostEntry
+		want  string
+	}{
+		{"proxy_command field", SSHHostEntry{Name: "a", ProxyCommand: "ssh -W %h:%p bastion"}, "  ProxyCommand ssh -W %h:%p bastion\n"},
+		{"legacy command in proxy_jump", SSHHostEntry{Name: "a", ProxyJump: "ssh -W %h:%p bastion"}, "  ProxyCommand ssh -W %h:%p bastion\n"},
+		{"jump spec stays ProxyJump", SSHHostEntry{Name: "a", ProxyJump: "admin@bastion:2222"}, "  ProxyJump admin@bastion:2222\n"},
+		{"jump spec with trailing comment stays ProxyJump", SSHHostEntry{Name: "a", ProxyJump: "bastion # office"}, "  ProxyJump bastion # office\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			block := buildHostBlock(tt.entry, "/home/user")
+			if !strings.Contains(block, tt.want) {
+				t.Errorf("block =\n%s\nwant line %q", block, tt.want)
+			}
+			if strings.Count(block, "Proxy") != 1 {
+				t.Errorf("block should carry exactly one proxy directive:\n%s", block)
+			}
+		})
+	}
+}
+
 func TestImport_OnlySSH(t *testing.T) {
 	origUserHomeDir := userHomeDir
 	origWriteFile := writeFile
@@ -581,5 +605,20 @@ func TestImport_OnlyGit(t *testing.T) {
 	}
 	if !result.GitConfigWritten {
 		t.Error("expected git config written with --only git")
+	}
+}
+
+func TestAddIncludeIf_ParentOfExisting(t *testing.T) {
+	home := t.TempDir()
+	existing := "[includeIf \"gitdir:~/work/sub/\"]\n\tpath = ~/.gitconfig-sub\n"
+	if err := os.WriteFile(filepath.Join(home, ".gitconfig"), []byte(existing), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := addIncludeIf(home, GitProfileExport{Name: "work", Directory: "~/work"}); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := os.ReadFile(filepath.Join(home, ".gitconfig"))
+	if !strings.Contains(string(got), "[includeIf \"gitdir:~/work/\"]") {
+		t.Errorf("includeIf for ~/work/ was not written:\n%s", got)
 	}
 }

@@ -32,13 +32,19 @@ func Audit(hosts []Host) AuditResult {
 	var result AuditResult
 
 	keyUsage := make(map[string][]string)
+	var keyOrder []string // config order, so repeated runs print the same report
 	for _, h := range hosts {
-		if h.IdentityFile != "" {
-			keyUsage[h.IdentityFile] = append(keyUsage[h.IdentityFile], h.Name)
+		if h.IdentityFile == "" {
+			continue
 		}
+		if _, seen := keyUsage[h.IdentityFile]; !seen {
+			keyOrder = append(keyOrder, h.IdentityFile)
+		}
+		keyUsage[h.IdentityFile] = append(keyUsage[h.IdentityFile], h.Name)
 	}
 
-	for keyFile, hostNames := range keyUsage {
+	for _, keyFile := range keyOrder {
+		hostNames := keyUsage[keyFile]
 		keyName := filepath.Base(keyFile)
 		if len(hostNames) > 3 {
 			result.Findings = append(result.Findings, AuditFinding{
@@ -95,7 +101,7 @@ func Audit(hosts []Host) AuditResult {
 			result.Findings = append(result.Findings, AuditFinding{
 				Severity: SeverityWarn,
 				Key:      h.Name,
-				Message:  "no IdentityFile specified (will use default keys)",
+				Message:  fmt.Sprintf("%s: no IdentityFile specified (will use default keys)", h.Name),
 			})
 		}
 	}

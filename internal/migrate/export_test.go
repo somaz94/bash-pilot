@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/somaz94/bash-pilot/internal/ssh"
+	"github.com/somaz94/bash-pilot/internal/testutil"
 )
 
 func TestExport_Basic(t *testing.T) {
@@ -41,7 +42,8 @@ func TestExport_Basic(t *testing.T) {
 			{Name: "github.com-personal", Hostname: "github.com", User: "git",
 				IdentityFile: tmpDir + "/.ssh/id_ed25519"},
 			{Name: "server1", Hostname: "192.168.1.10", User: "deploy",
-				Port: "2222", IdentityFile: tmpDir + "/.ssh/id_rsa_work"},
+				Port: "2222", IdentityFile: tmpDir + "/.ssh/id_rsa_work",
+				ProxyCommand: "ssh -W %h:%p bastion"},
 		}, nil
 	}
 
@@ -87,6 +89,9 @@ func TestExport_Basic(t *testing.T) {
 	}
 	if cfg.SSH.Hosts[1].Port != "2222" {
 		t.Errorf("expected port 2222, got %s", cfg.SSH.Hosts[1].Port)
+	}
+	if h := cfg.SSH.Hosts[1]; h.ProxyCommand != "ssh -W %h:%p bastion" || h.ProxyJump != "" {
+		t.Errorf("ProxyCommand = %q, ProxyJump = %q; want the command exported as proxy_command", h.ProxyCommand, h.ProxyJump)
 	}
 
 	if len(cfg.SSH.Keys) != 1 {
@@ -171,6 +176,8 @@ func TestNormalizePath(t *testing.T) {
 		{"/etc/ssh/key", "/Users/user", "/etc/ssh/key"},
 		{"", "/Users/user", ""},
 		{"/Users/user/.ssh/key", "", "/Users/user/.ssh/key"},
+		{"/home/alice/x", "/home/al", "/home/alice/x"},
+		{"/home/al", "/home/al", "~"},
 	}
 
 	for _, tt := range tests {
@@ -273,5 +280,20 @@ func TestExport_GitProfileWithTildePath(t *testing.T) {
 	}
 	if cfg.Git.Profiles[0].Email != "me@gmail.com" {
 		t.Errorf("expected email, got %s", cfg.Git.Profiles[0].Email)
+	}
+}
+
+func TestExportGit_PathAfterComments(t *testing.T) {
+	home := t.TempDir()
+	testutil.WriteFile(t, home, ".gitconfig-work", "[user]\n\temail = work@example.com\n")
+	testutil.WriteFile(t, home, ".gitconfig", "[includeIf \"gitdir:~/work/\"]\n\t# work identity\n\t# signed commits\n\t# see wiki\n\t# owner: platform\n\tpath = ~/.gitconfig-work\n")
+	origRun := runCommand
+	t.Cleanup(func() { runCommand = origRun })
+	runCommand = func(string, ...string) ([]byte, error) { return nil, fmt.Errorf("no git") }
+
+	cfg := &MigrateConfig{}
+	exportGit(cfg, home)
+	if len(cfg.Git.Profiles) != 1 || cfg.Git.Profiles[0].Email != "work@example.com" {
+		t.Fatalf("profiles = %+v", cfg.Git.Profiles)
 	}
 }

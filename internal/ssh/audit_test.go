@@ -34,8 +34,11 @@ func TestAudit_KeyPermissions(t *testing.T) {
 	tmpDir := t.TempDir()
 	keyPath := filepath.Join(tmpDir, "test_key")
 
-	// 0644 relies on umask 022; a 077 umask yields 0600 and this test fails.
-	if err := os.WriteFile(keyPath, []byte("fake-key"), 0644); err != nil {
+	if err := os.WriteFile(keyPath, []byte("fake-key"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	// Chmod, not WriteFile's mode, so the result does not depend on umask.
+	if err := os.Chmod(keyPath, 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -87,10 +90,34 @@ func TestAudit_NoIdentityFile(t *testing.T) {
 	for _, f := range result.Findings {
 		if f.Severity == SeverityWarn && f.Key == "server1" {
 			found = true
+			if want := "server1: no IdentityFile specified (will use default keys)"; f.Message != want {
+				t.Errorf("Message = %q, want %q", f.Message, want)
+			}
 			break
 		}
 	}
 	if !found {
 		t.Error("expected warning about missing IdentityFile")
+	}
+}
+
+func TestAudit_KeyFindingsFollowConfigOrder(t *testing.T) {
+	hosts := []Host{
+		{Name: "h1", IdentityFile: "/nonexistent/k1"},
+		{Name: "h2", IdentityFile: "/nonexistent/k2"},
+		{Name: "h3", IdentityFile: "/nonexistent/k3"},
+		{Name: "h4", IdentityFile: "/nonexistent/k4"},
+	}
+	var got []string
+	for _, f := range Audit(hosts).Findings {
+		if f.Severity == SeverityOK {
+			got = append(got, f.Key)
+		}
+	}
+	want := []string{"k1", "k2", "k3", "k4"}
+	for i := range want {
+		if i >= len(got) || got[i] != want[i] {
+			t.Fatalf("usage findings order = %v, want %v", got, want)
+		}
 	}
 }

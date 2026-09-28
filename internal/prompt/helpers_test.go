@@ -271,3 +271,13 @@ func TestGetK8sContext_NamespaceError(t *testing.T) {
 		t.Errorf("expected my-cluster (no namespace), got %s", got)
 	}
 }
+
+func TestGetCurrentDir_HomeBoundary(t *testing.T) {
+	origGetwd := getwd
+	t.Cleanup(func() { getwd = origGetwd })
+	t.Setenv("HOME", "/home/al")
+	getwd = func() (string, error) { return "/home/alice/x", nil }
+	if got := getCurrentDir(); got != "/home/alice/x" {
+		t.Errorf("getCurrentDir() = %q, want unchanged", got)
+	}
+}

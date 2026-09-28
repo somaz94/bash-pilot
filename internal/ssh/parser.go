@@ -15,6 +15,8 @@ func ParseConfig(path string) ([]Host, error) {
 			return nil, err
 		}
 		path = filepath.Join(home, ".ssh", "config")
+	} else {
+		path = expandPath(path)
 	}
 
 	f, err := os.Open(path)
@@ -72,9 +74,14 @@ func ParseConfig(path string) ([]Host, error) {
 			if current != nil {
 				current.Port = value
 			}
-		case "proxycommand", "proxyjump":
-			if current != nil {
+		case "proxyjump":
+			// ssh_config(5): whichever of ProxyJump / ProxyCommand comes first wins.
+			if current != nil && current.ProxyCommand == "" {
 				current.ProxyJump = value
+			}
+		case "proxycommand":
+			if current != nil && current.ProxyJump == "" {
+				current.ProxyCommand = value
 			}
 		case "forwardagent":
 			if current != nil {
@@ -86,23 +93,17 @@ func ParseConfig(path string) ([]Host, error) {
 	return hosts, scanner.Err()
 }
 
-// parseKeyValue splits "Key Value" or "Key=Value" into key and value.
+// parseKeyValue splits an ssh_config line into keyword and argument. Per
+// ssh_config(5) the keyword ends at the first whitespace or '=', and the
+// separator is whitespace with at most one '='; later '=' belong to the value.
 func parseKeyValue(line string) (string, string) {
-	if idx := strings.Index(line, "="); idx > 0 {
-		return strings.TrimSpace(line[:idx]), strings.TrimSpace(line[idx+1:])
+	idx := strings.IndexAny(line, " \t=")
+	if idx == -1 {
+		return line, ""
 	}
-
-	parts := strings.SplitN(line, " ", 2)
-	if len(parts) == 2 && strings.TrimSpace(parts[1]) != "" {
-		return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-	}
-
-	parts = strings.SplitN(line, "\t", 2)
-	if len(parts) == 2 && strings.TrimSpace(parts[1]) != "" {
-		return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
-	}
-
-	return line, ""
+	rest := strings.TrimLeft(line[idx:], " \t")
+	rest = strings.TrimPrefix(rest, "=")
+	return line[:idx], strings.TrimSpace(rest)
 }
 
 // expandPath replaces ~ with the home directory.

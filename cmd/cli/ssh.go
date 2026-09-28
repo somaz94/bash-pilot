@@ -127,8 +127,7 @@ var sshAuditCmd = &cobra.Command{
 		}
 
 		for _, finding := range result.Findings {
-			line := fmt.Sprintf("%s: %s", finding.Key, finding.Message)
-			f.Println(f.RenderSeverity(string(finding.Severity), line))
+			f.Println(f.RenderSeverity(string(finding.Severity), finding.Message))
 		}
 
 		return nil

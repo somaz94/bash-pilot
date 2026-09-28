@@ -24,6 +24,7 @@ type SSHHostEntry struct {
 	Port         string `json:"port,omitempty"`
 	IdentityFile string `json:"identity_file,omitempty"`
 	ProxyJump    string `json:"proxy_jump,omitempty"`
+	ProxyCommand string `json:"proxy_command,omitempty"`
 	ForwardAgent bool   `json:"forward_agent,omitempty"`
 }
 

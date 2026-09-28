@@ -43,7 +43,7 @@ func getCurrentDir() string {
 	if err != nil {
 		return dir
 	}
-	if strings.HasPrefix(dir, home) {
+	if dir == home || strings.HasPrefix(dir, home+"/") {
 		return "~" + dir[len(home):]
 	}
 	return dir
