@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.9.0](https://github.com/somaz94/bash-pilot/compare/v0.8.0...v0.9.0) (2026-09-28)
+
+### Bug Fixes
+
+- **ssh:** read ssh_config values the way ssh does and re-quote them on migrate import ([63d7a78](https://github.com/somaz94/bash-pilot/commit/63d7a78fa4df39588bf45862ea692ad439fc3a3f))
+- **ssh:** use the first value of a repeated ssh_config parameter ([3ca19e8](https://github.com/somaz94/bash-pilot/commit/3ca19e8b218467b206ec010c4d8e86d8773914fb))
+
+### Documentation
+
+- document the migrate export format version ([3a149e5](https://github.com/somaz94/bash-pilot/commit/3a149e5e92f76f94a9904dfb2fe982e9d90188c6))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.8.0](https://github.com/somaz94/bash-pilot/compare/v0.7.1...v0.8.0) (2026-09-28)
 
 ### Bug Fixes
