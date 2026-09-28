@@ -641,3 +641,95 @@ func TestFormatSummary(t *testing.T) {
 		}
 	}
 }
+
+func TestParseIncludeIfProfiles_SectionScoped(t *testing.T) {
+	tests := []struct {
+		name      string
+		gitconfig string
+		want      map[string]string // profile name -> email
+	}{
+		{
+			name: "basename is a substring of another include path",
+			gitconfig: `[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig-work
+[includeIf "gitdir:~/homework/"]
+	path = ~/.gitconfig-homework
+`,
+			want: map[string]string{"work": "work@example.com", "homework": "home@example.com"},
+		},
+		{
+			name: "plain include naming the profile is ignored",
+			gitconfig: `[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig-work
+[include]
+	path = ~/.gitconfig-work-extra
+`,
+			want: map[string]string{"work": "work@example.com"},
+		},
+		{
+			name: "path not named after the directory",
+			gitconfig: `[includeIf "gitdir:~/company/"]
+	path = ~/.gitconfig-work
+`,
+			want: map[string]string{"company": "work@example.com"},
+		},
+		{
+			name: "path without spaces around equals",
+			gitconfig: `[includeIf "gitdir:~/work/"]
+	path=~/.gitconfig-work
+`,
+			want: map[string]string{"work": "work@example.com"},
+		},
+		{
+			name: "missing include file leaves email empty",
+			gitconfig: `[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig-missing
+`,
+			want: map[string]string{"work": ""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			home := t.TempDir()
+			testutil.WriteFile(t, home, ".gitconfig-work", "[user]\n\temail = work@example.com\n")
+			testutil.WriteFile(t, home, ".gitconfig-homework", "[user]\n\temail = home@example.com\n")
+			testutil.WriteFile(t, home, ".gitconfig-work-extra", "[user]\n\temail = extra@example.com\n")
+
+			got := parseIncludeIfProfiles([]byte(tt.gitconfig), home)
+			if len(got) != len(tt.want) {
+				t.Fatalf("got %d profiles, want %d", len(got), len(tt.want))
+			}
+			for _, p := range got {
+				if want := tt.want[p.Name]; p.Email != want {
+					t.Errorf("profile %q email = %q, want %q", p.Name, p.Email, want)
+				}
+			}
+		})
+	}
+}
+
+func TestCaptureTools_KubectlClientVersion(t *testing.T) {
+	origLookPath, origRunCommand := lookPath, runCommand
+	t.Cleanup(func() { lookPath, runCommand = origLookPath, origRunCommand })
+
+	lookPath = func(file string) (string, error) {
+		if file == "kubectl" {
+			return "/usr/local/bin/kubectl", nil
+		}
+		return "", errNotFound
+	}
+	runCommand = func(name string, args ...string) ([]byte, error) {
+		// kubectl >= 1.28 rejects --short; only the plain --client form succeeds.
+		if name == "kubectl" && len(args) == 2 && args[0] == "version" && args[1] == "--client" {
+			return []byte("Client Version: v1.31.0\nKustomize Version: v5.4.2\n"), nil
+		}
+		return nil, errNotFound
+	}
+
+	snap := &Snapshot{}
+	captureTools(snap)
+
+	if len(snap.Tools) != 1 || snap.Tools[0].Version != "Client Version: v1.31.0" {
+		t.Fatalf("kubectl tool = %+v, want Version %q", snap.Tools, "Client Version: v1.31.0")
+	}
+}

@@ -129,7 +129,7 @@ func captureTools(snap *Snapshot) {
 		{"curl", "--version"},
 		{"make", "--version"},
 		{"docker", "--version"},
-		{"kubectl", "version --client --short"},
+		{"kubectl", "version --client"},
 		{"helm", "version --short"},
 		{"terraform", "--version"},
 		{"go", "version"},
@@ -187,11 +187,11 @@ func captureGit(snap *Snapshot) {
 }
 
 // parseIncludeIfProfiles returns one GitProfile per [includeIf "gitdir:..."]
-// section, with the email guessed from a path line naming the profile.
+// section, with the email read from the file its path key includes.
 func parseIncludeIfProfiles(data []byte, home string) []GitProfile {
 	var profiles []GitProfile
 	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
+	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
 		lower := strings.ToLower(trimmed)
 		if !strings.HasPrefix(lower, "[includeif \"gitdir:") {
@@ -212,20 +212,24 @@ func parseIncludeIfProfiles(data []byte, home string) []GitProfile {
 			Directory: dir,
 		}
 
-		// Heuristic: any "path = " line containing the profile name; the last match wins.
-		for _, l2 := range lines {
+		// Only this section's path keys apply; a later path overrides an earlier one, as in git.
+		for _, l2 := range lines[i+1:] {
 			t2 := strings.TrimSpace(l2)
-			if strings.HasPrefix(t2, "path = ") && strings.Contains(t2, name) {
-				includePath := strings.TrimPrefix(t2, "path = ")
-				includePath = expandHome(includePath, home)
-				incData, err := os.ReadFile(includePath)
-				if err == nil {
-					for _, il := range strings.Split(string(incData), "\n") {
-						it := strings.TrimSpace(il)
-						if strings.HasPrefix(it, "email = ") {
-							profile.Email = strings.TrimPrefix(it, "email = ")
-						}
-					}
+			if strings.HasPrefix(t2, "[") {
+				break
+			}
+			key, value, ok := strings.Cut(t2, "=")
+			if !ok || !strings.EqualFold(strings.TrimSpace(key), "path") {
+				continue
+			}
+			incData, err := os.ReadFile(expandHome(strings.TrimSpace(value), home))
+			if err != nil {
+				continue
+			}
+			for _, il := range strings.Split(string(incData), "\n") {
+				it := strings.TrimSpace(il)
+				if strings.HasPrefix(it, "email = ") {
+					profile.Email = strings.TrimPrefix(it, "email = ")
 				}
 			}
 		}
