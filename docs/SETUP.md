@@ -278,6 +278,9 @@ cat ~/.config/bash-pilot/config.yaml | python3 -c "import sys,yaml; yaml.safe_lo
 
 - Ensure `~/.ssh/config` exists and has valid `Host` blocks
 - Wildcard-only entries (`Host *`) are skipped by design
+- Hosts defined in files pulled in with `Include` are not listed; `Include` is not followed
+- Settings inside a `Match` block are ignored, since they belong to no single `Host`
+- A trailing `# comment` is ignored, as ssh does, except in `ProxyCommand`, which ssh passes to the shell as written
 - Check that host names match your group patterns
 
 <br/>
