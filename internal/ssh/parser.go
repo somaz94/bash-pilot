@@ -27,6 +27,7 @@ func ParseConfig(path string) ([]Host, error) {
 
 	var hosts []Host
 	var current *Host
+	var seen map[string]bool // parameters already set on current
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -55,47 +56,49 @@ func ParseConfig(path string) ([]Host, error) {
 		case "match":
 			// A Match block's settings are conditional and belong to no Host above it.
 			current = nil
+			continue
 		case "host":
 			// "Host *" holds defaults and a comment-only Host matches nothing; neither is a host.
 			if value == "*" || value == "" {
 				current = nil
 				continue
 			}
-			h := Host{
-				Name: value,
-			}
-			hosts = append(hosts, h)
+			hosts = append(hosts, Host{Name: value})
 			current = &hosts[len(hosts)-1]
-		case "hostname":
-			if current != nil {
-				current.Hostname = value
-			}
-		case "user":
-			if current != nil {
-				current.User = value
-			}
-		case "identityfile":
-			if current != nil {
-				current.IdentityFile = expandPath(value)
-			}
-		case "port":
-			if current != nil {
-				current.Port = value
-			}
-		case "proxyjump":
-			// ssh_config(5): whichever of ProxyJump / ProxyCommand comes first wins.
-			if current != nil && current.ProxyCommand == "" {
-				current.ProxyJump = value
-			}
-		case "proxycommand":
-			if current != nil && current.ProxyJump == "" {
-				current.ProxyCommand = value
-			}
-		case "forwardagent":
-			if current != nil {
-				current.ForwardAgent = strings.EqualFold(value, "yes")
-			}
+			seen = map[string]bool{}
+			continue
 		}
+		if current == nil || value == "" {
+			continue
+		}
+		// ssh_config(5): the first value obtained wins, and ProxyJump and ProxyCommand share one
+		// slot. IdentityFile is cumulative in ssh; its first entry, which ssh tries first, is kept.
+		slot := lower
+		if slot == "proxycommand" {
+			slot = "proxyjump"
+		}
+		if seen[slot] {
+			continue
+		}
+		switch lower {
+		case "hostname":
+			current.Hostname = value
+		case "user":
+			current.User = value
+		case "identityfile":
+			current.IdentityFile = expandPath(value)
+		case "port":
+			current.Port = value
+		case "proxyjump":
+			current.ProxyJump = value
+		case "proxycommand":
+			current.ProxyCommand = value
+		case "forwardagent":
+			current.ForwardAgent = strings.EqualFold(value, "yes")
+		default:
+			continue
+		}
+		seen[slot] = true
 	}
 
 	return hosts, scanner.Err()

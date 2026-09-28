@@ -336,3 +336,33 @@ func TestParseConfig_MatchEndsHostBlock(t *testing.T) {
 		t.Errorf("c.User = %q, want carol", hosts[1].User)
 	}
 }
+
+// Expected values match what `ssh -G` reports for the same block.
+func TestParseConfig_FirstValueWins(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host dup\n" +
+		"  HostName 192.0.2.1\n  HostName 192.0.2.2\n" +
+		"  User first\n  User second\n" +
+		"  Port 2201\n  Port 2202\n" +
+		"  IdentityFile /keys/a\n  IdentityFile /keys/b\n" +
+		"  ForwardAgent no\n  ForwardAgent yes\n" +
+		"  ProxyJump j1\n  ProxyJump j2\n  ProxyCommand nc %h %p\n" +
+		"Host next\n  User again\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 2 {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	want := Host{Name: "dup", Hostname: "192.0.2.1", User: "first", Port: "2201", IdentityFile: "/keys/a", ProxyJump: "j1"}
+	if hosts[0] != want {
+		t.Errorf("dup = %+v\nwant  %+v", hosts[0], want)
+	}
+	if hosts[1].User != "again" {
+		t.Errorf("next.User = %q; a new Host must start with no parameters set", hosts[1].User)
+	}
+}
