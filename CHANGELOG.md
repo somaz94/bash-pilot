@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.7.0](https://github.com/somaz94/bash-pilot/compare/v0.6.3...v0.7.0) (2026-09-28)
+
+### Bug Fixes
+
+- **cli:** fail on an unreadable --config, report an unreadable SSH config in doctor, and print errors once ([8534972](https://github.com/somaz94/bash-pilot/commit/8534972b1db95213f99aad686e29bddb4326d0da))
+- **snapshot:** scope includeIf email lookup to its own section and drop removed kubectl --short ([9481688](https://github.com/somaz94/bash-pilot/commit/94816886f751acdad7758072cd487878621623a7))
+- **ssh:** follow ssh_config(5) syntax, split ProxyCommand from ProxyJump, and stabilize audit output ([87d14c6](https://github.com/somaz94/bash-pilot/commit/87d14c6959507a376e5629087271797671ac17e0))
+
+### Documentation
+
+- document config fallback, ProxyCommand export, and prefixed audit messages ([eb2ff84](https://github.com/somaz94/bash-pilot/commit/eb2ff84a31b5bb9d5c186efcec04fbe0ef43d149))
+
+### Tests
+
+- make MakeDir umask-proof and assert exact gitconfig clean output ([63d394a](https://github.com/somaz94/bash-pilot/commit/63d394ab51adac3fd319ae215bd3bd6718701c0a))
+
+### Continuous Integration
+
+- retry mirror pushes on transient remote failures ([bfc0c0a](https://github.com/somaz94/bash-pilot/commit/bfc0c0a9da76b697f6ef43340b82bb409204e813))
+- drop the dead issue-close trigger from changelog generation ([fe726e7](https://github.com/somaz94/bash-pilot/commit/fe726e711828bef4f5b23eb3b67648c696d1dc66))
+
+### Chores
+
+- replace routable IPs, LAN-shaped octets and personal paths in examples and fixtures ([1e96fdd](https://github.com/somaz94/bash-pilot/commit/1e96fdd97d01f0bb5dd23ea75aa5f09337c38c78))
+- tighten remaining comments to their non-obvious why ([5bc33f4](https://github.com/somaz94/bash-pilot/commit/5bc33f496b0c31a99fd097070b41178e6d3fbcef))
+- trim stale and redundant comments in internal git, migrate and snapshot ([b2f4276](https://github.com/somaz94/bash-pilot/commit/b2f42764f43aea6770b4d05bf869886f6e9eca3c))
+- trim stale and redundant comments in internal ssh, env, prompt, report and config ([519a0e9](https://github.com/somaz94/bash-pilot/commit/519a0e97a2445c6ce273d7b768373064d5250a04))
+- trim stale and redundant comments in cmd/cli ([1302da2](https://github.com/somaz94/bash-pilot/commit/1302da23d3ca92edb7e6c199acfb6c9bdbce7df5))
+- trim stale and redundant comments in scripts ([f73b9c8](https://github.com/somaz94/bash-pilot/commit/f73b9c8939f43f778da1d89cafd2ec548f252806))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.6.3](https://github.com/somaz94/bash-pilot/compare/v0.6.2...v0.6.3) (2026-08-14)
 
 ### Bug Fixes
