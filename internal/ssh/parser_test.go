@@ -1,9 +1,11 @@
 package ssh
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -439,5 +441,83 @@ func TestParseConfig_EmptyArgumentsClaimNothing(t *testing.T) {
 	}
 	if len(hosts) != 1 || hosts[0].Name != "a" || hosts[0].User != "carol" {
 		t.Errorf("hosts = %+v, want only a with User carol", hosts)
+	}
+}
+
+// Expected values match `ssh -G`: yes/true and no/false are flags, and any other
+// value turns forwarding on for the socket it names.
+func TestParseConfig_ForwardAgentValues(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	tests := []struct {
+		value      string
+		wantOn     bool
+		wantSocket string
+	}{
+		{"yes", true, ""},
+		{"TRUE", true, ""},
+		{"no", false, ""},
+		{"False", false, ""},
+		{"/tmp/agent.sock", true, "/tmp/agent.sock"},
+		{"~/.agent/sock", true, filepath.Join(home, ".agent", "sock")},
+		{"$SSH_AUTH_SOCK", true, "$SSH_AUTH_SOCK"},
+		{`"/tmp/my sock"`, true, "/tmp/my sock"},
+	}
+	var content strings.Builder
+	for i, tt := range tests {
+		fmt.Fprintf(&content, "Host h%d\n  ForwardAgent %s\n", i, tt.value)
+	}
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	if err := os.WriteFile(cfgPath, []byte(content.String()), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != len(tests) {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	for i, tt := range tests {
+		if h := hosts[i]; h.ForwardAgent != tt.wantOn || h.ForwardAgentSocket != tt.wantSocket {
+			t.Errorf("ForwardAgent %s: got (%v, %q), want (%v, %q)", tt.value, h.ForwardAgent, h.ForwardAgentSocket, tt.wantOn, tt.wantSocket)
+		}
+	}
+}
+
+// Expected values follow readconf.c: the flag and the socket are separate first-value
+// slots, and ssh uses the socket only when the flag is on (`ssh -G` prints a stored
+// socket even when the flag is off).
+func TestParseConfig_ForwardAgentTwoLines(t *testing.T) {
+	tests := []struct {
+		first, second string
+		wantOn        bool
+		wantSocket    string
+	}{
+		{"yes", "/tmp/sock", true, "/tmp/sock"},
+		{"no", "/tmp/sock", false, ""},
+		{"/tmp/a", "/tmp/b", true, "/tmp/a"},
+		{"/tmp/a", "no", true, "/tmp/a"},
+		{"true", "$SSH_AUTH_SOCK", true, "$SSH_AUTH_SOCK"},
+	}
+	var content strings.Builder
+	for i, tt := range tests {
+		fmt.Fprintf(&content, "Host h%d\n  ForwardAgent %s\n  ForwardAgent %s\n", i, tt.first, tt.second)
+	}
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	if err := os.WriteFile(cfgPath, []byte(content.String()), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != len(tests) {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	for i, tt := range tests {
+		if h := hosts[i]; h.ForwardAgent != tt.wantOn || h.ForwardAgentSocket != tt.wantSocket {
+			t.Errorf("ForwardAgent %s then %s: got (%v, %q), want (%v, %q)", tt.first, tt.second, h.ForwardAgent, h.ForwardAgentSocket, tt.wantOn, tt.wantSocket)
+		}
 	}
 }

@@ -90,6 +90,10 @@ func ParseConfig(path string) ([]Host, error) {
 			slot = "proxyjump"
 		}
 		if seen[slot] {
+			// ssh stores ForwardAgent's socket in a slot of its own, so a path after "yes" still names the agent.
+			if lower == "forwardagent" && current.ForwardAgent && current.ForwardAgentSocket == "" && !isForwardAgentFlag(value) {
+				current.ForwardAgentSocket = expandPath(value)
+			}
 			continue
 		}
 		switch lower {
@@ -106,7 +110,11 @@ func ParseConfig(path string) ([]Host, error) {
 		case "proxycommand":
 			current.ProxyCommand = value
 		case "forwardagent":
-			current.ForwardAgent = strings.EqualFold(value, "yes")
+			current.ForwardAgent = !strings.EqualFold(value, "no") && !strings.EqualFold(value, "false")
+			if !isForwardAgentFlag(value) {
+				// Any other value names the agent socket to forward, as a path or $VARIABLE.
+				current.ForwardAgentSocket = expandPath(value)
+			}
 		default:
 			continue
 		}
@@ -127,6 +135,16 @@ func parseKeyValue(line string) (string, string) {
 	rest := strings.TrimLeft(line[idx:], " \t")
 	rest = strings.TrimPrefix(rest, "=")
 	return line[:idx], strings.TrimSpace(rest)
+}
+
+// isForwardAgentFlag reports whether v is one of the yes/no words ForwardAgent
+// accepts; any other value names an agent socket.
+func isForwardAgentFlag(v string) bool {
+	switch strings.ToLower(v) {
+	case "yes", "true", "no", "false":
+		return true
+	}
+	return false
 }
 
 // splitArgs splits an ssh_config argument list as OpenSSH's argv_split does:

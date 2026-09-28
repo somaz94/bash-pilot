@@ -19,6 +19,9 @@ type Host struct {
 	ProxyJump    string `json:"proxy_jump,omitempty"`
 	ProxyCommand string `json:"proxy_command,omitempty"`
 	ForwardAgent bool   `json:"forward_agent,omitempty"`
+	// ForwardAgentSocket is the socket (path or $VARIABLE) when the ssh_config ForwardAgent
+	// value names one instead of yes/no; ForwardAgent is always true when it is set.
+	ForwardAgentSocket string `json:"forward_agent_socket,omitempty"`
 }
 
 // KeyName returns the basename of the identity file.

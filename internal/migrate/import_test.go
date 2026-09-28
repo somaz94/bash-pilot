@@ -706,7 +706,8 @@ func TestExportImport_QuotedValuesRoundTrip(t *testing.T) {
 	oldHome, newHome := t.TempDir(), t.TempDir()
 	t.Setenv("HOME", oldHome)
 	src := filepath.Join(oldHome, "config")
-	content := "Host \"a'b\" odd\n  HostName 192.0.2.5\n  User o\\'brien\n  IdentityFile \"~/.ssh/my key #1\"\n  ProxyJump jump\n"
+	content := "Host \"a'b\" odd\n  HostName 192.0.2.5\n  User o\\'brien\n  IdentityFile \"~/.ssh/my key #1\"\n  ProxyJump jump\n" +
+		"  ForwardAgent \"~/.agent/my sock\"\n"
 	if err := os.WriteFile(src, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -731,6 +732,9 @@ func TestExportImport_QuotedValuesRoundTrip(t *testing.T) {
 	}
 	if h.Name != "a'b odd" || h.User != "o'brien" || h.Hostname != "192.0.2.5" || h.ProxyJump != "jump" {
 		t.Errorf("host = %+v", h)
+	}
+	if want := filepath.Join(newHome, ".agent", "my sock"); !h.ForwardAgent || h.ForwardAgentSocket != want {
+		t.Errorf("ForwardAgent = (%v, %q), want (true, %q)", h.ForwardAgent, h.ForwardAgentSocket, want)
 	}
 }
 
@@ -766,6 +770,27 @@ func TestImport_QuotesOnlyFormat2Values(t *testing.T) {
 			warned := strings.Contains(strings.Join(result.Warnings, "\n"), "unknown export format version")
 			if warned != tt.wantWarning {
 				t.Errorf("warnings = %q, want unknown-version warning: %v", result.Warnings, tt.wantWarning)
+			}
+		})
+	}
+}
+
+func TestBuildHostBlock_ForwardAgent(t *testing.T) {
+	tests := []struct {
+		name  string
+		entry SSHHostEntry
+		want  string
+	}{
+		{"flag", SSHHostEntry{Name: "a", ForwardAgent: true}, "  ForwardAgent yes\n"},
+		{"socket under home", SSHHostEntry{Name: "a", ForwardAgentSocket: "~/.agent/my sock"}, "  ForwardAgent \"/home/user/.agent/my sock\"\n"},
+		{"socket variable", SSHHostEntry{Name: "a", ForwardAgentSocket: "$SSH_AUTH_SOCK"}, "  ForwardAgent $SSH_AUTH_SOCK\n"},
+		{"socket wins over flag", SSHHostEntry{Name: "a", ForwardAgent: true, ForwardAgentSocket: "/run/agent"}, "  ForwardAgent /run/agent\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			block := buildHostBlock(tt.entry, "/home/user", true)
+			if !strings.Contains(block, tt.want) || strings.Count(block, "ForwardAgent") != 1 {
+				t.Errorf("block =\n%s\nwant exactly the line %q", block, tt.want)
 			}
 		})
 	}

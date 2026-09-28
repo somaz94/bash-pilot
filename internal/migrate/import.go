@@ -258,7 +258,10 @@ func buildHostBlock(h SSHHostEntry, home string, parsedValues bool) string {
 	if proxyCommand != "" {
 		b.WriteString(fmt.Sprintf("  ProxyCommand %s\n", proxyCommand))
 	}
-	if h.ForwardAgent {
+	switch {
+	case h.ForwardAgentSocket != "":
+		b.WriteString(fmt.Sprintf("  ForwardAgent %s\n", arg(expandHome(h.ForwardAgentSocket, home))))
+	case h.ForwardAgent:
 		b.WriteString("  ForwardAgent yes\n")
 	}
 	return b.String()

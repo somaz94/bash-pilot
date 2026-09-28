@@ -58,7 +58,10 @@ func exportSSH(cfg *MigrateConfig, sshConfigPath, home string) {
 			IdentityFile: normalizePath(h.IdentityFile, home),
 			ProxyJump:    h.ProxyJump,
 			ProxyCommand: h.ProxyCommand,
-			ForwardAgent: h.ForwardAgent,
+			// forward_agent stays false beside a socket, so an older release's import leaves
+			// forwarding off instead of forwarding its own default agent.
+			ForwardAgent:       h.ForwardAgent && h.ForwardAgentSocket == "",
+			ForwardAgentSocket: normalizePath(h.ForwardAgentSocket, home),
 		}
 		cfg.SSH.Hosts = append(cfg.SSH.Hosts, entry)
 	}

@@ -22,14 +22,15 @@ type SSHExport struct {
 
 // SSHHostEntry represents a single SSH host for migration.
 type SSHHostEntry struct {
-	Name         string `json:"name"`
-	Hostname     string `json:"hostname,omitempty"`
-	User         string `json:"user,omitempty"`
-	Port         string `json:"port,omitempty"`
-	IdentityFile string `json:"identity_file,omitempty"`
-	ProxyJump    string `json:"proxy_jump,omitempty"`
-	ProxyCommand string `json:"proxy_command,omitempty"`
-	ForwardAgent bool   `json:"forward_agent,omitempty"`
+	Name               string `json:"name"`
+	Hostname           string `json:"hostname,omitempty"`
+	User               string `json:"user,omitempty"`
+	Port               string `json:"port,omitempty"`
+	IdentityFile       string `json:"identity_file,omitempty"`
+	ProxyJump          string `json:"proxy_jump,omitempty"`
+	ProxyCommand       string `json:"proxy_command,omitempty"`
+	ForwardAgent       bool   `json:"forward_agent,omitempty"`
+	ForwardAgentSocket string `json:"forward_agent_socket,omitempty"`
 }
 
 // SSHKeyRef is a reference to an SSH key (no private data).

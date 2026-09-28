@@ -297,3 +297,28 @@ func TestExportGit_PathAfterComments(t *testing.T) {
 		t.Fatalf("profiles = %+v", cfg.Git.Profiles)
 	}
 }
+
+func TestExportSSH_ForwardAgent(t *testing.T) {
+	origParseSSHConf := parseSSHConf
+	defer func() { parseSSHConf = origParseSSHConf }()
+	home := t.TempDir()
+	parseSSHConf = func(string) ([]ssh.Host, error) {
+		return []ssh.Host{
+			{Name: "flag", ForwardAgent: true},
+			{Name: "sock", ForwardAgent: true, ForwardAgentSocket: filepath.Join(home, ".agent", "sock")},
+		}, nil
+	}
+
+	cfg := &MigrateConfig{}
+	exportSSH(cfg, "unused", home)
+	if len(cfg.SSH.Hosts) != 2 {
+		t.Fatalf("hosts = %+v", cfg.SSH.Hosts)
+	}
+	if e := cfg.SSH.Hosts[0]; !e.ForwardAgent || e.ForwardAgentSocket != "" {
+		t.Errorf("flag = %+v", e)
+	}
+	// An older release reads only forward_agent, so it must be false when a socket is named.
+	if e := cfg.SSH.Hosts[1]; e.ForwardAgent || e.ForwardAgentSocket != "~/.agent/sock" {
+		t.Errorf("sock = %+v, want forward_agent false and a tilde-relative socket", e)
+	}
+}
