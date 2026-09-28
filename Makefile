@@ -1,4 +1,4 @@
-.PHONY: build clean test test-unit cover cover-html fmt vet install demo demo-clean demo-all check-gh branch pr help
+.PHONY: build clean test test-unit cover cover-html lint fmt vet install demo demo-clean demo-all check-gh branch pr help
 
 APP_NAME=bash-pilot
 VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -32,6 +32,9 @@ cover-html: cover ## Open coverage report in browser
 	@command -v xdg-open >/dev/null 2>&1 && xdg-open coverage.html || open coverage.html
 
 ## Quality
+
+lint: ## Run golangci-lint
+	golangci-lint run ./...
 
 fmt: ## Format code
 	go fmt ./...

@@ -20,6 +20,7 @@ Guide for building, testing, and contributing to bash-pilot.
 
 - Go 1.26+
 - Make
+- golangci-lint v2 (for `make lint`)
 
 <br/>
 
@@ -130,6 +131,7 @@ make test            # Run unit tests (alias)
 make test-unit       # go test ./... -v -race -cover
 make cover           # Generate coverage report
 make cover-html      # Open coverage report in browser
+make lint            # golangci-lint (config in .golangci.yml)
 ```
 
 <br/>
