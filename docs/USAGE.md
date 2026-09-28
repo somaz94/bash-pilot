@@ -415,7 +415,7 @@ bash-pilot migrate export | jq .
 
 | Category | Details |
 |----------|---------|
-| SSH Hosts | name, hostname, user, port, identity file (tilde-relative), ProxyJump (`proxy_jump`), ProxyCommand (`proxy_command`), forward agent |
+| SSH Hosts | name, hostname, user, port, identity file (tilde-relative), ProxyJump (`proxy_jump`), ProxyCommand (`proxy_command`), ForwardAgent (`forward_agent` for `yes`, or `forward_agent_socket`, tilde-relative, when it names an agent socket) |
 | SSH Keys | name, type, path (no private key content) |
 | Git Identity | global user.name, user.email |
 | Git Profiles | includeIf profile name, directory, email, signing key |
@@ -467,7 +467,7 @@ bash-pilot migrate import my-config.json -o json
 - SSH private keys are never copied — only key generation commands are shown
 - `~/.ssh/config` is appended to, not replaced
 
-**Export format:** the file's `version` field says how SSH values are stored. Version 2 stores parsed values, with ssh_config quotes, escapes and trailing comments removed, and import quotes a host name, hostname, user or identity file again when it contains a space, quote, `#` or backslash; `ProxyJump` and `ProxyCommand` are kept as ssh reads them. Version 1 files, written by earlier releases, hold the raw ssh_config text and are imported as written, and a file with no `version` is treated as version 1. An unknown version is imported as version 2 with a warning. Import a version 2 file with a release that writes it; an older release would write values that need quotes without them.
+**Export format:** the file's `version` field says how SSH values are stored. Version 2 stores parsed values, with ssh_config quotes, escapes and trailing comments removed, and import quotes a host name, hostname, user, identity file or agent socket again when it contains a space, quote, `#` or backslash; `ProxyJump` and `ProxyCommand` are kept as ssh reads them. Version 1 files, written by earlier releases, hold the raw ssh_config text and are imported as written, and a file with no `version` is treated as version 1. An unknown version is imported as version 2 with a warning. Import a version 2 file with a release that writes it; an older release would write values that need quotes without them. A host whose `ForwardAgent` names a socket is exported with `forward_agent` left false, so a release that does not know `forward_agent_socket` imports it with forwarding off instead of forwarding its own default agent.
 
 <br/>
 
