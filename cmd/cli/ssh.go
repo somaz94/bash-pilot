@@ -69,6 +69,7 @@ var sshPingCmd = &cobra.Command{
 	Use:   "ping [pattern]",
 	Short: "Test SSH host connectivity (parallel)",
 	Long:  "Test TCP connectivity to SSH hosts. Optionally filter by glob pattern.",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		hosts, err := ssh.ParseConfig(appCfg.SSH.ConfigFile)
 		if err != nil {
