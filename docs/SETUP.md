@@ -189,8 +189,8 @@ bash-pilot ssh ping web-server ci-server
 bash-pilot ssh audit
 
 # Expected warnings:
-# WARN  Shared key: id_rsa_office used by 8 hosts
-# WARN  Key permission too open: ~/.ssh/some_key (0644, want 0600)
+# ! id_rsa_office: used by 8 hosts (consider per-host keys)
+# ! some_key: permissions 0644 (should be 0600)
 ```
 
 ### 4. JSON output for scripting

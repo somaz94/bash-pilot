@@ -415,7 +415,7 @@ bash-pilot migrate export | jq .
 
 | Category | Details |
 |----------|---------|
-| SSH Hosts | name, hostname, user, port, identity file (tilde-relative), proxy, forward agent |
+| SSH Hosts | name, hostname, user, port, identity file (tilde-relative), ProxyJump (`proxy_jump`), ProxyCommand (`proxy_command`), forward agent |
 | SSH Keys | name, type, path (no private key content) |
 | Git Identity | global user.name, user.email |
 | Git Profiles | includeIf profile name, directory, email, signing key |
@@ -482,7 +482,7 @@ bash-pilot doctor -o json
 ```
 
 **Sections reported:**
-- SSH: shared keys, file permissions, missing keys
+- SSH: shared keys, file permissions, missing keys; an SSH config that is missing or unreadable is reported as a failure and counted as an SSH issue
 - Git: duplicate safe.directory, missing includeIf targets, permissions
 - Env: shell, tools, SSH agent, git config, editor, home directory
 

@@ -24,6 +24,12 @@ Override with `--config` or `-c` flag:
 bash-pilot ssh list --config /path/to/config.yaml
 ```
 
+How a missing or broken config is handled:
+
+- No file at the default location: built-in defaults are used silently.
+- A `--config` path that cannot be read or parsed: the command exits with an error.
+- A file at the default location that exists but cannot be read or parsed: a warning is printed to stderr and built-in defaults are used.
+
 <br/>
 
 ### Full Example
@@ -63,7 +69,7 @@ git:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `ssh.config_file` | string | `~/.ssh/config` | Path to SSH config file |
+| `ssh.config_file` | string | `~/.ssh/config` | Path to SSH config file (a leading `~/` is expanded to the home directory) |
 | `ssh.groups.<name>.pattern` | []string | — | Glob patterns to match host names |
 | `ssh.groups.<name>.label` | string | — | Display label for the group |
 | `ssh.ping.timeout` | duration | `5s` | TCP connection timeout per host |

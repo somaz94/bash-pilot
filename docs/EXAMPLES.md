@@ -34,8 +34,8 @@ Hands-on examples for bash-pilot.
 ```bash
 $ bash-pilot init
 Config generated: /home/user/.config/bash-pilot/config.yaml
-Detected 4 groups from 15 hosts:
-  git        3 hosts
+Detected 4 groups from 14 hosts:
+  git        2 hosts
   cloud      2 hosts
   k8s        4 hosts
   on-prem    6 hosts
@@ -53,16 +53,15 @@ Use --force to overwrite.
 Generated config (preview):
 ---
 ssh:
-  groups:
-    git:
-      pattern:
-        - github.com-personal
-        - github.com-work
-    cloud:
-      pattern:
-        - web-server
-        - ci-server
-  ...
+    groups:
+        cloud:
+            pattern:
+                - ci-server
+                - web-server
+        git:
+            pattern:
+                - github.com-*
+    ...
 ```
 
 <br/>
@@ -592,9 +591,10 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519
 ```bash
 $ bash-pilot doctor
 ┌─ DOCTOR: SSH ─────────────────────────────────────
-│ ✓ used by 1 host(s)
-│ ! used by 14 hosts (consider per-host keys)
-│ ✓ permissions OK (0600)
+│ ✓ id_rsa_personal: used by 1 host(s)
+│ ! id_rsa_office: used by 14 hosts (consider per-host keys)
+│ ✓ id_rsa_personal: permissions OK (0600)
+│ ✓ id_rsa_office: permissions OK (0600)
 └────────────────────────────────────────────────────
 
 ┌─ DOCTOR: GIT ─────────────────────────────────────
