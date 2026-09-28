@@ -16,6 +16,7 @@ var (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version info",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("bash-pilot %s (commit: %s, built: %s)\n", Version, GitCommit, BuildDate)
 	},

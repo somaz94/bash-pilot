@@ -23,6 +23,8 @@ Usage:
   # Import on new machine
   bash-pilot migrate import my-config.json --dry-run
   bash-pilot migrate import my-config.json`,
+	Args: groupArgs,
+	RunE: runGroupHelp,
 }
 
 var migrateExportCmd = &cobra.Command{
@@ -33,6 +35,7 @@ Private keys are NOT included — only names and types.
 
 Usage:
   bash-pilot migrate export > my-config.json`,
+	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg, err := migrate.Export("")
 		if err != nil {

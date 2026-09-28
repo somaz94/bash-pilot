@@ -15,11 +15,14 @@ var sshCmd = &cobra.Command{
 	Use:   "ssh",
 	Short: "SSH host management",
 	Long:  "Manage SSH hosts — list, test connectivity, and audit security.",
+	Args:  groupArgs,
+	RunE:  runGroupHelp,
 }
 
 var sshListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List SSH hosts with grouping",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		hosts, err := ssh.ParseConfig(appCfg.SSH.ConfigFile)
 		if err != nil {
@@ -114,6 +117,7 @@ var sshPingCmd = &cobra.Command{
 var sshAuditCmd = &cobra.Command{
 	Use:   "audit",
 	Short: "Audit SSH config for security issues",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		hosts, err := ssh.ParseConfig(appCfg.SSH.ConfigFile)
 		if err != nil {

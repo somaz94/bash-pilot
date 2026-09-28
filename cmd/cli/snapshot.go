@@ -21,6 +21,7 @@ Usage:
 
   # Preview snapshot summary
   bash-pilot snapshot --summary`,
+	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		snap := snapshot.Capture()
 

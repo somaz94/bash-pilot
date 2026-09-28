@@ -18,6 +18,8 @@ var promptCmd = &cobra.Command{
 	Use:   "prompt",
 	Short: "Smart bash prompt with git and k8s context",
 	Long:  "Generate and preview a smart bash prompt with git branch, k8s context, and exit code indicator.",
+	Args:  groupArgs,
+	RunE:  runGroupHelp,
 }
 
 var promptInitCmd = &cobra.Command{
@@ -34,6 +36,7 @@ Usage:
 
   # Persist in your shell profile
   echo 'eval "$(bash-pilot prompt init)"' >> ~/.bashrc`,
+	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts := prompt.Options{
 			Theme: parseTheme(promptTheme),
@@ -49,6 +52,7 @@ Usage:
 var promptShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Preview prompt components for current environment",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts := prompt.Options{
 			Theme: parseTheme(promptTheme),

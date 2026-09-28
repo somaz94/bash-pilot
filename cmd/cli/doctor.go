@@ -23,6 +23,7 @@ var doctorCmd = &cobra.Command{
 	Use:   "doctor",
 	Short: "Full system diagnostics (SSH + Git + Env)",
 	Long:  "Run all diagnostic checks across SSH, Git, and Env modules in a single command.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		f := report.NewFormatter(os.Stdout, output, noColor)
 

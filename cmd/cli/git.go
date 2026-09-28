@@ -15,12 +15,15 @@ var gitCmd = &cobra.Command{
 	Use:   "git",
 	Short: "Git multi-profile management",
 	Long:  "Manage git identities — profiles, diagnostics, and cleanup.",
+	Args:  groupArgs,
+	RunE:  runGroupHelp,
 }
 
 var gitProfilesCmd = &cobra.Command{
 	Use:   "profiles",
 	Short: "List git identity profiles",
 	Long:  "Show all git profiles from includeIf directives, with active profile highlighted.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgPath := resolveGitConfigPath()
 
@@ -69,6 +72,7 @@ var gitDoctorCmd = &cobra.Command{
 	Use:   "doctor",
 	Short: "Diagnose gitconfig issues",
 	Long:  "Check for duplicate safe.directory entries, missing includeIf targets, and other common problems.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgPath := resolveGitConfigPath()
 
@@ -106,6 +110,7 @@ var gitCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean up stale/duplicate gitconfig entries",
 	Long:  "Remove duplicate safe.directory entries and stale references from gitconfig.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfgPath := resolveGitConfigPath()
 

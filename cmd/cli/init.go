@@ -17,6 +17,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Generate config from existing SSH config",
 	Long:  "Analyze ~/.ssh/config and generate ~/.config/bash-pilot/config.yaml with auto-detected groups.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sshConfigPath := appCfg.SSH.ConfigFile
 

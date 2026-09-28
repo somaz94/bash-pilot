@@ -13,12 +13,15 @@ var envCmd = &cobra.Command{
 	Use:   "env",
 	Short: "Shell environment diagnostics",
 	Long:  "Analyze shell environment — health check, PATH analysis.",
+	Args:  groupArgs,
+	RunE:  runGroupHelp,
 }
 
 var envCheckCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Shell environment health scan",
 	Long:  "Check shell, tools, SSH agent, git config, and home directory.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		result := env.Check()
 
@@ -57,6 +60,7 @@ var envPathCmd = &cobra.Command{
 	Use:   "path",
 	Short: "PATH analysis (duplicates, missing directories)",
 	Long:  "Analyze the PATH environment variable for duplicates, missing directories, and ordering.",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		result := env.AnalyzePath()
 

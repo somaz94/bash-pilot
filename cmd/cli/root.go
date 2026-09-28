@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"strings"
 
 	"github.com/somaz94/bash-pilot/internal/config"
 	"github.com/spf13/cobra"
@@ -53,6 +54,27 @@ func loadConfig(path string, stderr io.Writer) (*config.Config, error) {
 		fmt.Fprintf(stderr, "warning: %v; using defaults\n", err)
 		return config.Default(), nil
 	}
+}
+
+// runGroupHelp makes a command group runnable, because cobra validates Args only on
+// runnable commands; a mistyped subcommand then fails instead of printing help and exiting 0.
+func runGroupHelp(cmd *cobra.Command, _ []string) error {
+	return cmd.Help()
+}
+
+// groupArgs rejects a mistyped subcommand with the "Did you mean" hint cobra gives only at the root.
+func groupArgs(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return nil
+	}
+	if cmd.SuggestionsMinimumDistance <= 0 {
+		cmd.SuggestionsMinimumDistance = 2
+	}
+	msg := fmt.Sprintf("unknown command %q for %q", args[0], cmd.CommandPath())
+	if s := cmd.SuggestionsFor(args[0]); len(s) > 0 {
+		msg += "\n\nDid you mean this?\n\t" + strings.Join(s, "\n\t")
+	}
+	return errors.New(msg)
 }
 
 // Execute runs the root command.

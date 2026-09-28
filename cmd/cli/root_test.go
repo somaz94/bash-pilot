@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -88,5 +90,53 @@ func TestExecute_RuntimeErrorPrintsNoUsage(t *testing.T) {
 	}
 	if s := out.String(); strings.Contains(s, "Usage:") || strings.Count(s, "typo.yaml") != 1 {
 		t.Errorf("want the error exactly once and no usage:\n%s", s)
+	}
+}
+
+// Cobra ignores stray arguments on a command without Args, and validates Args only
+// on runnable commands, so every subcommand needs both.
+func TestCommandsRejectStrayArgs(t *testing.T) {
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		for _, sub := range c.Commands() {
+			if sub.Name() == "help" || sub.Name() == "completion" {
+				continue
+			}
+			if !sub.Runnable() || sub.Args == nil {
+				t.Errorf("%q: runnable = %v, Args set = %v; want both", sub.CommandPath(), sub.Runnable(), sub.Args != nil)
+			} else if !strings.ContainsAny(sub.Use, "<[") {
+				if err := sub.Args(sub, []string{"stray"}); err == nil {
+					t.Errorf("%q accepted a stray argument", sub.CommandPath())
+				}
+			}
+			walk(sub)
+		}
+	}
+	walk(rootCmd)
+}
+
+func TestGroupCommands_TypoFailsBareShowsHelp(t *testing.T) {
+	var out bytes.Buffer
+	rootCmd.SetOut(&out)
+	rootCmd.SetErr(&out)
+	t.Setenv("HOME", t.TempDir())
+	t.Cleanup(func() {
+		rootCmd.SetArgs(nil)
+		rootCmd.SetOut(nil)
+		rootCmd.SetErr(nil)
+		cfgFile, appCfg = "", nil
+		sshCmd.SilenceUsage = false
+	})
+
+	rootCmd.SetArgs([]string{"ssh", "lst"})
+	err := Execute()
+	if err == nil || !strings.Contains(err.Error(), `unknown command "lst"`) || !strings.Contains(err.Error(), "list") {
+		t.Fatalf("ssh lst: err = %v, want unknown command suggesting list", err)
+	}
+
+	out.Reset()
+	rootCmd.SetArgs([]string{"ssh"})
+	if err := Execute(); err != nil || !strings.Contains(out.String(), "Available Commands:") {
+		t.Fatalf("bare ssh: err = %v\n%s", err, out.String())
 	}
 }
