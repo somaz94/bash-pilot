@@ -510,7 +510,6 @@ func TestImport_OnlySSH(t *testing.T) {
 	origReadFile := readFile
 	origMkdirAll := mkdirAll
 	origStatFile := statFile
-	origOpenFile := openFile
 	origRunGitConfig := runGitConfig
 	defer func() {
 		userHomeDir = origUserHomeDir
@@ -518,7 +517,6 @@ func TestImport_OnlySSH(t *testing.T) {
 		readFile = origReadFile
 		mkdirAll = origMkdirAll
 		statFile = origStatFile
-		openFile = origOpenFile
 		runGitConfig = origRunGitConfig
 	}()
 
@@ -526,7 +524,6 @@ func TestImport_OnlySSH(t *testing.T) {
 	userHomeDir = func() (string, error) { return tmpDir, nil }
 	mkdirAll = func(path string, perm os.FileMode) error { return nil }
 	statFile = func(name string) (os.FileInfo, error) { return nil, os.ErrNotExist }
-	openFile = func(name string) (*os.File, error) { return nil, os.ErrNotExist }
 	writeFile = func(name string, data []byte, perm os.FileMode) error { return nil }
 	readFile = func(name string) ([]byte, error) { return nil, os.ErrNotExist }
 	runGitConfig = func(args ...string) error {
@@ -564,7 +561,6 @@ func TestImport_OnlyGit(t *testing.T) {
 	origReadFile := readFile
 	origMkdirAll := mkdirAll
 	origStatFile := statFile
-	origOpenFile := openFile
 	origRunGitConfig := runGitConfig
 	defer func() {
 		userHomeDir = origUserHomeDir
@@ -572,7 +568,6 @@ func TestImport_OnlyGit(t *testing.T) {
 		readFile = origReadFile
 		mkdirAll = origMkdirAll
 		statFile = origStatFile
-		openFile = origOpenFile
 		runGitConfig = origRunGitConfig
 	}()
 
@@ -620,5 +615,70 @@ func TestAddIncludeIf_ParentOfExisting(t *testing.T) {
 	got, _ := os.ReadFile(filepath.Join(home, ".gitconfig"))
 	if !strings.Contains(string(got), "[includeIf \"gitdir:~/work/\"]") {
 		t.Errorf("includeIf for ~/work/ was not written:\n%s", got)
+	}
+}
+
+func TestParseExistingHosts(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config")
+	content := "Host plain\n" +
+		"Host=equals\n" +
+		"Host\ttabbed\n" +
+		"Host multi-a multi-b\n" +
+		"Host bastion *\n" +
+		"Host *\n" +
+		"  HostName not-a-host\n"
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got := parseExistingHosts(path)
+	for _, name := range []string{"plain", "equals", "tabbed", "multi-a", "multi-b", "bastion"} {
+		if !got[name] {
+			t.Errorf("%q not found in %v", name, got)
+		}
+	}
+	for _, name := range []string{"*", "not-a-host", "multi-a multi-b"} {
+		if got[name] {
+			t.Errorf("%q should not be an existing host: %v", name, got)
+		}
+	}
+
+	if missing := parseExistingHosts(filepath.Join(t.TempDir(), "none")); len(missing) != 0 {
+		t.Errorf("missing config = %v, want empty", missing)
+	}
+}
+
+func TestImport_SSHHostSharesExistingPattern(t *testing.T) {
+	origUserHomeDir := userHomeDir
+	defer func() { userHomeDir = origUserHomeDir }()
+	home := t.TempDir()
+	userHomeDir = func() (string, error) { return home, nil }
+
+	sshDir := filepath.Join(home, ".ssh")
+	if err := os.MkdirAll(sshDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sshDir, "config"), []byte("Host=web1 web2\n  HostName 192.0.2.10\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := &MigrateConfig{SSH: SSHExport{Hosts: []SSHHostEntry{
+		{Name: "web2", Hostname: "192.0.2.20"},
+		{Name: "web9 web1", Hostname: "192.0.2.90"},
+		{Name: "web3", Hostname: "192.0.2.30"},
+	}}}
+	result, err := Import(cfg, true, map[string]bool{"ssh": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.SSHHostsSkipped != 2 || result.SSHHostsAdded != 1 {
+		t.Errorf("skipped = %d, added = %d; want web2 and 'web9 web1' skipped, web3 added", result.SSHHostsSkipped, result.SSHHostsAdded)
+	}
+	want := []string{
+		"Host 'web2' already exists in SSH config, skipping",
+		"Host 'web9 web1' shares 'web1' with an existing SSH config entry, skipping",
+	}
+	if strings.Join(result.Warnings, "\n") != strings.Join(want, "\n") {
+		t.Errorf("warnings = %q, want %q", result.Warnings, want)
 	}
 }

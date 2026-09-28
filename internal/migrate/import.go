@@ -1,13 +1,13 @@
 package migrate
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/somaz94/bash-pilot/internal/config"
+	"github.com/somaz94/bash-pilot/internal/ssh"
 )
 
 // ImportResult holds the result of an import operation.
@@ -35,7 +35,6 @@ var (
 	readFile     = os.ReadFile
 	mkdirAll     = os.MkdirAll
 	statFile     = os.Stat
-	openFile     = os.Open
 	runGitConfig = func(args ...string) error {
 		allArgs := append([]string{"config", "--global"}, args...)
 		_, err := runCommand("git", allArgs...)
@@ -80,10 +79,13 @@ func importSSH(cfg *MigrateConfig, home string, dryRun bool, result *ImportResul
 
 	var newBlocks []string
 	for _, h := range cfg.SSH.Hosts {
-		if _, exists := existingHosts[h.Name]; exists {
+		if pattern, ok := existingPattern(h.Name, existingHosts); ok {
 			result.SSHHostsSkipped++
-			result.Warnings = append(result.Warnings,
-				fmt.Sprintf("Host '%s' already exists in SSH config, skipping", h.Name))
+			msg := fmt.Sprintf("Host '%s' already exists in SSH config, skipping", h.Name)
+			if pattern != h.Name {
+				msg = fmt.Sprintf("Host '%s' shares '%s' with an existing SSH config entry, skipping", h.Name, pattern)
+			}
+			result.Warnings = append(result.Warnings, msg)
 			continue
 		}
 
@@ -240,26 +242,30 @@ func buildHostBlock(h SSHHostEntry, home string) string {
 	return b.String()
 }
 
+// parseExistingHosts returns every pattern named on a Host line of the SSH
+// config at path. A missing or unreadable config has no existing hosts.
 func parseExistingHosts(path string) map[string]bool {
-	hosts := make(map[string]bool)
-	f, err := openFile(path)
-	if err != nil {
-		return hosts
-	}
-	defer func() { _ = f.Close() }()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		lower := strings.ToLower(line)
-		if strings.HasPrefix(lower, "host ") {
-			name := strings.TrimSpace(line[5:])
-			if name != "*" {
-				hosts[name] = true
+	existing := make(map[string]bool)
+	hosts, _ := ssh.ParseConfig(path)
+	for _, h := range hosts {
+		for _, pattern := range strings.Fields(h.Name) {
+			if pattern != "*" {
+				existing[pattern] = true
 			}
 		}
 	}
-	return hosts
+	return existing
+}
+
+// existingPattern returns the first pattern of a "Host a b" name that is already
+// defined; ssh uses the first block that sets a value, so an appended duplicate would be ignored.
+func existingPattern(name string, existing map[string]bool) (string, bool) {
+	for _, pattern := range strings.Fields(name) {
+		if existing[pattern] {
+			return pattern, true
+		}
+	}
+	return "", false
 }
 
 // addIncludeIf appends an includeIf block for the profile to ~/.gitconfig.
