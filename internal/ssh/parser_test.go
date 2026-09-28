@@ -265,3 +265,74 @@ func TestParseConfig_FirstProxyDirectiveWins(t *testing.T) {
 		t.Errorf("jump-first: ProxyJump = %q, ProxyCommand = %q", h.ProxyJump, h.ProxyCommand)
 	}
 }
+
+func TestStripTrailingComment(t *testing.T) {
+	tests := []struct{ in, want string }{
+		{"192.0.2.10", "192.0.2.10"},
+		{"192.0.2.10 # primary", "192.0.2.10"},
+		{"192.0.2.10\t#primary", "192.0.2.10"},
+		{"web#1", "web#1"},
+		{`"~/.ssh/key #1"`, `"~/.ssh/key #1"`},
+		{`'a # b' # c`, `'a # b'`},
+		{"# only a comment", ""},
+		{`o\'brien # c`, `o\'brien`},
+		{`~/x\ #2`, `~/x\ #2`},
+		{`"a\" # b" # c`, `"a\" # b"`},
+	}
+	for _, tt := range tests {
+		if got := stripTrailingComment(tt.in); got != tt.want {
+			t.Errorf("stripTrailingComment(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
+func TestParseConfig_TrailingComments(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host * # defaults\n  User nobody\n" +
+		"Host # retired\n  User nobody\n" +
+		"Host prod # production box\n  Hostname 192.0.2.10 # primary\n  User deploy #ops\n" +
+		"Host via-bastion\n  ProxyCommand ssh -W %h:%p bastion # shell comment\n" +
+		"Host=eq # c\n  ForwardAgent yes # c\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 3 {
+		t.Fatalf("hosts = %+v, want prod, via-bastion and eq (Host * and a comment-only Host are not hosts)", hosts)
+	}
+	if h := hosts[0]; h.Name != "prod" || h.Hostname != "192.0.2.10" || h.User != "deploy" {
+		t.Errorf("prod = %+v", h)
+	}
+	if h := hosts[1]; h.ProxyCommand != "ssh -W %h:%p bastion # shell comment" {
+		t.Errorf("ProxyCommand = %q, want it verbatim", h.ProxyCommand)
+	}
+	if h := hosts[2]; h.Name != "eq" || !h.ForwardAgent {
+		t.Errorf("eq = %+v, want ForwardAgent yes despite the trailing comment", h)
+	}
+}
+
+func TestParseConfig_MatchEndsHostBlock(t *testing.T) {
+	cfgPath := filepath.Join(t.TempDir(), "config")
+	content := "Host a\n  Hostname 192.0.2.1\n" +
+		"Match host b\n  User nobody\n  IdentityFile ~/.ssh/other\n" +
+		"Host c\n  User carol\n"
+	if err := os.WriteFile(cfgPath, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	hosts, err := ParseConfig(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hosts) != 2 {
+		t.Fatalf("hosts = %+v", hosts)
+	}
+	if h := hosts[0]; h.Hostname != "192.0.2.1" || h.User != "" || h.IdentityFile != "" {
+		t.Errorf("a picked up Match settings: %+v", h)
+	}
+	if hosts[1].User != "carol" {
+		t.Errorf("c.User = %q, want carol", hosts[1].User)
+	}
+}

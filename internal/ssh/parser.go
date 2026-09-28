@@ -45,11 +45,19 @@ func ParseConfig(path string) ([]Host, error) {
 		if key == "" {
 			continue
 		}
+		lower := strings.ToLower(key)
+		// ssh hands ProxyCommand to the shell verbatim; every other keyword parsed here ends at a "# comment".
+		if lower != "proxycommand" {
+			value = stripTrailingComment(value)
+		}
 
-		switch strings.ToLower(key) {
+		switch lower {
+		case "match":
+			// A Match block's settings are conditional and belong to no Host above it.
+			current = nil
 		case "host":
-			// "Host *" holds global defaults, not a host; nil current drops its directives.
-			if value == "*" {
+			// "Host *" holds defaults and a comment-only Host matches nothing; neither is a host.
+			if value == "*" || value == "" {
 				current = nil
 				continue
 			}
@@ -104,6 +112,33 @@ func parseKeyValue(line string) (string, string) {
 	rest := strings.TrimLeft(line[idx:], " \t")
 	rest = strings.TrimPrefix(rest, "=")
 	return line[:idx], strings.TrimSpace(rest)
+}
+
+// stripTrailingComment cuts value at an unquoted '#' that starts a word, as
+// OpenSSH's argument splitter does; a '#' inside a word or quotes is kept.
+func stripTrailingComment(value string) string {
+	var quote byte
+	wordStart := true
+	for i := 0; i < len(value); i++ {
+		c := value[i]
+		switch {
+		case c == '\\' && i+1 < len(value) &&
+			(strings.IndexByte(`'"\`, value[i+1]) >= 0 || quote == 0 && value[i+1] == ' '):
+			i++ // an escaped quote or space neither toggles quoting nor ends the word
+			wordStart = false
+			continue
+		case quote != 0:
+			if c == quote {
+				quote = 0
+			}
+		case c == '"' || c == '\'':
+			quote = c
+		case c == '#' && wordStart:
+			return strings.TrimSpace(value[:i])
+		}
+		wordStart = quote == 0 && (c == ' ' || c == '\t')
+	}
+	return value
 }
 
 // expandPath replaces ~ with the home directory.
