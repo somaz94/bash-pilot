@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.8.0](https://github.com/somaz94/bash-pilot/compare/v0.7.1...v0.8.0) (2026-09-28)
+
+### Bug Fixes
+
+- **cli:** reject stray arguments and suggest the intended subcommand on a typo ([2330e90](https://github.com/somaz94/bash-pilot/commit/2330e90bc2b8c11354a8f530aaa3420c5a28c9ca))
+- **ssh:** ignore trailing comments and Match blocks when parsing ssh_config ([135eab1](https://github.com/somaz94/bash-pilot/commit/135eab16d975c8983dde13738b28085f8db6f446))
+
+### Documentation
+
+- note Include, Match and trailing comment handling in SETUP troubleshooting ([193809d](https://github.com/somaz94/bash-pilot/commit/193809d392238be1c84621a6c20992127cb9be41))
+
+### Contributors
+
+- somaz
+
+<br/>
+
 ## [v0.7.1](https://github.com/somaz94/bash-pilot/compare/v0.7.0...v0.7.1) (2026-09-28)
 
 ### Bug Fixes
