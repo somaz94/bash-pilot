@@ -1,0 +1,10 @@
+# bash-pilot config for the README demo.
+ssh:
+  groups:
+    git:
+      pattern: ["github.com*"]
+    cloud:
+      pattern: ["staging-*"]
+      label: "AWS Seoul"
+    k8s:
+      pattern: ["k8s-*"]

@@ -8,6 +8,8 @@
 
 A powerful CLI toolkit for bash power users — SSH management, Git multi-profile, environment health checks, and smart prompt.
 
+![bash-pilot groups the hosts in ~/.ssh/config into git, cloud and k8s, then audits their keys: a missing key file and one with loose permissions](examples/demo/demo.gif)
+
 > For detailed documentation, see the [docs/](docs/) folder:
 >
 > [Setup](docs/SETUP.md) |

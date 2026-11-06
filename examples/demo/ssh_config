@@ -1,0 +1,35 @@
+# Synthetic SSH config for the README demo. Every host and address is an example.
+Host github.com-personal
+  Hostname github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_personal
+
+Host github.com-work
+  Hostname github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_work
+
+Host staging-web
+  Hostname 198.51.100.10
+  User ec2-user
+  IdentityFile ~/.ssh/staging.pem
+
+Host staging-api
+  Hostname 198.51.100.11
+  User ec2-user
+  IdentityFile ~/.ssh/staging.pem
+
+Host k8s-control-01
+  Hostname 192.0.2.51
+  User deploy
+  IdentityFile ~/.ssh/id_ed25519_deploy
+
+Host k8s-compute-01
+  Hostname 192.0.2.61
+  User deploy
+  IdentityFile ~/.ssh/id_ed25519_deploy
+
+Host jump-box
+  Hostname 203.0.113.50
+  User admin
+  IdentityFile ~/.ssh/id_ed25519_old

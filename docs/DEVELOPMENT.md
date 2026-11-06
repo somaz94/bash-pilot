@@ -150,6 +150,13 @@ make demo-clean      # Clean up demo resources
 make demo-all        # Run demo and clean up automatically
 ```
 
+The GIF in the README runs the real `bash-pilot` inside the recording container, against the synthetic SSH config in `examples/demo/` installed into a throwaway home. When the output of `ssh list` or `ssh audit` changes, regenerate it from the repo root:
+
+```bash
+GOOS=linux go build -o bin/linux/bash-pilot ./cmd
+docker run --rm -v "$PWD:/vhs" ghcr.io/charmbracelet/vhs examples/demo/demo.tape
+```
+
 <br/>
 
 ## Workflow
